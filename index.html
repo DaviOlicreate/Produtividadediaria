@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Produtividade - Timesheet Sense</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS (XLSX) para ler o Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .card-gradient-pink {
+            background: linear-gradient(135deg, #FF6FD8 0%, #3813C2 100%);
+        }
+        
+        .card-gradient-blue {
+            background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Timesheet Sense</h1>
+                        <p class="text-sm text-slate-500">Dashboard de Produtividade & Análise</p>
+                    </div>
+                </div>
+                
+                <!-- Controls Area -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Date Selector -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                            <i class="fa-regular fa-calendar"></i>
+                        </div>
+                        <select id="dateSelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2.5 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400">
+                            <option value="">Carregue um arquivo...</option>
+                        </select>
+                    </div>
+
+                    <!-- File Upload -->
+                    <label for="fileUpload" class="cursor-pointer bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors px-4 py-2 rounded-lg border border-indigo-200 flex items-center gap-2 text-sm font-medium">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span class="hidden sm:inline">Carregar Planilha</span>
+                    </label>
+                    <input type="file" id="fileUpload" accept=".xlsx, .xlsm, .xls" class="hidden">
+                    
+                    <button onclick="loadDemoData()" class="text-xs text-slate-500 hover:text-indigo-600 underline">
+                        Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- Status Message -->
+        <div id="statusMsg" class="hidden bg-blue-50 text-blue-700 p-4 rounded-lg border border-blue-100 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-info"></i>
+            <span id="statusText">Aguardando arquivo...</span>
+        </div>
+
+        <!-- KPI Cards Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Time -->
+            <div class="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white shadow-lg shadow-pink-200 transform hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-pink-100 text-sm font-medium mb-1">Tempo Total Monitorado</p>
+                        <h3 class="text-3xl font-bold" id="kpi-total-time">--</h3>
+                    </div>
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-regular fa-clock text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-pink-100 bg-white/10 inline-block px-2 py-1 rounded">
+                    <i class="fa-solid fa-calendar-day mr-1"></i>
+                    <span id="kpi-date">Selecione uma data</span>
+                </div>
+            </div>
+
+            <!-- Productivity Rate -->
+            <div class="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg shadow-cyan-200 transform hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-cyan-100 text-sm font-medium mb-1">Taxa de Produtividade</p>
+                        <h3 class="text-3xl font-bold" id="kpi-productivity">--%</h3>
+                    </div>
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 w-full bg-black/20 rounded-full h-1.5">
+                    <div id="kpi-prod-bar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Total Activities -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-slate-500 text-sm font-medium mb-1">Atividades Registradas</p>
+                        <h3 class="text-3xl font-bold text-slate-800" id="kpi-activities">--</h3>
+                    </div>
+                    <div class="bg-slate-100 p-2 rounded-lg text-slate-600">
+                        <i class="fa-solid fa-list-check text-xl"></i>
+                    </div>
+                </div>
+                <p class="mt-4 text-xs text-slate-400">Linhas processadas neste dia</p>
+            </div>
+
+            <!-- Unique Apps -->
+            <div class="bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl p-6 text-white shadow-lg shadow-orange-200">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-orange-100 text-sm font-medium mb-1">Aplicações Diferentes</p>
+                        <h3 class="text-3xl font-bold" id="kpi-apps">--</h3>
+                    </div>
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-window-restore text-xl"></i>
+                    </div>
+                </div>
+                <p class="mt-4 text-xs text-orange-100 opacity-80">Softwares utilizados</p>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- App Distribution Donut -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-lg font-semibold text-slate-800 mb-2">Distribuição de Aplicações</h3>
+                <p class="text-xs text-slate-500 mb-6">Top 5 aplicações + 'Outros' por tempo de uso</p>
+                <div class="relative h-64 w-full flex justify-center">
+                    <canvas id="appDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Activity Timeline Area -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                            Atividade por 30 minutos
+                            <span class="group relative">
+                                <i class="fa-regular fa-circle-question text-slate-400 cursor-help"></i>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg hidden group-hover:block z-10">
+                                    Soma dos minutos produtivos dentro de cada janela de 30 minutos (Máx: 30min).
+                                </span>
+                            </span>
+                        </h3>
+                        <p class="text-xs text-slate-500">Minutos produtivos por intervalo de tempo</p>
+                    </div>
+                    <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Tempo Real</span>
+                </div>
+                <div class="relative h-64 w-full">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 & Insights -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Active vs Inactive Pie -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-lg font-semibold text-slate-800 mb-2">Status de Atividade</h3>
+                <p class="text-xs text-slate-500 mb-6">Produtivo (Ativo) vs Improdutivo (AFK)</p>
+                <div class="relative h-56 w-full flex justify-center">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Productivity Trend Bar -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência de Produtividade</h3>
+                <p class="text-xs text-slate-500 mb-6">Score (0-100) baseado na intensidade do foco</p>
+                <div class="relative h-56 w-full">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Insights Panel -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                        <i class="fa-regular fa-lightbulb text-yellow-500 mr-2"></i>Insights do Dia
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Insight 1 -->
+                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500">
+                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Aplicação Mais Usada</p>
+                            <p class="text-sm text-slate-800 font-medium" id="insight-top-app">--</p>
+                        </div>
+
+                        <!-- Insight 2 -->
+                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Pico de Produtividade</p>
+                            <p class="text-sm text-slate-800 font-medium" id="insight-peak-time">--</p>
+                        </div>
+
+                        <!-- Insight 3 -->
+                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500">
+                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Tempo Ausente (AFK)</p>
+                            <p class="text-sm text-slate-800 font-medium" id="insight-afk-time">--</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-500">Meta Diária (8h)</span>
+                        <span class="font-bold text-slate-700" id="insight-goal-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
+                        <div id="insight-goal-bar" class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw Data Table Preview (Collapsible) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <details class="group">
+                <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="font-semibold text-slate-700">Visualizar Dados Brutos (Amostra)</span>
+                    <span class="transition group-open:rotate-180">
+                        <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                    </span>
+                </summary>
+                <div class="p-6 overflow-x-auto">
+                    <table class="min-w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th class="px-4 py-2 rounded-l-lg">Hora</th>
+                                <th class="px-4 py-2">App</th>
+                                <th class="px-4 py-2">Duração</th>
+                                <th class="px-4 py-2">Status</th>
+                                <th class="px-4 py-2 rounded-r-lg">Título</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <tr>
+                                <td colspan="5" class="px-4 py-4 text-center text-slate-400 italic">Carregue um arquivo para ver os dados.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Configuration & Global Variables ---
+        let charts = {}; 
+        let globalRawData = []; // Store all loaded data
+        let globalDates = []; // Store available dates
+        
+        // --- Format Helpers ---
+        function formatSecondsToTime(seconds) {
+            if (!seconds && seconds !== 0) return "--";
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            
+            if (h > 0) {
+                // Returns "2h e 30m"
+                return `${h}h e ${String(m).padStart(2,'0')}m`;
+            }
+            // Returns "45m"
+            return `${m}m`;
+        }
+        
+        // Helper to get raw hour for tooltips
+        function formatSecondsToTimeShort(seconds) {
+             const h = Math.floor(seconds / 3600);
+             const m = Math.floor((seconds % 3600) / 60);
+             if (h > 0) return `${h}h ${m}m`;
+             return `${m}m`;
+        }
+
+        function formatExcelTime(serial) {
+            // Excel time is fractional days. 0.5 = 12:00 PM
+            if(typeof serial === 'string') return serial;
+            const totalSeconds = Math.floor(serial * 86400);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        // --- Chart Initialization ---
+        function initCharts() {
+            // Common Options
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'Inter', size: 11 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    // Custom tooltip formatting based on context
+                                    if(context.chart.canvas.id === 'timelineChart') {
+                                        return `${label}${context.parsed.y} minutos`;
+                                    }
+                                    if(context.chart.canvas.id === 'appDistributionChart') {
+                                         return `${context.label}: ${formatSecondsToTimeShort(context.parsed)}`;
+                                    }
+                                    if(context.chart.canvas.id === 'statusChart') {
+                                         return `${context.label}: ${formatSecondsToTimeShort(context.parsed)}`;
+                                    }
+                                    return label + context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 1. App Distribution (Donut)
+            const ctxApp = document.getElementById('appDistributionChart').getContext('2d');
+            charts.appDist = new Chart(ctxApp, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#3b82f6', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#cbd5e1'] }] },
+                options: { ...commonOptions, cutout: '60%' }
+            });
+
+            // 2. Timeline (Line/Area) - NOW SHOWS MINUTES
+            const ctxTime = document.getElementById('timelineChart').getContext('2d');
+            charts.timeline = new Chart(ctxTime, {
+                type: 'line',
+                data: { labels: [], datasets: [{ 
+                    label: 'Tempo Produtivo (min)', 
+                    data: [], 
+                    borderColor: '#3b82f6', 
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                    fill: true, 
+                    tension: 0.4 
+                }] },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 30, // Max 30 mins in a 30 min bucket
+                            title: { display: true, text: 'Minutos' },
+                            grid: { borderDash: [2, 4] } 
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 3. Status (Pie)
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            charts.status = new Chart(ctxStatus, {
+                type: 'pie',
+                data: { 
+                    labels: ['Ativo (Produtivo)', 'Inativo (AFK)'], 
+                    datasets: [{ 
+                        data: [0, 0], 
+                        backgroundColor: ['#3b82f6', '#f43f5e'],
+                        borderWidth: 0
+                    }] 
+                },
+                options: commonOptions
+            });
+
+            // 4. Trend (Bar)
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            charts.trend = new Chart(ctxTrend, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ 
+                    label: 'Score Produtividade', 
+                    data: [], 
+                    backgroundColor: '#0ea5e9', 
+                    borderRadius: 4 
+                }] },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { max: 100, beginAtZero: true, grid: { borderDash: [2, 4] } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Date Handling ---
+        function parseDateKey(rawDate) {
+            // Returns YYYY-MM-DD
+            if (typeof rawDate === 'number') {
+                // Excel serial date
+                const dateObj = XLSX.SSF.parse_date_code(rawDate);
+                // SSF returns object {y, m, d, ...}
+                return `${dateObj.y}-${String(dateObj.m).padStart(2,'0')}-${String(dateObj.d).padStart(2,'0')}`;
+            }
+            if (typeof rawDate === 'string') {
+                // Try to parse "DD/MM/YYYY" or "MM/DD/YYYY"
+                // Assuming "12/09/2025" (DD/MM/YYYY) based on context (PT-BR)
+                const parts = rawDate.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) return rawDate; // Already YYYY-MM-DD? Unlikely with /
+                    // Assuming DD/MM/YYYY
+                    return `${parts[2]}-${String(parts[1]).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`;
+                }
+                // Fallback: try JS Date
+                const d = new Date(rawDate);
+                if (!isNaN(d)) return d.toISOString().split('T')[0];
+            }
+            return "Indefinido";
+        }
+
+        // --- Data Processing Logic ---
+        function processDataForDate(targetDateKey) {
+            // Filter global rows
+            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
+            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+
+            const filteredRows = globalRawData.filter(row => parseDateKey(row[keyDate]) === targetDateKey);
+
+            let totalSeconds = 0;
+            let totalActiveSeconds = 0;
+            let totalAfkSeconds = 0;
+            let appUsage = {}; 
+            let timelineBuckets = {}; // { "08:00": minutes_active }
+            
+            // Initialize buckets for standard day hours (00:00 to 23:30) to ensure continuous line
+            // Optional: Only create buckets that have data to keep graph clean
+            // Let's stick to buckets that appear in data + gaps filling if needed.
+            
+            filteredRows.forEach(row => {
+                let duration = parseFloat(row[keyDuration]) || 0;
+                let process = row[keyProcess] || "Desconhecido";
+                let status = (row[keyStatus] || "").toUpperCase();
+                let timeRaw = row[keyStartTime]; 
+
+                process = process.replace('.exe', '').replace('.EXE', '').toLowerCase();
+
+                totalSeconds += duration;
+                
+                if (status.includes('ATIVO')) {
+                    totalActiveSeconds += duration;
+                    if (!appUsage[process]) appUsage[process] = 0;
+                    appUsage[process] += duration;
+                } else if (status.includes('AFK') || status.includes('AUSENTE')) {
+                    totalAfkSeconds += duration;
+                }
+
+                // Timeline Logic: Sum MINUTES of activity
+                let hour = 0, minute = 0;
+                if (typeof timeRaw === 'number') {
+                    let totalSecs = Math.round(timeRaw * 86400);
+                    hour = Math.floor(totalSecs / 3600);
+                    minute = Math.floor((totalSecs % 3600) / 60);
+                } else if (typeof timeRaw === 'string' && timeRaw.includes(':')) {
+                    [hour, minute] = timeRaw.split(':').map(Number);
+                }
+
+                let bucketMinute = minute >= 30 ? "30" : "00";
+                let bucketKey = `${String(hour).padStart(2,'0')}:${bucketMinute}`;
+
+                if (!timelineBuckets[bucketKey]) timelineBuckets[bucketKey] = 0;
+                
+                // If Active, add duration to bucket (converted to minutes)
+                if (status.includes('ATIVO')) {
+                    timelineBuckets[bucketKey] += (duration / 60); 
+                }
+            });
+
+            // Cap buckets at 30 minutes (artifacts in data sometimes cause >30m)
+            Object.keys(timelineBuckets).forEach(k => {
+                if(timelineBuckets[k] > 30) timelineBuckets[k] = 30;
+                timelineBuckets[k] = parseFloat(timelineBuckets[k].toFixed(1));
+            });
+
+            return {
+                metrics: {
+                    totalSeconds,
+                    totalActiveSeconds,
+                    totalAfkSeconds,
+                    activitiesCount: filteredRows.length,
+                    appUsage,
+                    timelineBuckets
+                },
+                rows: filteredRows
+            };
+        }
+
+        function updateDashboardUI(dataObj) {
+            const metrics = dataObj.metrics;
+
+            // 1. Update KPIs
+            document.getElementById('kpi-total-time').textContent = formatSecondsToTime(metrics.totalSeconds);
+            document.getElementById('kpi-activities').textContent = metrics.activitiesCount.toLocaleString();
+            document.getElementById('kpi-apps').textContent = Object.keys(metrics.appUsage).length;
+            document.getElementById('kpi-date').textContent = document.getElementById('dateSelect').options[document.getElementById('dateSelect').selectedIndex]?.text || "Hoje";
+
+            const prodRate = metrics.totalSeconds > 0 ? Math.round((metrics.totalActiveSeconds / metrics.totalSeconds) * 100) : 0;
+            document.getElementById('kpi-productivity').textContent = `${prodRate}%`;
+            document.getElementById('kpi-prod-bar').style.width = `${prodRate}%`;
+
+            // 2. Update Charts
+            
+            // App Distribution
+            const sortedApps = Object.entries(metrics.appUsage).sort((a, b) => b[1] - a[1]);
+            const top5 = sortedApps.slice(0, 5);
+            const othersTotal = sortedApps.slice(5).reduce((acc, curr) => acc + curr[1], 0);
+            
+            const appLabels = top5.map(i => i[0]);
+            const appData = top5.map(i => i[1]);
+            if (othersTotal > 0) {
+                appLabels.push('Outros');
+                appData.push(othersTotal);
+            }
+            
+            charts.appDist.data.labels = appLabels;
+            charts.appDist.data.datasets[0].data = appData;
+            charts.appDist.update();
+
+            // Timeline & Trend
+            const sortedTimes = Object.keys(metrics.timelineBuckets).sort();
+            // Timeline: Value is Minutes Active
+            const activityData = sortedTimes.map(t => metrics.timelineBuckets[t]);
+            // Trend Score: (Minutes Active / 30) * 100
+            const scoreData = sortedTimes.map(t => Math.round((metrics.timelineBuckets[t] / 30) * 100));
+
+            charts.timeline.data.labels = sortedTimes;
+            charts.timeline.data.datasets[0].data = activityData;
+            charts.timeline.update();
+
+            charts.trend.data.labels = sortedTimes;
+            charts.trend.data.datasets[0].data = scoreData;
+            charts.trend.update();
+
+            // Status Pie
+            charts.status.data.datasets[0].data = [metrics.totalActiveSeconds, metrics.totalAfkSeconds];
+            charts.status.update();
+
+            // 3. Update Insights
+            const topApp = sortedApps.length > 0 ? sortedApps[0][0] : "Nenhuma";
+            document.getElementById('insight-top-app').textContent = `${topApp} (${formatSecondsToTime(sortedApps.length > 0 ? sortedApps[0][1] : 0)})`;
+
+            let maxScore = -1;
+            let peakTime = "--";
+            sortedTimes.forEach((time, index) => {
+                if (scoreData[index] > maxScore) {
+                    maxScore = scoreData[index];
+                    peakTime = time;
+                }
+            });
+            document.getElementById('insight-peak-time').textContent = `${peakTime} (Score: ${maxScore})`;
+
+            document.getElementById('insight-afk-time').textContent = formatSecondsToTime(metrics.totalAfkSeconds);
+
+            const goalSeconds = 28800; // 8h
+            const goalPercent = Math.min(100, Math.round((metrics.totalActiveSeconds / goalSeconds) * 100));
+            document.getElementById('insight-goal-percent').textContent = `${goalPercent}%`;
+            document.getElementById('insight-goal-bar').style.width = `${goalPercent}%`;
+            if (goalPercent >= 100) {
+                document.getElementById('insight-goal-bar').classList.add('bg-green-500');
+                document.getElementById('insight-goal-bar').classList.remove('bg-indigo-600');
+            }
+            
+            // Update Table
+            populateTablePreview(dataObj.rows.slice(0, 100));
+        }
+
+        // --- Loading & Event Handlers ---
+        
+        function onDateChange() {
+            const selectedDate = document.getElementById('dateSelect').value;
+            if(!selectedDate) return;
+            const data = processDataForDate(selectedDate);
+            updateDashboardUI(data);
+        }
+
+        document.getElementById('dateSelect').addEventListener('change', onDateChange);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('statusMsg').classList.remove('hidden');
+            document.getElementById('statusText').textContent = "Processando arquivo...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    globalRawData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (globalRawData.length === 0) throw new Error("Planilha vazia");
+
+                    // Extract Dates
+                    const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+                    const datesSet = new Set();
+                    globalRawData.forEach(r => {
+                        const d = parseDateKey(r[keyDate]);
+                        if(d !== "Indefinido") datesSet.add(d);
+                    });
+                    
+                    globalDates = Array.from(datesSet).sort().reverse(); // Newest first
+                    
+                    // Populate Select
+                    const select = document.getElementById('dateSelect');
+                    select.innerHTML = '';
+                    if(globalDates.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.text = "Sem datas válidas";
+                        select.add(opt);
+                    } else {
+                        globalDates.forEach(d => {
+                            const opt = document.createElement('option');
+                            opt.value = d;
+                            // Format date for display (YYYY-MM-DD -> DD/MM/YYYY)
+                            const [y, m, day] = d.split('-');
+                            opt.text = `${day}/${m}/${y}`;
+                            select.add(opt);
+                        });
+                        
+                        // Select first date
+                        select.value = globalDates[0];
+                        onDateChange();
+                    }
+
+                    document.getElementById('statusMsg').classList.add('hidden');
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('statusMsg').className = "bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 text-sm flex items-center gap-2";
+                    document.getElementById('statusText').textContent = "Erro ao ler arquivo. Verifique se é o formato correto.";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function populateTablePreview(rows) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            if(rows.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Sem dados.</td></tr>';
+                 return;
+            }
+
+            const keyDuration = Object.keys(rows[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(rows[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(rows[0]).find(k => k.includes('Status')) || 'Status';
+            const keyTitle = Object.keys(rows[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStartTime = Object.keys(rows[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                
+                let timeVal = row[keyStartTime];
+                if(typeof timeVal === 'number') timeVal = formatExcelTime(timeVal);
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono text-xs">${timeVal || '--'}</td>
+                    <td class="px-4 py-3 font-medium text-slate-700">${(row[keyProcess] || '').replace('.exe','')}</td>
+                    <td class="px-4 py-3">${formatSecondsToTimeShort(row[keyDuration] || 0)}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${String(row[keyStatus]).includes('ATIVO') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                            ${row[keyStatus] || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-500 truncate max-w-xs">${row[keyTitle] || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadDemoData() {
+            document.getElementById('statusMsg').classList.remove('hidden');
+            document.getElementById('statusText').textContent = "Carregando Demo...";
+            
+            // Create fake data for "Today" and "Yesterday"
+            globalRawData = [];
+            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer'];
+            const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO'];
+            
+            // Today
+            let dateToday = new Date().toISOString().split('T')[0];
+            // Yesterday
+            let dYest = new Date(); dYest.setDate(dYest.getDate() - 1);
+            let dateYest = dYest.toISOString().split('T')[0];
+
+            [dateToday, dateYest].forEach(dateStr => {
+                 let currentTime = 8 * 3600; 
+                 const endTime = 18 * 3600;
+                 
+                 // Transform dateStr back to what Excel usually looks like? 
+                 // We will use our parseDateKey logic which handles YYYY-MM-DD string nicely for Demo
+                 
+                 while(currentTime < endTime) {
+                    const duration = Math.floor(Math.random() * 300) + 60; 
+                    const app = apps[Math.floor(Math.random() * apps.length)];
+                    const status = statuses[Math.floor(Math.random() * statuses.length)];
+                    
+                    const h = Math.floor(currentTime / 3600);
+                    const m = Math.floor((currentTime % 3600) / 60);
+                    const s = currentTime % 60;
+                    const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    
+                    globalRawData.push({
+                        "Data Início": dateStr, // In demo we use ISO string directly
+                        "Hora Início": timeStr,
+                        "Processo": app + ".exe",
+                        "Duração (seg)": duration,
+                        "Status": status,
+                        "Título da Janela": "Demo Window"
+                    });
+                    currentTime += duration;
+                }
+            });
+
+            // Populate Select
+            const select = document.getElementById('dateSelect');
+            select.innerHTML = '';
+            
+            [dateToday, dateYest].forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                const [y, m, day] = d.split('-');
+                opt.text = `${day}/${m}/${y} (Demo)`;
+                select.add(opt);
+            });
+            
+            select.value = dateToday;
+            onDateChange();
+            
+            setTimeout(() => { document.getElementById('statusMsg').classList.add('hidden'); }, 500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            document.getElementById('fileUpload').addEventListener('change', handleFileSelect);
+            loadDemoData(); 
+        });
+
+    </script>
+</body>
+</html>

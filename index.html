@@ -47,6 +47,13 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; 
         }
+        
+        /* Input number arrow hide */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -54,8 +61,8 @@
     <!-- Header Section -->
     <div class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
+            <div class="flex flex-col xl:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3 w-full xl:w-auto">
                     <div class="bg-indigo-600 p-2 rounded-lg text-white">
                         <i class="fa-solid fa-clock-rotate-left text-xl"></i>
                     </div>
@@ -66,14 +73,27 @@
                 </div>
                 
                 <!-- Controls Area -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <!-- Date Selector -->
+                <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
+                    
+                    <!-- Compare Mode Toggle & Select -->
+                    <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200" title="Comparar dois dias">
+                        <div class="flex items-center h-5">
+                            <input id="enableCompare" type="checkbox" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                        </div>
+                        <label for="enableCompare" class="text-xs font-medium text-slate-700 select-none cursor-pointer">Comparar</label>
+                        <div class="h-4 w-px bg-slate-300 mx-1"></div>
+                        <select id="compareDateSelect" disabled class="bg-transparent text-xs text-slate-600 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer w-28">
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+
+                    <!-- Main Date Selector -->
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
                             <i class="fa-regular fa-calendar"></i>
                         </div>
-                        <select id="dateSelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2.5 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400">
-                            <option value="">Carregue um arquivo...</option>
+                        <select id="dateSelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-40 pl-10 p-2.5 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400">
+                            <option value="">Carregue arquivo...</option>
                         </select>
                     </div>
 
@@ -104,36 +124,43 @@
         <!-- KPI Cards Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Time -->
-            <div class="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white shadow-lg shadow-pink-200 transform hover:scale-[1.02] transition-transform">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white shadow-lg shadow-pink-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
+                <div class="flex justify-between items-start z-10 relative">
                     <div>
                         <p class="text-pink-100 text-sm font-medium mb-1">Tempo Total Monitorado</p>
                         <h3 class="text-3xl font-bold" id="kpi-total-time">--</h3>
+                        <div id="diff-total-time" class="hidden mt-1 text-xs font-bold bg-white/20 inline-block px-1.5 py-0.5 rounded backdrop-blur-sm"></div>
                     </div>
                     <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                         <i class="fa-regular fa-clock text-xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 text-sm text-pink-100 bg-white/10 inline-block px-2 py-1 rounded">
+                <div class="mt-4 text-sm text-pink-100 bg-white/10 inline-block px-2 py-1 rounded z-10 relative">
                     <i class="fa-solid fa-calendar-day mr-1"></i>
                     <span id="kpi-date">Selecione uma data</span>
                 </div>
+                <!-- Decorator -->
+                <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             </div>
 
             <!-- Productivity Rate -->
-            <div class="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg shadow-cyan-200 transform hover:scale-[1.02] transition-transform">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg shadow-cyan-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
+                <div class="flex justify-between items-start z-10 relative">
                     <div>
                         <p class="text-cyan-100 text-sm font-medium mb-1">Taxa de Produtividade</p>
-                        <h3 class="text-3xl font-bold" id="kpi-productivity">--%</h3>
+                        <div class="flex items-baseline gap-2">
+                             <h3 class="text-3xl font-bold" id="kpi-productivity">--%</h3>
+                             <span id="diff-productivity" class="hidden text-xs font-bold bg-black/20 px-1.5 py-0.5 rounded"></span>
+                        </div>
                     </div>
                     <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                         <i class="fa-solid fa-chart-line text-xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 w-full bg-black/20 rounded-full h-1.5">
+                <div class="mt-4 w-full bg-black/20 rounded-full h-1.5 z-10 relative">
                     <div id="kpi-prod-bar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
                 </div>
+                <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             </div>
 
             <!-- Total Activities -->
@@ -141,7 +168,10 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-slate-500 text-sm font-medium mb-1">Atividades Registradas</p>
-                        <h3 class="text-3xl font-bold text-slate-800" id="kpi-activities">--</h3>
+                        <div class="flex items-baseline gap-2">
+                             <h3 class="text-3xl font-bold text-slate-800" id="kpi-activities">--</h3>
+                             <span id="diff-activities" class="hidden text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100"></span>
+                        </div>
                     </div>
                     <div class="bg-slate-100 p-2 rounded-lg text-slate-600">
                         <i class="fa-solid fa-list-check text-xl"></i>
@@ -191,7 +221,13 @@
                         </h3>
                         <p class="text-xs text-slate-500">Minutos produtivos por intervalo de tempo</p>
                     </div>
-                    <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Tempo Real</span>
+                    <div class="flex gap-2">
+                        <div id="legend-compare" class="hidden items-center gap-1 text-xs">
+                             <span class="w-3 h-3 rounded-full bg-slate-400 block"></span>
+                             <span class="text-slate-500">Dia Comparado</span>
+                        </div>
+                        <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Dia Atual</span>
+                    </div>
                 </div>
                 <div class="relative h-64 w-full">
                     <canvas id="timelineChart"></canvas>
@@ -248,13 +284,21 @@
                 </div>
                 
                 <div class="mt-4 pt-4 border-t border-slate-100">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-500">Meta Diária (8h)</span>
-                        <span class="font-bold text-slate-700" id="insight-goal-percent">0%</span>
+                    <div class="flex justify-between items-end text-sm mb-2">
+                        <div class="flex flex-col">
+                            <span class="text-slate-500 text-xs">Meta de Foco Diário</span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-slate-400 font-light">Meta:</span>
+                                <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-12 border-b border-indigo-200 focus:border-indigo-600 focus:outline-none text-indigo-700 font-bold bg-transparent text-center">
+                                <span class="text-slate-500">h</span>
+                            </div>
+                        </div>
+                        <span class="font-bold text-slate-700 text-lg" id="insight-goal-percent">0%</span>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
-                        <div id="insight-goal-bar" class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                    <div class="w-full bg-slate-200 rounded-full h-3">
+                        <div id="insight-goal-bar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
+                    <p class="text-xs text-slate-400 mt-2 text-right">Baseado em tempo ativo (não total)</p>
                 </div>
             </div>
         </div>
@@ -472,9 +516,11 @@
             let appUsage = {}; 
             let timelineBuckets = {}; // { "08:00": minutes_active }
             
-            // Initialize buckets for standard day hours (00:00 to 23:30) to ensure continuous line
-            // Optional: Only create buckets that have data to keep graph clean
-            // Let's stick to buckets that appear in data + gaps filling if needed.
+            // Generate standard buckets 00:00 to 23:30 for clean comparing
+            for(let h=0; h<24; h++) {
+                timelineBuckets[`${String(h).padStart(2,'0')}:00`] = 0;
+                timelineBuckets[`${String(h).padStart(2,'0')}:30`] = 0;
+            }
             
             filteredRows.forEach(row => {
                 let duration = parseFloat(row[keyDuration]) || 0;
@@ -507,15 +553,17 @@
                 let bucketMinute = minute >= 30 ? "30" : "00";
                 let bucketKey = `${String(hour).padStart(2,'0')}:${bucketMinute}`;
 
-                if (!timelineBuckets[bucketKey]) timelineBuckets[bucketKey] = 0;
+                // if (!timelineBuckets[bucketKey]) timelineBuckets[bucketKey] = 0; // Already initialized
                 
                 // If Active, add duration to bucket (converted to minutes)
                 if (status.includes('ATIVO')) {
-                    timelineBuckets[bucketKey] += (duration / 60); 
+                    if (timelineBuckets[bucketKey] !== undefined) {
+                         timelineBuckets[bucketKey] += (duration / 60); 
+                    }
                 }
             });
 
-            // Cap buckets at 30 minutes (artifacts in data sometimes cause >30m)
+            // Cap buckets at 30 minutes
             Object.keys(timelineBuckets).forEach(k => {
                 if(timelineBuckets[k] > 30) timelineBuckets[k] = 30;
                 timelineBuckets[k] = parseFloat(timelineBuckets[k].toFixed(1));
@@ -534,7 +582,47 @@
             };
         }
 
-        function updateDashboardUI(dataObj) {
+        // Helper to update diffs
+        function updateDiffBadge(elementId, currentVal, prevVal, isPercentage = false) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            if (prevVal === undefined || prevVal === null || prevVal === 0) {
+                el.classList.add('hidden');
+                return;
+            }
+
+            let diff = currentVal - prevVal;
+            let diffPercent = (diff / prevVal) * 100;
+            let icon = diff >= 0 ? '▲' : '▼';
+            let colorClass = diff >= 0 ? 'text-green-300' : 'text-rose-300';
+            
+            // For negative metrics like "Total Time" if "more is better" then green. 
+            // Assuming more time/prod/activities is generally "Active" -> better.
+            
+            if(elementId === 'diff-total-time') {
+                 // Format: +1h 30m
+                 let absDiff = Math.abs(diff);
+                 let h = Math.floor(absDiff / 3600);
+                 let m = Math.floor((absDiff % 3600) / 60);
+                 let timeStr = h > 0 ? `${h}h${m}m` : `${m}m`;
+                 el.textContent = `${icon} ${timeStr}`;
+                 el.className = `mt-1 text-xs font-bold inline-block px-1.5 py-0.5 rounded backdrop-blur-sm ${diff >= 0 ? 'bg-green-500/30 text-green-100' : 'bg-rose-500/30 text-rose-100'}`;
+                 el.classList.remove('hidden');
+            } else {
+                 el.textContent = `${icon} ${Math.abs(diffPercent).toFixed(1)}%`;
+                 if(elementId === 'diff-productivity') {
+                     // Productivity diff inside blue card
+                     el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-500/30 text-green-100' : 'bg-rose-500/30 text-rose-100'}`;
+                 } else {
+                     // Standard gray card
+                     el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
+                 }
+                 el.classList.remove('hidden');
+            }
+        }
+
+        function updateDashboardUI(dataObj, comparisonObj = null) {
             const metrics = dataObj.metrics;
 
             // 1. Update KPIs
@@ -546,6 +634,18 @@
             const prodRate = metrics.totalSeconds > 0 ? Math.round((metrics.totalActiveSeconds / metrics.totalSeconds) * 100) : 0;
             document.getElementById('kpi-productivity').textContent = `${prodRate}%`;
             document.getElementById('kpi-prod-bar').style.width = `${prodRate}%`;
+
+            // Comparison Logic for KPIs
+            if (comparisonObj) {
+                const compMetrics = comparisonObj.metrics;
+                const compProdRate = compMetrics.totalSeconds > 0 ? Math.round((compMetrics.totalActiveSeconds / compMetrics.totalSeconds) * 100) : 0;
+                
+                updateDiffBadge('diff-total-time', metrics.totalSeconds, compMetrics.totalSeconds);
+                updateDiffBadge('diff-productivity', prodRate, compProdRate, true);
+                updateDiffBadge('diff-activities', metrics.activitiesCount, compMetrics.activitiesCount, true);
+            } else {
+                ['diff-total-time', 'diff-productivity', 'diff-activities'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            }
 
             // 2. Update Charts
             
@@ -567,13 +667,39 @@
 
             // Timeline & Trend
             const sortedTimes = Object.keys(metrics.timelineBuckets).sort();
-            // Timeline: Value is Minutes Active
             const activityData = sortedTimes.map(t => metrics.timelineBuckets[t]);
-            // Trend Score: (Minutes Active / 30) * 100
             const scoreData = sortedTimes.map(t => Math.round((metrics.timelineBuckets[t] / 30) * 100));
 
             charts.timeline.data.labels = sortedTimes;
-            charts.timeline.data.datasets[0].data = activityData;
+            // Primary Dataset
+            charts.timeline.data.datasets = [{ 
+                label: 'Dia Atual', 
+                data: activityData, 
+                borderColor: '#3b82f6', 
+                backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                fill: true, 
+                tension: 0.4 
+            }];
+
+            // Comparison Dataset
+            if (comparisonObj) {
+                const compActivityData = sortedTimes.map(t => comparisonObj.metrics.timelineBuckets[t] || 0);
+                charts.timeline.data.datasets.push({
+                    label: 'Dia Comparado',
+                    data: compActivityData,
+                    borderColor: '#94a3b8',
+                    backgroundColor: 'rgba(148, 163, 184, 0.05)',
+                    fill: true,
+                    borderDash: [5, 5],
+                    tension: 0.4
+                });
+                document.getElementById('legend-compare').classList.remove('hidden');
+                document.getElementById('legend-compare').classList.add('flex');
+            } else {
+                document.getElementById('legend-compare').classList.add('hidden');
+                document.getElementById('legend-compare').classList.remove('flex');
+            }
+
             charts.timeline.update();
 
             charts.trend.data.labels = sortedTimes;
@@ -600,29 +726,73 @@
 
             document.getElementById('insight-afk-time').textContent = formatSecondsToTime(metrics.totalAfkSeconds);
 
-            const goalSeconds = 28800; // 8h
-            const goalPercent = Math.min(100, Math.round((metrics.totalActiveSeconds / goalSeconds) * 100));
-            document.getElementById('insight-goal-percent').textContent = `${goalPercent}%`;
-            document.getElementById('insight-goal-bar').style.width = `${goalPercent}%`;
-            if (goalPercent >= 100) {
-                document.getElementById('insight-goal-bar').classList.add('bg-green-500');
-                document.getElementById('insight-goal-bar').classList.remove('bg-indigo-600');
-            }
+            // Goal Logic with User Input
+            updateGoal(metrics.totalActiveSeconds);
             
             // Update Table
             populateTablePreview(dataObj.rows.slice(0, 100));
+        }
+
+        function updateGoal(currentActiveSeconds) {
+            // Get value from input
+            let goalHours = parseFloat(document.getElementById('goalInput').value) || 8;
+            if(goalHours <= 0) goalHours = 1;
+            
+            const goalSeconds = goalHours * 3600;
+            const goalPercent = Math.min(100, Math.round((currentActiveSeconds / goalSeconds) * 100));
+            
+            document.getElementById('insight-goal-percent').textContent = `${goalPercent}%`;
+            const bar = document.getElementById('insight-goal-bar');
+            bar.style.width = `${goalPercent}%`;
+            
+            if (goalPercent >= 100) {
+                bar.classList.add('bg-green-500');
+                bar.classList.remove('bg-indigo-600');
+            } else {
+                bar.classList.add('bg-indigo-600');
+                bar.classList.remove('bg-green-500');
+            }
         }
 
         // --- Loading & Event Handlers ---
         
         function onDateChange() {
             const selectedDate = document.getElementById('dateSelect').value;
+            const compareDate = document.getElementById('compareDateSelect').value;
+            const isCompareEnabled = document.getElementById('enableCompare').checked;
+
             if(!selectedDate) return;
+            
             const data = processDataForDate(selectedDate);
-            updateDashboardUI(data);
+            
+            let compareData = null;
+            if (isCompareEnabled && compareDate && compareDate !== "") {
+                compareData = processDataForDate(compareDate);
+            }
+
+            updateDashboardUI(data, compareData);
         }
 
+        // Listeners for new controls
         document.getElementById('dateSelect').addEventListener('change', onDateChange);
+        document.getElementById('compareDateSelect').addEventListener('change', onDateChange);
+        document.getElementById('enableCompare').addEventListener('change', (e) => {
+            const compSelect = document.getElementById('compareDateSelect');
+            compSelect.disabled = !e.target.checked;
+            if (!e.target.checked) {
+                compSelect.value = "";
+                onDateChange();
+            }
+        });
+        
+        // Listener for Goal Input
+        document.getElementById('goalInput').addEventListener('input', () => {
+             // We need to re-run updateGoal, but we need the current active seconds.
+             // Simplest is to just re-trigger onDateChange to refresh UI or store active seconds globally.
+             // Let's store a temp var on UI update to make this efficient.
+             // Or just trigger onDateChange, it's fast enough.
+             onDateChange();
+        });
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -652,21 +822,31 @@
                     
                     globalDates = Array.from(datesSet).sort().reverse(); // Newest first
                     
-                    // Populate Select
+                    // Populate Selects
                     const select = document.getElementById('dateSelect');
+                    const compSelect = document.getElementById('compareDateSelect');
+                    
                     select.innerHTML = '';
+                    compSelect.innerHTML = '<option value="">Selecione...</option>';
+
                     if(globalDates.length === 0) {
                         const opt = document.createElement('option');
                         opt.text = "Sem datas válidas";
                         select.add(opt);
                     } else {
                         globalDates.forEach(d => {
-                            const opt = document.createElement('option');
-                            opt.value = d;
-                            // Format date for display (YYYY-MM-DD -> DD/MM/YYYY)
                             const [y, m, day] = d.split('-');
-                            opt.text = `${day}/${m}/${y}`;
-                            select.add(opt);
+                            const dateLabel = `${day}/${m}/${y}`;
+                            
+                            const opt1 = document.createElement('option');
+                            opt1.value = d;
+                            opt1.text = dateLabel;
+                            select.add(opt1);
+                            
+                            const opt2 = document.createElement('option');
+                            opt2.value = d;
+                            opt2.text = dateLabel;
+                            compSelect.add(opt2);
                         });
                         
                         // Select first date
@@ -725,23 +905,17 @@
             document.getElementById('statusMsg').classList.remove('hidden');
             document.getElementById('statusText').textContent = "Carregando Demo...";
             
-            // Create fake data for "Today" and "Yesterday"
             globalRawData = [];
             const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer'];
             const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO'];
             
-            // Today
             let dateToday = new Date().toISOString().split('T')[0];
-            // Yesterday
             let dYest = new Date(); dYest.setDate(dYest.getDate() - 1);
             let dateYest = dYest.toISOString().split('T')[0];
 
             [dateToday, dateYest].forEach(dateStr => {
                  let currentTime = 8 * 3600; 
                  const endTime = 18 * 3600;
-                 
-                 // Transform dateStr back to what Excel usually looks like? 
-                 // We will use our parseDateKey logic which handles YYYY-MM-DD string nicely for Demo
                  
                  while(currentTime < endTime) {
                     const duration = Math.floor(Math.random() * 300) + 60; 
@@ -754,7 +928,7 @@
                     const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
                     
                     globalRawData.push({
-                        "Data Início": dateStr, // In demo we use ISO string directly
+                        "Data Início": dateStr, 
                         "Hora Início": timeStr,
                         "Processo": app + ".exe",
                         "Duração (seg)": duration,
@@ -767,14 +941,19 @@
 
             // Populate Select
             const select = document.getElementById('dateSelect');
+            const compSelect = document.getElementById('compareDateSelect');
             select.innerHTML = '';
+            compSelect.innerHTML = '<option value="">Selecione...</option>';
             
             [dateToday, dateYest].forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d;
                 const [y, m, day] = d.split('-');
-                opt.text = `${day}/${m}/${y} (Demo)`;
-                select.add(opt);
+                const label = `${day}/${m}/${y} (Demo)`;
+                
+                const opt1 = document.createElement('option');
+                opt1.value = d; opt1.text = label; select.add(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.value = d; opt2.text = label; compSelect.add(opt2);
             });
             
             select.value = dateToday;

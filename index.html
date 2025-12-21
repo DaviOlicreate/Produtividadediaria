@@ -22,7 +22,7 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Slate-50 background for contrast with white cards */
+            background-color: #f8fafc;
         }
 
         /* --- Card Styles Identity --- */
@@ -32,7 +32,7 @@
             background-color: #FFFFFF;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #F1F5F9; /* slate-100 */
+            border: 1px solid #F1F5F9;
             transition: transform 0.2s ease-in-out;
         }
         .card-type-a:hover {
@@ -40,28 +40,28 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
         }
         .card-type-a .label {
-            font-size: 0.75rem; /* text-xs */
-            font-weight: 600; /* font-semibold */
+            font-size: 0.75rem;
+            font-weight: 600;
             text-transform: uppercase;
-            color: #64748B; /* slate-500 */
+            color: #64748B;
             letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
         }
         .card-type-a .value {
-            font-size: 1.875rem; /* text-3xl */
-            font-weight: 800; /* font-extrabold */
-            color: #1E293B; /* slate-800 */
+            font-size: 1.875rem;
+            font-weight: 800;
+            color: #1E293B;
             line-height: 1.2;
         }
         .card-type-a .subtext {
-            font-size: 0.75rem; /* text-xs */
-            color: #94A3B8; /* slate-400 */
+            font-size: 0.75rem;
+            color: #94A3B8;
             margin-top: 0.5rem;
         }
 
-        /* Tipo B: Card Destaque (Vitória) */
+        /* Tipo B: Card Destaque */
         .card-type-b {
-            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%); /* Roxo Vibrante solicitado */
+            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(75, 0, 130, 0.25);
             color: #FFFFFF;
@@ -95,7 +95,6 @@
             margin-top: 0.5rem;
             position: relative; z-index: 10;
         }
-        /* Decorator circle for Type B */
         .card-type-b::after {
             content: '';
             position: absolute;
@@ -121,7 +120,7 @@
         }
 
         .tab-active {
-            border-bottom: 2px solid #8A2BE2; /* Match Type B purple */
+            border-bottom: 2px solid #8A2BE2;
             color: #4B0082;
             font-weight: 700;
         }
@@ -138,11 +137,11 @@
         .heatmap-grid {
             display: grid;
             grid-template-columns: 40px repeat(7, 1fr);
-            gap: 4px; /* Increased gap for cleaner look */
+            gap: 4px;
         }
         .heatmap-cell {
-            height: 28px; /* Slightly taller */
-            border-radius: 4px; /* Matches card vibe */
+            height: 28px;
+            border-radius: 4px;
             transition: all 0.2s;
         }
         .heatmap-cell:hover {
@@ -749,22 +748,33 @@
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
-                                // Specific Fix for Monthly Day Dist Chart
-                                if(context.chart.canvas.id === 'monthlyDayDistChart') {
-                                     return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
+                                
+                                const type = context.chart.config.type;
+                                const id = context.chart.canvas.id;
+                                const raw = context.raw;
+
+                                // 1. Time-based charts (Seconds input)
+                                // Doughnuts, Pies, Monthly Day Dist
+                                if (type === 'doughnut' || type === 'pie' || id === 'monthlyDayDistChart') {
+                                    return `${context.label || label.replace(': ','')}: ${formatSecondsToTimeShort(raw)}`;
                                 }
-                                if (context.parsed.y !== null && typeof context.parsed.y === 'number') {
-                                    if(context.chart.config.type === 'doughnut' || context.chart.config.type === 'pie') {
-                                         return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
-                                    }
-                                    if(context.chart.canvas.id === 'timelineChart') {
-                                        return `${label}${context.parsed.y.toFixed(2)} horas`;
-                                    }
+
+                                // 2. Radar (Hours input)
+                                if (type === 'radar') {
+                                    return `${context.label}: ${formatSecondsToTimeShort(raw * 3600)}`;
+                                }
+
+                                // 3. Timeline (Hours input)
+                                if (id === 'timelineChart') {
+                                    // context.parsed.y is hours. 
+                                    return `${label}${context.parsed.y.toFixed(2)}h`;
+                                }
+
+                                // 4. Default (Scores, Percentages)
+                                if (context.parsed.y !== null) {
                                     return label + context.parsed.y;
                                 }
-                                if(context.chart.config.type === 'radar') {
-                                    return `${context.label}: ${formatSecondsToTimeShort(context.raw * 3600)}`;
-                                }
+                                
                                 return label + context.formattedValue;
                             }
                         }

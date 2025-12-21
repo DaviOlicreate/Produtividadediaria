@@ -89,6 +89,26 @@
                         </select>
                     </div>
 
+                    <!-- NEW: Month Selector -->
+                    <div id="month-control" class="hidden relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                            <i class="fa-regular fa-calendar-check"></i>
+                        </div>
+                        <select id="monthSelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-36 pl-10 p-2.5 cursor-pointer">
+                            <option value="">Mês...</option>
+                        </select>
+                    </div>
+
+                    <!-- NEW: Week Selector -->
+                    <div id="week-control" class="hidden relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                            <i class="fa-solid fa-calendar-week"></i>
+                        </div>
+                        <select id="weekSelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-48 pl-10 p-2.5 cursor-pointer">
+                            <option value="">Semana...</option>
+                        </select>
+                    </div>
+
                     <!-- Main Date Selector -->
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
@@ -525,10 +545,24 @@
                 }
             });
 
-            // Toggle Compare Controls (Only relevant for Daily)
+            // Toggle Controls Visibility
             const compareControls = document.getElementById('compare-controls');
-            if(viewName === 'daily') compareControls.classList.remove('hidden');
-            else compareControls.classList.add('hidden');
+            const monthControl = document.getElementById('month-control');
+            const weekControl = document.getElementById('week-control');
+
+            if(viewName === 'daily') {
+                compareControls.classList.remove('hidden');
+                monthControl.classList.add('hidden');
+                weekControl.classList.add('hidden');
+            } else if (viewName === 'weekly') {
+                compareControls.classList.add('hidden');
+                monthControl.classList.remove('hidden');
+                weekControl.classList.remove('hidden');
+            } else if (viewName === 'monthly') {
+                compareControls.classList.add('hidden');
+                monthControl.classList.remove('hidden');
+                weekControl.classList.add('hidden');
+            }
 
             // Trigger Update based on current selection
             onDateChange();
@@ -548,7 +582,11 @@
                                 if (label) label += ': ';
                                 if (context.parsed.y !== null && typeof context.parsed.y === 'number') {
                                     if(context.chart.config.type === 'doughnut' || context.chart.canvas.id.includes('Dist')) {
-                                         return `${context.label}: ${formatSecondsToTimeShort(context.parsed)}`;
+                                         // For bar charts parsed is {x, y}, for doughnut it's number
+                                         // We need to handle this to avoid NaN
+                                         let val = context.parsed;
+                                         if(typeof val === 'object' && val.y !== undefined) val = val.y;
+                                         return `${context.label}: ${formatSecondsToTimeShort(val)}`;
                                     }
                                     return label + context.parsed.y;
                                 }
@@ -632,7 +670,17 @@
                 data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Horas Totais', data: [], backgroundColor: '#ec4899', borderRadius: 4 }] },
                 options: {
                     ...commonOptions,
-                    scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { borderDash: [2, 4] },
+                            ticks: {
+                                // Convert seconds back to hours for axis
+                                callback: function(value) { return Math.floor(value / 3600) + 'h'; }
+                            }
+                        }, 
+                        x: { grid: { display: false } } 
+                    }
                 }
             });
         }
@@ -689,6 +737,83 @@
                 currentDate.setDate(currentDate.getDate() + 1);
             }
             return dateArray;
+        }
+
+        // --- New Populate Logic for Month/Week Selectors ---
+        function populateAuxiliarySelects() {
+            const monthSelect = document.getElementById('monthSelect');
+            const weekSelect = document.getElementById('weekSelect');
+            
+            // Extract Unique Months
+            const months = new Set();
+            globalDates.forEach(d => {
+                months.add(d.substring(0, 7)); // YYYY-MM
+            });
+            const sortedMonths = Array.from(months).sort().reverse();
+
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            // Clear current options (keep placeholder)
+            while (monthSelect.options.length > 1) monthSelect.remove(1);
+            
+            sortedMonths.forEach(ym => {
+                const [y, m] = ym.split('-');
+                const label = `${monthNames[parseInt(m)-1]} ${y}`;
+                const opt = document.createElement('option');
+                opt.value = ym;
+                opt.text = label;
+                monthSelect.add(opt);
+            });
+
+            // Set initial value based on current selected date
+            syncAuxiliarySelectsWithDate();
+        }
+
+        function updateWeekOptions(selectedMonthKey) {
+            const weekSelect = document.getElementById('weekSelect');
+            // Clear current options
+            while (weekSelect.options.length > 1) weekSelect.remove(1);
+
+            if (!selectedMonthKey) return;
+
+            // Find all Mondays in that month present in globalDates or generally in that month
+            // Better: Iterate all dates in that month, find their week ranges, unique them.
+            const weeks = new Set();
+            globalDates.filter(d => d.startsWith(selectedMonthKey)).forEach(d => {
+                const range = getWeekRange(d);
+                weeks.add(JSON.stringify({start: range.start, end: range.end}));
+            });
+
+            // Sort weeks
+            const sortedWeeks = Array.from(weeks).map(w => JSON.parse(w)).sort((a,b) => b.start.localeCompare(a.start));
+
+            sortedWeeks.forEach((range, idx) => {
+                const label = `Semana ${sortedWeeks.length - idx}`;
+                
+                const opt = document.createElement('option');
+                opt.value = range.start; // Value is start date of week
+                opt.text = label;
+                weekSelect.add(opt);
+            });
+        }
+
+        function syncAuxiliarySelectsWithDate() {
+            const dateVal = document.getElementById('dateSelect').value;
+            if(!dateVal) return;
+            
+            const monthKey = dateVal.substring(0, 7);
+            const monthSelect = document.getElementById('monthSelect');
+            
+            if(monthSelect.value !== monthKey) {
+                monthSelect.value = monthKey;
+                updateWeekOptions(monthKey);
+            }
+
+            const weekRange = getWeekRange(dateVal);
+            const weekSelect = document.getElementById('weekSelect');
+            // Check if this week exists in options, if not adds it (edge case crossing months)
+            // Ideally we select the week that matches the start date
+            weekSelect.value = weekRange.start;
         }
 
         // --- Aggregation Logic (Multi-period) ---
@@ -883,7 +1008,8 @@
                 let dayIdx = dateObj.getDay(); // 0=Sun, 1=Mon
                 // Convert to 0=Mon, 6=Sun
                 let arrIdx = dayIdx === 0 ? 6 : dayIdx - 1;
-                dowTotals[arrIdx] += (data.dailyStats[d].total / 3600); // Hours
+                // Accumulate seconds (data.dailyStats is now in seconds from processDataForRange)
+                dowTotals[arrIdx] += data.dailyStats[d].total; 
             });
 
             charts.monthlyDay.data.datasets[0].data = dowTotals;
@@ -1106,6 +1232,9 @@
             const selectedDate = document.getElementById('dateSelect').value;
             if(!selectedDate) return;
 
+            // Sync selectors visually if coming from Date change
+            syncAuxiliarySelectsWithDate();
+
             // Route based on View
             if (currentView === 'daily') {
                 const compareDate = document.getElementById('compareDateSelect').value;
@@ -1123,6 +1252,28 @@
                 updateMonthlyUI(selectedDate);
             }
         }
+
+        // New Handlers for Auxiliary Controls
+        document.getElementById('monthSelect').addEventListener('change', (e) => {
+             const monthKey = e.target.value;
+             if(!monthKey) return;
+             
+             updateWeekOptions(monthKey);
+
+             if (currentView === 'monthly') {
+                 // Update monthly view with first day of month
+                 updateMonthlyUI(monthKey + '-01');
+             }
+        });
+
+        document.getElementById('weekSelect').addEventListener('change', (e) => {
+             const startDate = e.target.value;
+             if(!startDate) return;
+             
+             if (currentView === 'weekly') {
+                 updateWeeklyUI(startDate);
+             }
+        });
 
         document.getElementById('dateSelect').addEventListener('change', onDateChange);
         document.getElementById('compareDateSelect').addEventListener('change', onDateChange);
@@ -1165,6 +1316,7 @@
                     
                     globalDates = Array.from(datesSet).sort().reverse();
                     populateDateSelects();
+                    populateAuxiliarySelects(); // NEW
                     
                     document.getElementById('statusMsg').classList.add('hidden');
                 } catch (error) {
@@ -1290,6 +1442,7 @@
             globalRawData.forEach(r => datesSet.add(r["Data Início"]));
             globalDates = Array.from(datesSet).sort().reverse();
             populateDateSelects();
+            populateAuxiliarySelects(); // NEW
             
             setTimeout(() => { document.getElementById('statusMsg').classList.add('hidden'); }, 500);
         }

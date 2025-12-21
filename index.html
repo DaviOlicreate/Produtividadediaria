@@ -270,11 +270,11 @@
                                 <span class="group relative">
                                     <i class="fa-regular fa-circle-question text-slate-400 cursor-help"></i>
                                     <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg hidden group-hover:block z-10">
-                                        Soma dos minutos produtivos dentro de cada janela de 30 minutos (Máx: 30min).
+                                        Soma dos minutos produtivos dentro de cada janela de 30 minutos (Máx: 0.5h).
                                     </span>
                                 </span>
                             </h3>
-                            <p class="text-xs text-slate-500">Minutos produtivos por intervalo de tempo</p>
+                            <p class="text-xs text-slate-500">Tempo produtivo (em horas) por intervalo</p>
                         </div>
                         <div class="flex gap-2">
                             <div id="legend-compare" class="hidden items-center gap-1 text-xs">
@@ -607,17 +607,14 @@
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             
-            if (h > 0) {
-                return `${h}h e ${String(m).padStart(2,'0')}m`;
-            }
-            return `${m}m`;
+            // Always return "Xh Ym" even if H is 0
+            return `${h}h ${String(m).padStart(2,'0')}m`;
         }
         
         function formatSecondsToTimeShort(seconds) {
              const h = Math.floor(seconds / 3600);
              const m = Math.floor((seconds % 3600) / 60);
-             if (h > 0) return `${h}h ${m}m`;
-             return `${m}m`;
+             return `${h}h ${m}m`;
         }
 
         function formatExcelTime(serial) {
@@ -691,10 +688,14 @@
                                          if(typeof val === 'object' && val.y !== undefined) val = val.y;
                                          return `${context.label}: ${formatSecondsToTimeShort(val)}`;
                                     }
+                                    // For timeline chart, data is now in hours, so format appropriately
+                                    if(context.chart.canvas.id === 'timelineChart') {
+                                        return `${label}${context.parsed.y.toFixed(2)} horas`;
+                                    }
                                     return label + context.parsed.y;
                                 }
                                 if(context.chart.config.type === 'radar') {
-                                    return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
+                                    return `${context.label}: ${formatSecondsToTimeShort(context.raw * 3600)}`; // context.raw is in hours, multiply back for formatter
                                 }
                                 return label + context.formattedValue;
                             }
@@ -714,11 +715,17 @@
             const ctxTime = document.getElementById('timelineChart').getContext('2d');
             charts.timeline = new Chart(ctxTime, {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'Tempo Produtivo (min)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] },
+                data: { labels: [], datasets: [{ label: 'Tempo Produtivo (h)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] },
                 options: {
                     ...commonOptions,
                     scales: {
-                        y: { beginAtZero: true, max: 30, title: { display: true, text: 'Minutos' }, grid: { borderDash: [2, 4] } },
+                        y: { 
+                            beginAtZero: true, 
+                            max: 0.5, // 30 mins = 0.5h
+                            title: { display: true, text: 'Horas' }, 
+                            grid: { borderDash: [2, 4] },
+                            ticks: { stepSize: 0.1 } 
+                        },
                         x: { grid: { display: false } }
                     }
                 }
@@ -1403,7 +1410,8 @@
                  el.className = `mt-1 text-xs font-bold inline-block px-1.5 py-0.5 rounded backdrop-blur-sm ${diff >= 0 ? 'bg-green-500/30 text-green-100' : 'bg-rose-500/30 text-rose-100'}`;
                  el.classList.remove('hidden');
             } else {
-                 el.textContent = `${icon} ${Math.abs(diffPercent).toFixed(1)}%`;
+                 // CHANGED: Removed .toFixed(1) to show integer percentage (e.g. 75%)
+                 el.textContent = `${icon} ${Math.round(Math.abs(diffPercent))}%`;
                  el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
                  el.classList.remove('hidden');
             }
@@ -1455,12 +1463,27 @@
             const scoreData = sortedTimes.map(t => Math.round((metrics.timelineBuckets[t] / 30) * 100));
 
             charts.timeline.data.labels = sortedTimes;
-            charts.timeline.data.datasets = [{ label: 'Dia Atual', data: activityData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }];
+            
+            // CHANGED: Convert minutes to hours for display
+            charts.timeline.data.datasets = [{ 
+                label: 'Dia Atual', 
+                data: activityData.map(v => v/60), // Convert min to hours
+                borderColor: '#3b82f6', 
+                backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                fill: true, 
+                tension: 0.4 
+            }];
 
             if (comparisonObj) {
                 const compActivityData = sortedTimes.map(t => comparisonObj.metrics.timelineBuckets[t] || 0);
                 charts.timeline.data.datasets.push({
-                    label: 'Dia Comparado', data: compActivityData, borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.05)', fill: true, borderDash: [5, 5], tension: 0.4
+                    label: 'Dia Comparado', 
+                    data: compActivityData.map(v => v/60), // Convert min to hours
+                    borderColor: '#94a3b8', 
+                    backgroundColor: 'rgba(148, 163, 184, 0.05)', 
+                    fill: true, 
+                    borderDash: [5, 5], 
+                    tension: 0.4
                 });
                 document.getElementById('legend-compare').classList.remove('hidden');
                 document.getElementById('legend-compare').classList.add('flex');

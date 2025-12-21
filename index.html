@@ -24,6 +24,7 @@
                             100: '#f5f5f4',
                             200: '#e7e5e4',
                             300: '#d6d3d1',
+                            500: '#78716c', // Added for better text visibility
                             800: '#292524',
                         }
                     },
@@ -255,7 +256,6 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600 group-hover:text-violet-700 transition-colors">
                             <i class="fa-solid fa-calendar-week"></i>
                         </div>
-                        <!-- Width increased from w-48 to w-64 to fit full date range -->
                         <select id="weekSelect" class="bg-white border border-stone-200 text-charcoal text-xs font-semibold rounded-full focus:ring-1 focus:ring-violet-500 focus:border-violet-500 block w-64 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-stone-300 transition-all uppercase tracking-wide">
                             <option value="">Semana...</option>
                         </select>
@@ -321,7 +321,7 @@
                             <p class="label">Tempo Total</p>
                             <i class="fa-regular fa-clock text-stone-300 text-xl"></i>
                         </div>
-                        <h3 class="value mt-2 text-charcoal" id="kpi-total-time">--</h3>
+                        <h3 class="value mt-2 text-slate-900" id="kpi-total-time">--</h3>
                         <div id="diff-total-time" class="hidden mt-3 text-xs font-bold font-sans px-2.5 py-1 rounded-md inline-block"></div>
                     </div>
                     <div class="mt-6 border-t border-stone-100 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -389,22 +389,19 @@
 
                 <!-- Activity Timeline Area -->
                 <div class="card-type-a p-8 lg:col-span-2">
-                    <div class="flex justify-between items-center mb-8">
+                    <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
-                                Ritmo Diário
+                                Linha do Tempo (30min)
                             </h3>
-                            <p class="font-sans text-xs text-stone-400 mt-1">Produtividade em blocos de 30min</p>
+                            <p class="font-sans text-xs text-stone-400 mt-1">Tempo produtivo (horas) por intervalo</p>
                         </div>
-                        <div class="flex gap-3">
+                        <div class="flex gap-2">
                             <div id="legend-compare" class="hidden items-center gap-2 text-xs font-sans">
                                  <span class="w-2 h-2 rounded-full bg-stone-300 block shadow-sm"></span>
-                                 <span class="text-stone-500 font-medium uppercase tracking-wide">Anterior</span>
+                                 <span class="text-slate-600 font-semibold">Anterior</span>
                             </div>
-                            <div class="flex items-center gap-2 text-xs font-sans">
-                                <span class="w-2 h-2 rounded-full bg-violet-600 block"></span>
-                                <span class="text-violet-700 font-bold uppercase tracking-wide">Atual</span>
-                            </div>
+                            <span class="text-xs font-bold bg-violet-100 text-violet-700 px-3 py-1 rounded-full shadow-sm">Atual</span>
                         </div>
                     </div>
                     <div class="relative h-64 w-full">
@@ -440,42 +437,42 @@
                 <!-- Insights Panel -->
                 <div class="card-type-a p-8 flex flex-col justify-between">
                     <div>
-                        <h3 class="font-serif text-lg font-bold text-charcoal mb-6 flex items-center gap-3">
-                            Insights
-                            <span class="text-[10px] font-sans font-normal text-stone-400 uppercase tracking-widest border border-stone-200 px-2 py-0.5 rounded-full">Hoje</span>
+                        <h3 class="font-serif text-lg font-bold text-charcoal mb-4 flex items-center gap-2">
+                            <i class="fa-regular fa-lightbulb text-yellow-500"></i>
+                            Insights Rápidos
                         </h3>
                         
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Top App</span>
-                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-top-app">--</span>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Top App</p>
+                                <p class="text-sm text-slate-800 font-bold" id="insight-top-app">--</p>
                             </div>
 
-                            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Pico de Foco</span>
-                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-peak-time">--</span>
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Pico de Foco</p>
+                                <p class="text-sm text-slate-800 font-bold" id="insight-peak-time">--</p>
                             </div>
 
-                            <div class="flex justify-between items-center pb-1">
-                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Tempo Ausente</span>
-                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-afk-time">--</span>
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500 shadow-sm">
+                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Tempo Ausente</p>
+                                <p class="text-sm text-slate-800 font-bold" id="insight-afk-time">--</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="mt-8 pt-6 border-t border-stone-100">
-                        <div class="flex justify-between items-end text-sm mb-3">
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-end text-sm mb-2">
                             <div class="flex flex-col">
-                                <span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-1">Meta Diária</span>
-                                <div class="flex items-center gap-1">
-                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-12 border-b border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-sans font-bold text-lg bg-transparent text-center transition-colors placeholder-violet-300">
-                                    <span class="text-stone-400 font-serif italic">hrs</span>
+                                <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Meta Diária</span>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-bold bg-transparent text-center transition-colors">
+                                    <span class="text-slate-500 font-bold">h</span>
                                 </div>
                             </div>
-                            <span class="font-sans font-extrabold text-charcoal text-2xl" id="insight-goal-percent">0%</span>
+                            <span class="font-extrabold text-slate-800 text-xl" id="insight-goal-percent">0%</span>
                         </div>
-                        <div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
-                            <div id="insight-goal-bar" class="bg-violet-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
+                            <div id="insight-goal-bar" class="bg-violet-600 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -626,7 +623,7 @@
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Dias Úteis</p>
                     <h3 class="value" id="kpi-monthly-days">--</h3>
-                    <p class="subtext">Com Atividade</p>
+                    <p class="subtext">Registros encontrados</p>
                 </div>
 
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
@@ -671,7 +668,7 @@
                 
                 <div class="card-type-a p-6 flex flex-col justify-center lg:col-span-2 text-center">
                     <p class="label mb-2">Média Semanal</p>
-                    <h3 class="value text-charcoal" id="kpi-monthly-avg-weekly">--</h3>
+                    <h3 class="value text-slate-700" id="kpi-monthly-avg-weekly">--</h3>
                     <p class="subtext">Ritmo Médio</p>
                 </div>
             </div>
@@ -717,7 +714,7 @@
         <div class="card-type-a overflow-hidden mt-8">
             <details class="group">
                 <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-stone-50 hover:bg-stone-100 transition-colors">
-                    <span class="font-serif font-bold text-charcoal uppercase text-sm tracking-widest">Dados Brutos (Amostra)</span>
+                    <span class="font-bold text-slate-600 uppercase text-sm tracking-widest">Dados Brutos (Amostra)</span>
                     <span class="transition group-open:rotate-180">
                         <i class="fa-solid fa-chevron-down text-stone-400"></i>
                     </span>
@@ -1123,13 +1120,13 @@
             container.appendChild(document.createElement('div')); // Empty Corner
             dayLabels.forEach(label => {
                 const header = document.createElement('div');
-                header.className = "text-center text-[10px] font-sans font-bold text-stone-400 py-1 uppercase tracking-wide";
+                header.className = "text-center text-[10px] font-sans font-bold text-stone-500 py-1 uppercase tracking-wide";
                 header.innerText = label.substring(0,3);
                 container.appendChild(header);
             });
             for(let h=0; h<24; h++) {
                 const timeLabel = document.createElement('div');
-                timeLabel.className = "text-right text-[10px] text-stone-300 pr-2 pt-1 font-sans";
+                timeLabel.className = "text-right text-[10px] text-stone-500 pr-2 pt-1 font-sans font-medium";
                 timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
                 container.appendChild(timeLabel);
                 sortedDays.forEach(d => {
@@ -1194,13 +1191,20 @@
             
             const sortedDays = Object.keys(data.dailyStats).sort();
             
+            // Use 'sortedDays' to create weekday labels for Heatmap
+            const dayNamesMap = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const weekDayLabels = sortedDays.map(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                return dayNamesMap[dateObj.getDay()];
+            });
+            
             sortedDays.forEach((d) => {
                 const s = data.dailyStats[d];
                 const p = s.total > 0 ? (s.active / s.total) * 100 : 0;
                 if(p > bestVal) { 
                     bestVal = p; 
                     const dateObj = new Date(d + 'T00:00:00');
-                    const dayIdx = dateObj.getDay(); // 0=Sun
+                    const dayIdx = dateObj.getDay(); 
                     const ptDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
                     bestDay = ptDays[dayIdx];
                 }
@@ -1209,7 +1213,7 @@
             document.getElementById('kpi-weekly-best-val').textContent = `${Math.round(bestVal)}% Produtividade`;
 
             // Update Charts
-            // Labels for Trend Chart
+            // Labels for Trend Chart (Day/Month)
             const labels = sortedDays.map(d => {
                 const parts = d.split('-');
                 return `${parts[2]}/${parts[1]}`;
@@ -1222,13 +1226,11 @@
             });
             charts.weeklyTrend.update();
 
-            // App Dist
             const sortedApps = Object.entries(data.appUsage).sort((a,b)=>b[1]-a[1]).slice(0,5);
             charts.weeklyApp.data.labels = sortedApps.map(i=>i[0]);
             charts.weeklyApp.data.datasets[0].data = sortedApps.map(i=>i[1]);
             charts.weeklyApp.update();
 
-            // Category Stack
             const cats = Object.keys(data.categoryUsage);
             charts.weeklyCat.data.labels = labels;
             charts.weeklyCat.data.datasets = cats.map((cat, i) => ({
@@ -1238,8 +1240,8 @@
             }));
             charts.weeklyCat.update();
 
-            // Heatmap
-            renderHeatmap(data.dailyStats, sortedDays, labels); 
+            // Heatmap with Week Day Names
+            renderHeatmap(data.dailyStats, sortedDays, weekDayLabels); 
         }
         
         // ********** RESTORED updateMonthlyUI **********

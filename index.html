@@ -467,7 +467,7 @@
                 </div>
             </div>
 
-            <!-- Monthly KPIs -->
+            <!-- Monthly KPIs Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                  <!-- Burnout Trend (NEW) -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -492,6 +492,37 @@
                     <p class="text-purple-100 text-sm font-medium mb-1">Melhor Semana</p>
                     <h3 class="text-xl font-bold" id="kpi-monthly-best-week">--</h3>
                     <p class="text-xs text-purple-100 opacity-80 mt-1" id="kpi-monthly-best-val">--</p>
+                </div>
+            </div>
+
+            <!-- Monthly KPIs Row 2 (Added) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Avg Daily Time -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Média Diária</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-avg-daily">--</h3>
+                    <div class="mt-2 text-xs text-slate-400">Tempo total / dias no mês</div>
+                </div>
+                <!-- Avg Weekly Time -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Média Semanal</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-avg-weekly">--</h3>
+                    <div class="mt-2 text-xs text-slate-400">Tempo total / semanas</div>
+                </div>
+                <!-- Consistency -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Consistência de Foco</p>
+                    <h3 class="text-2xl font-bold text-indigo-600" id="kpi-monthly-consistency">--%</h3>
+                    <div class="mt-2 text-xs text-slate-400">Estabilidade mensal</div>
+                    <div class="absolute right-0 bottom-0 opacity-10 text-indigo-500 p-2">
+                        <i class="fa-solid fa-wave-square text-4xl"></i>
+                    </div>
+                </div>
+                <!-- Top Category -->
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200">
+                    <p class="text-indigo-100 text-sm font-medium mb-1">Top Categoria</p>
+                    <h3 class="text-2xl font-bold truncate" id="kpi-monthly-top-cat">--</h3>
+                    <div class="mt-2 text-xs text-indigo-100 opacity-80" id="kpi-monthly-top-cat-time">--</div>
                 </div>
             </div>
 
@@ -1155,48 +1186,6 @@
             renderHeatmap(data.dailyStats, sortedDays, weekDays);
         }
 
-        function renderHeatmap(dailyStats, sortedDays, dayLabels) {
-            const container = document.getElementById('heatmap-container');
-            container.innerHTML = ''; // Clear
-
-            // Header Row (Days)
-            const emptyCorner = document.createElement('div');
-            container.appendChild(emptyCorner);
-            dayLabels.forEach(label => {
-                const header = document.createElement('div');
-                header.className = "text-center text-xs font-bold text-slate-500 py-1";
-                header.innerText = label.substring(0,3);
-                container.appendChild(header);
-            });
-
-            // Rows (Hours 0-23)
-            for(let h=0; h<24; h++) {
-                // Y Axis Label
-                const timeLabel = document.createElement('div');
-                timeLabel.className = "text-right text-xs text-slate-400 pr-2 pt-1";
-                timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
-                container.appendChild(timeLabel);
-
-                // Cells
-                sortedDays.forEach(d => {
-                    const duration = dailyStats[d].hourlyActivity[h] || 0;
-                    const cell = document.createElement('div');
-                    cell.className = "heatmap-cell";
-                    cell.title = `${d} ${h}:00 - ${formatSecondsToTimeShort(duration)}`;
-                    
-                    // Color scale (max expected ~3600s/hour, but practical active time max ~3000)
-                    const intensity = Math.min(1, duration / 3000); 
-                    if(duration === 0) cell.classList.add('bg-slate-50');
-                    else if(intensity < 0.2) cell.classList.add('bg-indigo-100');
-                    else if(intensity < 0.4) cell.classList.add('bg-indigo-300');
-                    else if(intensity < 0.7) cell.classList.add('bg-indigo-500');
-                    else cell.classList.add('bg-indigo-700');
-
-                    container.appendChild(cell);
-                });
-            }
-        }
-
         function updateMonthlyUI(dateKey) {
             const { start, end } = getMonthRange(dateKey);
             const [y, m] = dateKey.split('-');
@@ -1277,6 +1266,50 @@
             });
             document.getElementById('kpi-monthly-best-week').textContent = bestWeekIdx > -1 ? `Semana ${bestWeekIdx}` : "--";
             document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWeekProd)}% Produtividade`;
+
+            // --- ADDED: New KPIs Logic for Monthly ---
+            
+            // i. Monthly Daily Average
+            // Calendar days in month range (approx 30)
+            const daysInMonth = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24) + 1;
+            const avgDailyTime = data.totalSeconds / daysInMonth; 
+            document.getElementById('kpi-monthly-avg-daily').textContent = formatSecondsToTime(avgDailyTime);
+
+            // ii. Monthly Weekly Average
+            const weeksInMonth = daysInMonth / 7;
+            const avgWeeklyTime = data.totalSeconds / weeksInMonth;
+            document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(avgWeeklyTime);
+
+            // iii. Monthly Consistency
+            let dailyProds = [];
+            Object.keys(data.dailyStats).forEach(d => {
+                const s = data.dailyStats[d];
+                if(s.total > 0) dailyProds.push(s.active / s.total);
+            });
+            let consistencyScore = 0;
+            if(dailyProds.length > 1) {
+                const mean = dailyProds.reduce((a,b)=>a+b,0) / dailyProds.length;
+                const variance = dailyProds.reduce((a,b)=>a+Math.pow(b-mean,2),0) / dailyProds.length;
+                const stdDev = Math.sqrt(variance); 
+                consistencyScore = Math.max(0, 100 - (stdDev * 200)); 
+            } else if (dailyProds.length === 1) {
+                consistencyScore = 100;
+            }
+            document.getElementById('kpi-monthly-consistency').textContent = `${Math.round(consistencyScore)}%`;
+
+            // iv. Monthly Top Category
+            let topCat = "Nenhuma";
+            let topCatTime = 0;
+            Object.entries(data.categoryUsage).forEach(([cat, dur]) => {
+                if(dur > topCatTime) {
+                    topCatTime = dur;
+                    topCat = cat;
+                }
+            });
+            document.getElementById('kpi-monthly-top-cat').textContent = topCat;
+            document.getElementById('kpi-monthly-top-cat-time').textContent = formatSecondsToTime(topCatTime);
+
+            // --- End Added Logic ---
 
             charts.monthlyWeekly.data.labels = weeklyLabels;
             charts.monthlyWeekly.data.datasets[0].data = weeklyScores;

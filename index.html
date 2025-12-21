@@ -687,7 +687,7 @@
         function formatSecondsToTimeShort(seconds) {
              const h = Math.floor(seconds / 3600);
              const m = Math.floor((seconds % 3600) / 60);
-             return `${h}h ${m}m`; // Used in tooltips (hours mostly)
+             return `${h}h ${String(m).padStart(2,'0')}m`; // Force hour unit display
         }
 
         function formatExcelTime(serial) {
@@ -749,8 +749,11 @@
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
+                                // Specific Fix for Monthly Day Dist Chart
+                                if(context.chart.canvas.id === 'monthlyDayDistChart') {
+                                     return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
+                                }
                                 if (context.parsed.y !== null && typeof context.parsed.y === 'number') {
-                                    // Handle Doughnut/Pie where raw data is seconds
                                     if(context.chart.config.type === 'doughnut' || context.chart.config.type === 'pie') {
                                          return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
                                     }
@@ -927,7 +930,7 @@
             return { totalSeconds, totalActiveSeconds, appUsage, categoryUsage, dailyStats, daysCount: Object.keys(dailyStats).filter(d => dailyStats[d].total > 0).length, rangeRows };
         }
 
-        // Add this missing function
+        // --- Daily Data Processing ---
         function processDataForDate(targetDateKey) {
             const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
@@ -985,8 +988,12 @@
                 }
             });
 
-            // Ensure bucket max is logical if needed, but not strictly required for fix.
-            // Returning structure compatible with updateDashboardUI
+            // Ensure bucket max is logical
+            Object.keys(timelineBuckets).forEach(k => {
+                if(timelineBuckets[k] > 30) timelineBuckets[k] = 30;
+                timelineBuckets[k] = parseFloat(timelineBuckets[k].toFixed(1));
+            });
+
             return {
                 metrics: {
                     totalSeconds, 
@@ -1034,10 +1041,9 @@
             }
         }
 
-        function updateDailyUI(dateKey) {
-            // Re-using processDataForDate from original code, kept inline for brevity
+        function updateDailyUI(dateKey, compareData = null) {
             const result = processDataForDate(dateKey); 
-            updateDashboardUI(result);
+            updateDashboardUI(result, compareData);
         }
 
         function updateWeeklyUI(dateKey) {

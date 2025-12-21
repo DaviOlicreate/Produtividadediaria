@@ -1121,17 +1121,193 @@
             charts.monthlyDay.update();
         }
 
-        // Keep original daily process and event listeners...
-        // (Re-including essential event listeners and init)
-        document.getElementById('monthSelect').addEventListener('change', (e) => { const k=e.target.value; if(k){ updateWeekOptions(k); if(currentView==='monthly') updateMonthlyUI(k+'-01'); } });
-        document.getElementById('weekSelect').addEventListener('change', (e) => { if(e.target.value && currentView==='weekly') updateWeeklyUI(e.target.value); });
-        document.getElementById('dateSelect').addEventListener('change', onDateChange);
-        document.getElementById('compareDateSelect').addEventListener('change', onDateChange);
-        document.getElementById('enableCompare').addEventListener('change', (e) => { 
-            const s = document.getElementById('compareDateSelect'); s.disabled = !e.target.checked; 
-            if(!e.target.checked) { s.value=""; onDateChange(); } 
-        });
-        document.getElementById('goalInput').addEventListener('input', onDateChange);
+        // ==========================================
+        //  RESTORED FUNCTIONS (Fixing ReferenceError)
+        // ==========================================
+
+        function onDateChange() {
+            const selectedDate = document.getElementById('dateSelect').value;
+            if(!selectedDate) return;
+
+            // Sync selectors visually if coming from Date change
+            syncAuxiliarySelectsWithDate();
+
+            // Route based on View
+            if (currentView === 'daily') {
+                const compareDate = document.getElementById('compareDateSelect').value;
+                const isCompareEnabled = document.getElementById('enableCompare').checked;
+                let compareData = null;
+                if (isCompareEnabled && compareDate && compareDate !== "") {
+                    compareData = processDataForDate(compareDate);
+                }
+                updateDailyUI(selectedDate, compareData);
+            } 
+            else if (currentView === 'weekly') {
+                updateWeeklyUI(selectedDate);
+            }
+            else if (currentView === 'monthly') {
+                updateMonthlyUI(selectedDate);
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('statusMsg').classList.remove('hidden');
+            document.getElementById('statusText').textContent = "Processando arquivo...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    globalRawData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (globalRawData.length === 0) throw new Error("Planilha vazia");
+
+                    // Extract Dates
+                    const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+                    const datesSet = new Set();
+                    globalRawData.forEach(r => {
+                        const d = parseDateKey(r[keyDate]);
+                        if(d !== "Indefinido") datesSet.add(d);
+                    });
+                    
+                    globalDates = Array.from(datesSet).sort().reverse();
+                    populateDateSelects();
+                    populateAuxiliarySelects(); 
+                    
+                    document.getElementById('statusMsg').classList.add('hidden');
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('statusMsg').className = "bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 text-sm flex items-center gap-2";
+                    document.getElementById('statusText').textContent = "Erro ao ler arquivo. Verifique se é o formato correto.";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function populateDateSelects() {
+            const select = document.getElementById('dateSelect');
+            const compSelect = document.getElementById('compareDateSelect');
+            
+            select.innerHTML = '';
+            compSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            if(globalDates.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "Sem datas válidas";
+                select.add(opt);
+            } else {
+                globalDates.forEach(d => {
+                    const [y, m, day] = d.split('-');
+                    const dateLabel = `${day}/${m}/${y}`;
+                    
+                    const opt1 = document.createElement('option');
+                    opt1.value = d; opt1.text = dateLabel; select.add(opt1);
+                    
+                    const opt2 = document.createElement('option');
+                    opt2.value = d; opt2.text = dateLabel; compSelect.add(opt2);
+                });
+                select.value = globalDates[0];
+                onDateChange();
+            }
+        }
+        
+        function populateTablePreview(rows) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            if(rows.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Sem dados.</td></tr>';
+                 return;
+            }
+
+            const keyDuration = Object.keys(rows[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(rows[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(rows[0]).find(k => k.includes('Status')) || 'Status';
+            const keyTitle = Object.keys(rows[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStartTime = Object.keys(rows[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                
+                let timeVal = row[keyStartTime];
+                if(typeof timeVal === 'number') timeVal = formatExcelTime(timeVal);
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono text-xs">${timeVal || '--'}</td>
+                    <td class="px-4 py-3 font-medium text-slate-700">${(row[keyProcess] || '').replace('.exe','')}</td>
+                    <td class="px-4 py-3">${formatSecondsToTimeShort(row[keyDuration] || 0)}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${String(row[keyStatus]).includes('ATIVO') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                            ${row[keyStatus] || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-500 truncate max-w-xs">${row[keyTitle] || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadDemoData() {
+            document.getElementById('statusMsg').classList.remove('hidden');
+            document.getElementById('statusText').textContent = "Gerando dados demo (30 dias)...";
+            
+            globalRawData = [];
+            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer', 'outlook', 'word'];
+            const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO', 'AUSENTE'];
+            
+            // Generate last 30 days
+            const datesToGen = [];
+            for(let i=0; i<30; i++) {
+                let d = new Date();
+                d.setDate(d.getDate() - i);
+                datesToGen.push(d.toISOString().split('T')[0]);
+            }
+
+            datesToGen.forEach(dateStr => {
+                 let currentTime = 8 * 3600; 
+                 const endTime = 18 * 3600;
+                 
+                 // Skip some Sundays mostly
+                 const dateObj = new Date(dateStr);
+                 if (dateObj.getDay() === 0 && Math.random() > 0.2) return; 
+
+                 while(currentTime < endTime) {
+                    const duration = Math.floor(Math.random() * 300) + 60; 
+                    const app = apps[Math.floor(Math.random() * apps.length)];
+                    const status = statuses[Math.floor(Math.random() * statuses.length)];
+                    
+                    const h = Math.floor(currentTime / 3600);
+                    const m = Math.floor((currentTime % 3600) / 60);
+                    const s = currentTime % 60;
+                    const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    
+                    globalRawData.push({
+                        "Data Início": dateStr, 
+                        "Hora Início": timeStr,
+                        "Processo": app + ".exe",
+                        "Duração (seg)": duration,
+                        "Status": status,
+                        "Título da Janela": "Demo Window"
+                    });
+                    currentTime += duration;
+                }
+            });
+
+            const datesSet = new Set();
+            globalRawData.forEach(r => datesSet.add(r["Data Início"]));
+            globalDates = Array.from(datesSet).sort().reverse();
+            populateDateSelects();
+            populateAuxiliarySelects(); // NEW
+            
+            setTimeout(() => { document.getElementById('statusMsg').classList.add('hidden'); }, 500);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initCharts();

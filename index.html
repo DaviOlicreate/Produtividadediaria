@@ -325,7 +325,7 @@
                             <p class="label">Tempo Total</p>
                             <i class="fa-regular fa-clock text-stone-300 text-xl"></i>
                         </div>
-                        <h3 class="value mt-2 text-charcoal" id="kpi-total-time">--</h3>
+                        <h3 class="value mt-2 text-slate-900" id="kpi-total-time">--</h3>
                         <div id="diff-total-time" class="hidden mt-3 text-xs font-bold font-sans px-2.5 py-1 rounded-md inline-block"></div>
                     </div>
                     <div class="mt-6 border-t border-stone-100 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -382,18 +382,18 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- App Distribution Donut -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('appDist')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Distribuição de Apps</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Alocação de tempo por aplicação</p>
                     </div>
-                    <div class="relative h-64 w-full flex justify-center pointer-events-none">
+                    <div class="relative h-64 w-full flex justify-center">
                         <canvas id="appDistributionChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Activity Timeline Area -->
                 <div class="card-type-a p-8 lg:col-span-2 cursor-zoom-in" onclick="expandChart('timeline')">
-                    <div class="flex justify-between items-center mb-6 pointer-events-none">
+                    <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
                                 Ritmo Diário
@@ -408,7 +408,7 @@
                             <span class="text-xs font-bold bg-violet-100 text-violet-700 px-3 py-1 rounded-full shadow-sm">Atual</span>
                         </div>
                     </div>
-                    <div class="relative h-64 w-full pointer-events-none">
+                    <div class="relative h-64 w-full">
                         <canvas id="timelineChart"></canvas>
                     </div>
                 </div>
@@ -418,22 +418,22 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Active vs Inactive Pie -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('status')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Composição</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Proporção Ativo vs Ausente</p>
                     </div>
-                    <div class="relative h-56 w-full flex justify-center pointer-events-none">
+                    <div class="relative h-56 w-full flex justify-center">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Productivity Trend Bar -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('trend')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Intensidade</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Score de Foco (0-100)</p>
                     </div>
-                    <div class="relative h-56 w-full pointer-events-none">
+                    <div class="relative h-56 w-full">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
@@ -562,11 +562,11 @@
 
                 <!-- Daily Trend -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyTrend')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Evolução Diária</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Produtividade %</p>
                     </div>
-                    <div class="relative h-64 w-full pointer-events-none">
+                    <div class="relative h-64 w-full">
                         <canvas id="weeklyTrendChart"></canvas>
                     </div>
                 </div>
@@ -576,19 +576,19 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Stacked Bar -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyCat')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Categorias por Dia</h3>
                     </div>
-                    <div class="relative h-72 w-full pointer-events-none">
+                    <div class="relative h-72 w-full">
                         <canvas id="weeklyCategoryChart"></canvas>
                     </div>
                 </div>
                 <!-- Donut -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyApp')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Top Apps (Horas)</h3>
                     </div>
-                    <div class="relative h-72 w-full flex justify-center pointer-events-none">
+                    <div class="relative h-72 w-full flex justify-center">
                         <canvas id="weeklyAppChart"></canvas>
                     </div>
                 </div>
@@ -675,34 +675,34 @@
             <!-- Monthly Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyTrendLine')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                          <h3 class="font-serif text-lg font-bold text-charcoal">Tendência (Longo Prazo)</h3>
                     </div>
-                    <div class="relative h-72 w-full pointer-events-none">
+                    <div class="relative h-72 w-full">
                         <canvas id="monthlyTrendLineChart"></canvas>
                     </div>
                 </div>
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyRadar')">
-                    <div class="mb-6 pointer-events-none">
+                    <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Equilíbrio (Radar)</h3>
                     </div>
-                    <div class="relative h-72 w-full flex justify-center pointer-events-none">
+                    <div class="relative h-72 w-full flex justify-center">
                         <canvas id="monthlyRadarChart"></canvas>
                     </div>
                 </div>
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyWeekly')">
-                     <div class="mb-6 pointer-events-none">
+                     <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Performance Semanal</h3>
                     </div>
-                    <div class="relative h-64 w-full pointer-events-none">
+                    <div class="relative h-64 w-full">
                         <canvas id="monthlyWeeklyTrendChart"></canvas>
                     </div>
                 </div>
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyDay')">
-                     <div class="mb-6 pointer-events-none">
+                     <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Padrão por Dia</h3>
                     </div>
-                    <div class="relative h-64 w-full pointer-events-none">
+                    <div class="relative h-64 w-full">
                         <canvas id="monthlyDayDistChart"></canvas>
                     </div>
                 </div>
@@ -772,6 +772,12 @@
             if(chartKey === 'appDist') title = "Distribuição de Aplicativos (Diário)";
             else if(chartKey === 'timeline') title = "Linha do Tempo (Diário)";
             else if(chartKey === 'weeklyTrend') title = "Evolução Diária (Semanal)";
+            else if(chartKey === 'weeklyCat') title = "Categorias por Dia (Semanal)";
+            else if(chartKey === 'weeklyApp') title = "Top Apps (Semanal)";
+            else if(chartKey === 'monthlyTrendLine') title = "Tendência Mensal";
+            else if(chartKey === 'monthlyRadar') title = "Equilíbrio de Atividades (Mensal)";
+            else if(chartKey === 'monthlyWeekly') title = "Performance Semanal (Mensal)";
+            else if(chartKey === 'monthlyDay') title = "Padrão Diário (Mensal)";
 
             document.getElementById('modalTitle').innerText = title;
 

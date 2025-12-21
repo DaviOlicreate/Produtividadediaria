@@ -24,7 +24,7 @@
                             100: '#f5f5f4',
                             200: '#e7e5e4',
                             300: '#d6d3d1',
-                            500: '#78716c', // Added for better text visibility
+                            500: '#78716c',
                             800: '#292524',
                         }
                     },
@@ -48,18 +48,16 @@
 
     <style>
         body {
-            background-color: #F9F8F6; /* Creme Suave - Quiet Luxury Base */
-            color: #1F1F1F; /* Carvão Profundo */
+            background-color: #F9F8F6;
+            color: #1F1F1F;
         }
 
-        /* --- Card Styles: Editorial Design --- */
-        
-        /* Tipo A: Card Padrão (Editorial Clean) */
+        /* --- Card Styles --- */
         .card-type-a {
             background-color: #FFFFFF;
-            border-radius: 16px; /* Mantido conforme regra técnica */
-            border: 1px solid #E7E5E4; /* Stone-200: Borda fina e sutil */
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03); /* Sombra ultra difusa */
+            border-radius: 16px;
+            border: 1px solid #E7E5E4;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03);
             transition: all 0.3s ease;
         }
         .card-type-a:hover {
@@ -69,16 +67,16 @@
         }
         .card-type-a .label {
             font-family: 'Playfair Display', serif;
-            font-size: 0.875rem; /* um pouco maior para ser legível como serif */
+            font-size: 0.875rem;
             font-weight: 600;
-            color: #57534E; /* Stone-600 */
+            color: #57534E;
             letter-spacing: 0.02em;
             margin-bottom: 0.75rem;
         }
         .card-type-a .value {
             font-family: 'Montserrat', sans-serif;
             font-size: 2rem;
-            font-weight: 600; /* Semi-bold para elegância, não extra-bold */
+            font-weight: 600;
             color: #1F1F1F;
             letter-spacing: -0.03em;
             line-height: 1.1;
@@ -89,13 +87,12 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #A8A29E; /* Stone-400 */
+            color: #A8A29E;
             margin-top: 0.75rem;
         }
 
-        /* Tipo B: Card Destaque (Violet Tech Contrast) */
+        /* Tipo B: Card Destaque */
         .card-type-b {
-            /* Mantendo o gradiente roxo original conforme solicitado para contraste */
             background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.1);
@@ -112,7 +109,7 @@
         .card-type-b .label {
             font-family: 'Playfair Display', serif;
             font-size: 0.9rem;
-            font-style: italic; /* Toque editorial */
+            font-style: italic;
             color: rgba(255, 255, 255, 0.9);
             margin-bottom: 0.5rem;
             position: relative; z-index: 10;
@@ -132,7 +129,6 @@
             margin-top: 0.5rem;
             position: relative; z-index: 10;
         }
-        /* Decorator circle abstract */
         .card-type-b::before {
             content: '';
             position: absolute;
@@ -145,7 +141,7 @@
             z-index: 1;
         }
 
-        /* Custom Scrollbar - Slim & Elegant */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 10px; }
@@ -156,7 +152,7 @@
             -webkit-appearance: none; margin: 0; 
         }
 
-        /* Navigation Tabs - Editorial Style */
+        /* Navigation Tabs */
         .tab-btn {
             font-family: 'Playfair Display', serif;
             font-size: 1rem;
@@ -205,6 +201,14 @@
             transform: scale(1.1);
             z-index: 10;
             border: 1px solid #7C3AED;
+        }
+
+        /* Zoom Overlay */
+        #zoomModal {
+            transition: opacity 0.3s ease;
+        }
+        .cursor-zoom-in {
+            cursor: zoom-in;
         }
     </style>
 </head>
@@ -321,7 +325,7 @@
                             <p class="label">Tempo Total</p>
                             <i class="fa-regular fa-clock text-stone-300 text-xl"></i>
                         </div>
-                        <h3 class="value mt-2 text-slate-900" id="kpi-total-time">--</h3>
+                        <h3 class="value mt-2 text-charcoal" id="kpi-total-time">--</h3>
                         <div id="diff-total-time" class="hidden mt-3 text-xs font-bold font-sans px-2.5 py-1 rounded-md inline-block"></div>
                     </div>
                     <div class="mt-6 border-t border-stone-100 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -377,34 +381,34 @@
             <!-- Charts Row 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- App Distribution Donut -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('appDist')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Distribuição de Apps</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Alocação de tempo por aplicação</p>
                     </div>
-                    <div class="relative h-64 w-full flex justify-center">
+                    <div class="relative h-64 w-full flex justify-center pointer-events-none">
                         <canvas id="appDistributionChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Activity Timeline Area -->
-                <div class="card-type-a p-8 lg:col-span-2">
-                    <div class="flex justify-between items-center mb-6">
+                <div class="card-type-a p-8 lg:col-span-2 cursor-zoom-in" onclick="expandChart('timeline')">
+                    <div class="flex justify-between items-center mb-6 pointer-events-none">
                         <div>
                             <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
-                                Linha do Tempo (30min)
+                                Ritmo Diário
                             </h3>
-                            <p class="font-sans text-xs text-stone-400 mt-1">Tempo produtivo (horas) por intervalo</p>
+                            <p class="font-sans text-xs text-stone-500 font-medium">Tempo produtivo (horas) por intervalo</p>
                         </div>
                         <div class="flex gap-2">
                             <div id="legend-compare" class="hidden items-center gap-2 text-xs font-sans">
-                                 <span class="w-2 h-2 rounded-full bg-stone-300 block shadow-sm"></span>
+                                 <span class="w-3 h-3 rounded-full bg-stone-300 block shadow-sm"></span>
                                  <span class="text-slate-600 font-semibold">Anterior</span>
                             </div>
                             <span class="text-xs font-bold bg-violet-100 text-violet-700 px-3 py-1 rounded-full shadow-sm">Atual</span>
                         </div>
                     </div>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-64 w-full pointer-events-none">
                         <canvas id="timelineChart"></canvas>
                     </div>
                 </div>
@@ -413,23 +417,23 @@
             <!-- Charts Row 2 & Insights -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Active vs Inactive Pie -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('status')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Composição</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Proporção Ativo vs Ausente</p>
                     </div>
-                    <div class="relative h-56 w-full flex justify-center">
+                    <div class="relative h-56 w-full flex justify-center pointer-events-none">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Productivity Trend Bar -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('trend')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Intensidade</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Score de Foco (0-100)</p>
                     </div>
-                    <div class="relative h-56 w-full">
+                    <div class="relative h-56 w-full pointer-events-none">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
@@ -465,7 +469,7 @@
                             <div class="flex flex-col">
                                 <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Meta Diária</span>
                                 <div class="flex items-center gap-1 mt-1">
-                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-bold bg-transparent text-center transition-colors">
+                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-bold bg-transparent text-center transition-colors placeholder-violet-300">
                                     <span class="text-slate-500 font-bold">h</span>
                                 </div>
                             </div>
@@ -491,8 +495,8 @@
                 </div>
             </div>
 
-            <!-- Weekly KPIs Row 1 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <!-- Weekly KPIs Row 1 (Updated Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 <!-- NEW: Total Active Hours (Type A) -->
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Horas Ativas</p>
@@ -515,10 +519,9 @@
                     <i class="fa-solid fa-wave-square absolute -right-2 -bottom-2 text-6xl text-stone-100 -z-0 opacity-50"></i>
                 </div>
 
-                <!-- Top Category (Type B Highlight) -->
-                <div class="card-type-b p-6 flex flex-col justify-center text-center">
+                <!-- Top Category (Type B Highlight) - INCREASED WIDTH -->
+                <div class="card-type-b p-6 flex flex-col justify-center text-center xl:col-span-2">
                     <p class="label mb-2">Foco Principal</p>
-                    <!-- CHANGED: Removed truncate, added padding bottom -->
                     <h3 class="value text-xl px-2 pb-1" id="kpi-weekly-top-cat">--</h3>
                     <p class="subtext" id="kpi-weekly-top-cat-time">--</p>
                 </div>
@@ -558,12 +561,12 @@
                 </div>
 
                 <!-- Daily Trend -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyTrend')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Evolução Diária</h3>
                         <p class="font-sans text-xs text-stone-400 mt-1">Produtividade %</p>
                     </div>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-64 w-full pointer-events-none">
                         <canvas id="weeklyTrendChart"></canvas>
                     </div>
                 </div>
@@ -572,20 +575,20 @@
             <!-- Weekly Charts Row 3 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Stacked Bar -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyCat')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Categorias por Dia</h3>
                     </div>
-                    <div class="relative h-72 w-full">
+                    <div class="relative h-72 w-full pointer-events-none">
                         <canvas id="weeklyCategoryChart"></canvas>
                     </div>
                 </div>
                 <!-- Donut -->
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyApp')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Top Apps (Horas)</h3>
                     </div>
-                    <div class="relative h-72 w-full flex justify-center">
+                    <div class="relative h-72 w-full flex justify-center pointer-events-none">
                         <canvas id="weeklyAppChart"></canvas>
                     </div>
                 </div>
@@ -604,13 +607,11 @@
                 </div>
             </div>
 
-            <!-- Monthly KPIs Grid - Refactored Layout -->
+            <!-- Monthly KPIs Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <!-- Row 1: Overview (Type A) -->
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Horas Totais</p>
-                    <h3 class="value text-violet-800" id="kpi-monthly-total-active">--</h3> <!-- NEW -->
+                    <h3 class="value text-violet-800" id="kpi-monthly-total-active">--</h3>
                     <p class="subtext">Soma do Mês</p>
                 </div>
 
@@ -632,10 +633,9 @@
                     <p class="subtext">Estabilidade mensal</p>
                 </div>
 
-                <!-- Row 2: Highlights (Type B) -->
                 <div class="card-type-b p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Melhor Dia</p>
-                    <h3 class="value text-2xl capitalize" id="kpi-monthly-best-day-week">--</h3> <!-- NEW -->
+                    <h3 class="value text-2xl capitalize" id="kpi-monthly-best-day-week">--</h3>
                     <p class="subtext" id="kpi-monthly-best-day-val">--% Média</p>
                 </div>
 
@@ -653,7 +653,6 @@
                     </div>
                 </div>
 
-                <!-- Row 3: Alerts/Stats (Type A) -->
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Alerta Burnout</p>
                     <h3 class="value" id="kpi-monthly-burnout">--</h3>
@@ -675,35 +674,35 @@
 
             <!-- Monthly Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyTrendLine')">
+                    <div class="mb-6 pointer-events-none">
                          <h3 class="font-serif text-lg font-bold text-charcoal">Tendência (Longo Prazo)</h3>
                     </div>
-                    <div class="relative h-72 w-full">
+                    <div class="relative h-72 w-full pointer-events-none">
                         <canvas id="monthlyTrendLineChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-8">
-                    <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyRadar')">
+                    <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Equilíbrio (Radar)</h3>
                     </div>
-                    <div class="relative h-72 w-full flex justify-center">
+                    <div class="relative h-72 w-full flex justify-center pointer-events-none">
                         <canvas id="monthlyRadarChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-8">
-                     <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyWeekly')">
+                     <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Performance Semanal</h3>
                     </div>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-64 w-full pointer-events-none">
                         <canvas id="monthlyWeeklyTrendChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-8">
-                     <div class="mb-6">
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyDay')">
+                     <div class="mb-6 pointer-events-none">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Padrão por Dia</h3>
                     </div>
-                    <div class="relative h-64 w-full">
+                    <div class="relative h-64 w-full pointer-events-none">
                         <canvas id="monthlyDayDistChart"></canvas>
                     </div>
                 </div>
@@ -714,7 +713,7 @@
         <div class="card-type-a overflow-hidden mt-8">
             <details class="group">
                 <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-stone-50 hover:bg-stone-100 transition-colors">
-                    <span class="font-bold text-slate-600 uppercase text-sm tracking-widest">Dados Brutos (Amostra)</span>
+                    <span class="font-serif font-bold text-charcoal uppercase text-sm tracking-widest">Dados Brutos (Amostra)</span>
                     <span class="transition group-open:rotate-180">
                         <i class="fa-solid fa-chevron-down text-stone-400"></i>
                     </span>
@@ -742,12 +741,74 @@
 
     </main>
 
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-white/90 backdrop-blur-md p-6" onclick="closeZoom()">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-5xl h-[80vh] relative flex flex-col" onclick="event.stopPropagation()">
+            <button onclick="closeZoom()" class="absolute top-4 right-6 text-stone-400 hover:text-charcoal text-3xl font-serif">&times;</button>
+            <h3 id="modalTitle" class="font-serif text-2xl font-bold text-charcoal mb-4">Zoom</h3>
+            <div class="flex-grow relative">
+                <canvas id="modalCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Configuration & Global Variables ---
         let charts = {}; 
         let globalRawData = []; 
         let globalDates = []; 
         let currentView = 'daily'; 
+        let modalChart = null;
+
+        // --- Helper Function: Expand Chart ---
+        function expandChart(chartKey) {
+            const sourceChart = charts[chartKey];
+            if(!sourceChart) return;
+
+            const modal = document.getElementById('zoomModal');
+            modal.classList.remove('hidden');
+            
+            let title = "Gráfico Detalhado";
+            if(chartKey === 'appDist') title = "Distribuição de Aplicativos (Diário)";
+            else if(chartKey === 'timeline') title = "Linha do Tempo (Diário)";
+            else if(chartKey === 'weeklyTrend') title = "Evolução Diária (Semanal)";
+
+            document.getElementById('modalTitle').innerText = title;
+
+            if(modalChart) modalChart.destroy();
+
+            const ctx = document.getElementById('modalCanvas').getContext('2d');
+            
+            const newConfig = {
+                type: sourceChart.config.type,
+                data: JSON.parse(JSON.stringify(sourceChart.config.data)),
+                options: {
+                    ...sourceChart.config.options,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        ...sourceChart.config.options.plugins,
+                        legend: { position: 'top', labels: { font: { size: 14 } } },
+                        tooltip: {
+                            ...sourceChart.config.options.plugins.tooltip,
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 }
+                        }
+                    },
+                    scales: sourceChart.config.options.scales
+                }
+            };
+
+            modalChart = new Chart(ctx, newConfig);
+        }
+
+        function closeZoom() {
+            document.getElementById('zoomModal').classList.add('hidden');
+            if(modalChart) {
+                modalChart.destroy();
+                modalChart = null;
+            }
+        }
         
         // --- Helpers ---
         function categorizeApp(appName) {
@@ -823,10 +884,9 @@
 
         // --- Charts ---
         function initCharts() {
-            // Apply Global Chart Fonts and Colors for Editorial Look
             Chart.defaults.font.family = "'Montserrat', sans-serif";
-            Chart.defaults.color = '#57534E'; // Stone-600 for text
-            Chart.defaults.scale.grid.color = '#F5F5F4'; // Stone-100 for grid lines
+            Chart.defaults.color = '#57534E'; 
+            Chart.defaults.scale.grid.color = '#F5F5F4'; 
 
             const commonOptions = {
                 responsive: true,
@@ -892,7 +952,7 @@
             charts.monthlyTrendLine = new Chart(document.getElementById('monthlyTrendLineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tendência', data: [], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.4, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
         }
 
-        // --- Data Processing (Kept exactly as previous) ---
+        // --- Data Processing ---
         function parseDateKey(rawDate) {
             if (typeof rawDate === 'number') {
                 const dateObj = XLSX.SSF.parse_date_code(rawDate);
@@ -966,7 +1026,6 @@
             sortedWeeks.forEach((range, idx) => {
                 const sParts = range.start.split('-');
                 const eParts = range.end.split('-');
-                // Editorial style for weeks:
                 const label = `Semana ${sortedWeeks.length - idx} (${sParts[2]}/${sParts[1]} - ${eParts[2]}/${eParts[1]})`;
                 const opt = document.createElement('option');
                 opt.value = range.start; opt.text = label; weekSelect.add(opt);
@@ -1120,13 +1179,13 @@
             container.appendChild(document.createElement('div')); // Empty Corner
             dayLabels.forEach(label => {
                 const header = document.createElement('div');
-                header.className = "text-center text-[10px] font-sans font-bold text-stone-500 py-1 uppercase tracking-wide";
+                header.className = "text-center text-[10px] font-sans font-bold text-stone-400 py-1 uppercase tracking-wide";
                 header.innerText = label.substring(0,3);
                 container.appendChild(header);
             });
             for(let h=0; h<24; h++) {
                 const timeLabel = document.createElement('div');
-                timeLabel.className = "text-right text-[10px] text-stone-500 pr-2 pt-1 font-sans font-medium";
+                timeLabel.className = "text-right text-[10px] text-stone-300 pr-2 pt-1 font-sans";
                 timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
                 container.appendChild(timeLabel);
                 sortedDays.forEach(d => {
@@ -1151,7 +1210,6 @@
             updateDashboardUI(result, compareData);
         }
 
-        // ********** RESTORED updateWeeklyUI **********
         function updateWeeklyUI(dateKey) {
             const { start, end } = getWeekRange(dateKey);
             // Formatting Date Range Title
@@ -1204,7 +1262,7 @@
                 if(p > bestVal) { 
                     bestVal = p; 
                     const dateObj = new Date(d + 'T00:00:00');
-                    const dayIdx = dateObj.getDay(); 
+                    const dayIdx = dateObj.getDay(); // 0=Sun
                     const ptDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
                     bestDay = ptDays[dayIdx];
                 }
@@ -1243,8 +1301,7 @@
             // Heatmap with Week Day Names
             renderHeatmap(data.dailyStats, sortedDays, weekDayLabels); 
         }
-        
-        // ********** RESTORED updateMonthlyUI **********
+
         function updateMonthlyUI(dateKey) {
             const { start, end } = getMonthRange(dateKey);
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];

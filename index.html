@@ -56,6 +56,23 @@
             color: #334155;
             border-bottom: 2px solid #cbd5e1;
         }
+
+        /* Heatmap Grid Styles */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: 40px repeat(7, 1fr);
+            gap: 2px;
+        }
+        .heatmap-cell {
+            height: 24px;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            border: 1px solid #4f46e5;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -351,7 +368,7 @@
                 </div>
             </div>
 
-            <!-- Weekly KPIs -->
+            <!-- Weekly KPIs Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Avg Daily Time -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -359,17 +376,21 @@
                     <h3 class="text-2xl font-bold text-slate-800" id="kpi-weekly-avg-time">--</h3>
                     <div class="mt-2 text-xs text-slate-400">Total da semana / 7</div>
                 </div>
-                <!-- Avg Productivity -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                    <p class="text-slate-500 text-sm font-medium mb-1">Média Produtividade</p>
-                    <h3 class="text-2xl font-bold text-indigo-600" id="kpi-weekly-avg-prod">--%</h3>
-                    <div class="mt-2 text-xs text-slate-400">Consistência do foco</div>
+                <!-- Focus Consistency (NEW) -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Consistência de Foco</p>
+                    <h3 class="text-2xl font-bold text-indigo-600" id="kpi-weekly-consistency">--%</h3>
+                    <div class="mt-2 text-xs text-slate-400">Estabilidade da rotina</div>
+                    <!-- Small Sparkline/Decoration -->
+                    <div class="absolute right-0 bottom-0 opacity-10 text-indigo-500 p-2">
+                        <i class="fa-solid fa-wave-square text-4xl"></i>
+                    </div>
                 </div>
-                <!-- Total Active Hours -->
+                <!-- Top Category (NEW) -->
                 <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200">
-                    <p class="text-indigo-100 text-sm font-medium mb-1">Total Horas Ativas</p>
-                    <h3 class="text-3xl font-bold" id="kpi-weekly-total-active">--</h3>
-                    <div class="mt-2 text-xs text-indigo-100 opacity-80">Soma acumulada da semana</div>
+                    <p class="text-indigo-100 text-sm font-medium mb-1">Top Categoria de App</p>
+                    <h3 class="text-2xl font-bold truncate" id="kpi-weekly-top-cat">--</h3>
+                    <div class="mt-2 text-xs text-indigo-100 opacity-80" id="kpi-weekly-top-cat-time">-- horas</div>
                 </div>
                 <!-- Best Day -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -379,20 +400,58 @@
                 </div>
             </div>
 
-            <!-- Weekly Charts -->
+            <!-- Weekly Charts Row 2 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Daily Productivity Trend -->
+                <!-- Productivity Heatmap (NEW) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência Diária da Semana</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-slate-800">Heatmap de Produtividade</h3>
+                        <div class="text-xs text-slate-500 flex items-center gap-2">
+                            <span>Menos</span>
+                            <div class="flex gap-1">
+                                <div class="w-3 h-3 bg-slate-100 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-indigo-200 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-indigo-400 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-indigo-600 rounded-sm"></div>
+                                <div class="w-3 h-3 bg-indigo-900 rounded-sm"></div>
+                            </div>
+                            <span>Mais</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Intensidade de atividade por hora do dia</p>
+                    
+                    <div class="overflow-x-auto">
+                        <div class="heatmap-grid" id="heatmap-container" style="min-width: 600px;">
+                            <!-- Header Row (Days) generated by JS -->
+                            <!-- Rows (Hours) generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Productivity Trend -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência Diária</h3>
                     <p class="text-xs text-slate-500 mb-6">Taxa de produtividade (%) dia a dia</p>
-                    <div class="relative h-72 w-full">
+                    <div class="relative h-64 w-full">
                         <canvas id="weeklyTrendChart"></canvas>
                     </div>
                 </div>
-                <!-- Weekly App Distribution -->
+            </div>
+
+            <!-- Weekly Charts Row 3 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- App Category Comparison (Stack Bar) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Comparativo de Categorias</h3>
+                    <p class="text-xs text-slate-500 mb-6">Tempo por categoria em cada dia da semana</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="weeklyCategoryChart"></canvas>
+                    </div>
+                </div>
+                <!-- Weekly App Distribution Donut -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h3 class="text-lg font-semibold text-slate-800 mb-2">Top Apps da Semana</h3>
-                    <div class="relative h-64 w-full flex justify-center">
+                    <div class="relative h-72 w-full flex justify-center">
                         <canvas id="weeklyAppChart"></canvas>
                     </div>
                 </div>
@@ -410,23 +469,23 @@
 
             <!-- Monthly KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                 <!-- Monthly Productivity -->
+                 <!-- Burnout Trend (NEW) -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                    <p class="text-slate-500 text-sm font-medium mb-1">Produtividade Mensal</p>
-                    <h3 class="text-2xl font-bold text-purple-600" id="kpi-monthly-prod">--%</h3>
-                    <div class="mt-2 text-xs text-slate-400">Média global do mês</div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">Alerta de Burnout</p>
+                    <h3 class="text-2xl font-bold" id="kpi-monthly-burnout">--</h3>
+                    <div class="mt-2 text-xs text-slate-400" id="kpi-monthly-burnout-desc">Dias seguidos > 10h</div>
                 </div>
                 <!-- Days Worked -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                     <p class="text-slate-500 text-sm font-medium mb-1">Dias Trabalhados</p>
                     <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-days">--</h3>
-                    <div class="mt-2 text-xs text-slate-400">Dias com registro de atividade</div>
+                    <div class="mt-2 text-xs text-slate-400">Total no mês</div>
                 </div>
-                 <!-- Avg Weekly Hours -->
+                 <!-- Goal Efficiency (NEW) -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                    <p class="text-slate-500 text-sm font-medium mb-1">Média Horas/Semana</p>
-                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-weekly-avg">--</h3>
-                    <div class="mt-2 text-xs text-slate-400">Ritmo semanal</div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">Eficiência de Meta</p>
+                    <h3 class="text-2xl font-bold text-emerald-600" id="kpi-monthly-goal-eff">--%</h3>
+                    <div class="mt-2 text-xs text-slate-400">Dias que a meta foi atingida</div>
                 </div>
                 <!-- Best Week -->
                 <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg shadow-purple-200">
@@ -436,21 +495,39 @@
                 </div>
             </div>
 
-            <!-- Monthly Charts -->
+            <!-- Monthly Charts Row 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Weekly Trend Bar -->
+                <!-- Long Term Trend (Line) (NEW) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Evolução Semanal</h3>
-                    <p class="text-xs text-slate-500 mb-6">Produtividade Média por Semana</p>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Linha de Tendência</h3>
+                    <p class="text-xs text-slate-500 mb-6">Evolução da produtividade semanal (longo prazo)</p>
                     <div class="relative h-72 w-full">
+                        <canvas id="monthlyTrendLineChart"></canvas>
+                    </div>
+                </div>
+                <!-- Radar Chart (NEW) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Equilíbrio de Atividades</h3>
+                    <p class="text-xs text-slate-500 mb-6">Distribuição de tempo por categoria (Radar)</p>
+                    <div class="relative h-72 w-full flex justify-center">
+                        <canvas id="monthlyRadarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Weekly Bar Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Produtividade Semanal</h3>
+                    <div class="relative h-64 w-full">
                         <canvas id="monthlyWeeklyTrendChart"></canvas>
                     </div>
                 </div>
                 <!-- Day of Week Distribution -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h3 class="text-lg font-semibold text-slate-800 mb-2">Padrão por Dia da Semana</h3>
-                    <p class="text-xs text-slate-500 mb-6">Volume total de horas por dia (Seg-Dom)</p>
-                    <div class="relative h-72 w-full">
+                    <div class="relative h-64 w-full">
                         <canvas id="monthlyDayDistChart"></canvas>
                     </div>
                 </div>
@@ -496,6 +573,34 @@
         let globalDates = []; // Store available dates
         let currentView = 'daily'; // 'daily', 'weekly', 'monthly'
         
+        // --- Helper Function: App Categorization ---
+        function categorizeApp(appName) {
+            if(!appName) return 'Outros';
+            appName = appName.toLowerCase();
+            
+            // Development
+            if (['code', 'visual', 'studio', 'git', 'bash', 'terminal', 'powershell', 'cmd', 'sublime', 'atom', 'intellij', 'pycharm', 'eclipse', 'vim'].some(k => appName.includes(k))) {
+                return 'Desenvolvimento';
+            }
+            // Office/Work
+            if (['excel', 'word', 'powerpoint', 'outlook', 'access', 'onenote', 'teams', 'sheets', 'docs', 'slides', 'notion', 'trello', 'jira', 'asana'].some(k => appName.includes(k))) {
+                return 'Escritório';
+            }
+            // Communication
+            if (['slack', 'whatsapp', 'telegram', 'discord', 'skype', 'zoom', 'meet', 'signal'].some(k => appName.includes(k))) {
+                return 'Comunicação';
+            }
+            // Browsers (often mixed, but categorized as Research/Web)
+            if (['chrome', 'edge', 'firefox', 'brave', 'opera', 'safari'].some(k => appName.includes(k))) {
+                return 'Navegador';
+            }
+            // Design/Media
+            if (['photoshop', 'illustrator', 'figma', 'canva', 'premiere', 'adobe', 'blender', 'spotify', 'vlc'].some(k => appName.includes(k))) {
+                return 'Design/Mídia';
+            }
+            return 'Outros';
+        }
+
         // --- Format Helpers ---
         function formatSecondsToTime(seconds) {
             if (!seconds && seconds !== 0) return "--";
@@ -581,14 +686,15 @@
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
                                 if (context.parsed.y !== null && typeof context.parsed.y === 'number') {
-                                    if(context.chart.config.type === 'doughnut' || context.chart.canvas.id.includes('Dist')) {
-                                         // For bar charts parsed is {x, y}, for doughnut it's number
-                                         // We need to handle this to avoid NaN
+                                    if(context.chart.config.type === 'doughnut' || context.chart.canvas.id.includes('Dist') || context.chart.config.type === 'pie') {
                                          let val = context.parsed;
                                          if(typeof val === 'object' && val.y !== undefined) val = val.y;
                                          return `${context.label}: ${formatSecondsToTimeShort(val)}`;
                                     }
                                     return label + context.parsed.y;
+                                }
+                                if(context.chart.config.type === 'radar') {
+                                    return `${context.label}: ${formatSecondsToTimeShort(context.raw)}`;
                                 }
                                 return label + context.formattedValue;
                             }
@@ -653,6 +759,29 @@
                 options: { ...commonOptions, cutout: '50%' }
             });
 
+            // NEW: Weekly Category Stacked Bar
+            const ctxWeeklyCat = document.getElementById('weeklyCategoryChart').getContext('2d');
+            charts.weeklyCat = new Chart(ctxWeeklyCat, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatSecondsToTimeShort(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, grid: { borderDash: [2, 4] }, ticks: { callback: function(val) { return Math.floor(val/3600) + 'h'; } } }
+                    }
+                }
+            });
+
             // --- MONTHLY CHARTS ---
             const ctxMonthlyWeekly = document.getElementById('monthlyWeeklyTrendChart').getContext('2d');
             charts.monthlyWeekly = new Chart(ctxMonthlyWeekly, {
@@ -674,13 +803,32 @@
                         y: { 
                             beginAtZero: true, 
                             grid: { borderDash: [2, 4] },
-                            ticks: {
-                                // Convert seconds back to hours for axis
-                                callback: function(value) { return Math.floor(value / 3600) + 'h'; }
-                            }
+                            ticks: { callback: function(value) { return Math.floor(value / 3600) + 'h'; } }
                         }, 
                         x: { grid: { display: false } } 
                     }
+                }
+            });
+
+            // NEW: Monthly Radar Chart
+            const ctxMonthlyRadar = document.getElementById('monthlyRadarChart').getContext('2d');
+            charts.monthlyRadar = new Chart(ctxMonthlyRadar, {
+                type: 'radar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    ...commonOptions,
+                    scales: { r: { ticks: { display: false }, grid: { circular: true } } }
+                }
+            });
+
+            // NEW: Monthly Trend Line
+            const ctxMonthlyTrendLine = document.getElementById('monthlyTrendLineChart').getContext('2d');
+            charts.monthlyTrendLine = new Chart(ctxMonthlyTrendLine, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Tendência', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }] },
+                options: {
+                    ...commonOptions,
+                    scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
                 }
             });
         }
@@ -776,8 +924,6 @@
 
             if (!selectedMonthKey) return;
 
-            // Find all Mondays in that month present in globalDates or generally in that month
-            // Better: Iterate all dates in that month, find their week ranges, unique them.
             const weeks = new Set();
             globalDates.filter(d => d.startsWith(selectedMonthKey)).forEach(d => {
                 const range = getWeekRange(d);
@@ -789,9 +935,8 @@
 
             sortedWeeks.forEach((range, idx) => {
                 const label = `Semana ${sortedWeeks.length - idx}`;
-                
                 const opt = document.createElement('option');
-                opt.value = range.start; // Value is start date of week
+                opt.value = range.start; 
                 opt.text = label;
                 weekSelect.add(opt);
             });
@@ -811,20 +956,17 @@
 
             const weekRange = getWeekRange(dateVal);
             const weekSelect = document.getElementById('weekSelect');
-            // Check if this week exists in options, if not adds it (edge case crossing months)
-            // Ideally we select the week that matches the start date
             weekSelect.value = weekRange.start;
         }
 
         // --- Aggregation Logic (Multi-period) ---
         function processDataForRange(startDateKey, endDateKey) {
-            // Find Headers
             const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
             const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
             const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
+            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início'; // Need for heatmap
 
-            // Filter Rows within Range
             const rangeRows = globalRawData.filter(row => {
                 const d = parseDateKey(row[keyDate]);
                 return d >= startDateKey && d <= endDateKey;
@@ -834,19 +976,21 @@
             let totalSeconds = 0;
             let totalActiveSeconds = 0;
             let appUsage = {};
-            let dailyStats = {}; // { 'YYYY-MM-DD': { total: 0, active: 0 } }
+            let categoryUsage = {}; // New for categories
+            let dailyStats = {}; // { 'YYYY-MM-DD': { total: 0, active: 0, buckets: [24] } }
             
-            // Initialize daily buckets for the range
             const allDates = getDatesInRange(startDateKey, endDateKey);
-            allDates.forEach(d => dailyStats[d] = { total: 0, active: 0 });
+            allDates.forEach(d => dailyStats[d] = { total: 0, active: 0, categorySeconds: {}, hourlyActivity: new Array(24).fill(0) });
 
             rangeRows.forEach(row => {
                 let duration = parseFloat(row[keyDuration]) || 0;
                 let process = row[keyProcess] || "Desconhecido";
                 let status = (row[keyStatus] || "").toUpperCase();
                 let d = parseDateKey(row[keyDate]);
+                let timeRaw = row[keyStartTime];
 
                 process = process.replace('.exe', '').replace('.EXE', '').toLowerCase();
+                let category = categorizeApp(process);
                 
                 totalSeconds += duration;
                 
@@ -858,9 +1002,26 @@
                     totalActiveSeconds += duration;
                     if (!appUsage[process]) appUsage[process] = 0;
                     appUsage[process] += duration;
+
+                    if (!categoryUsage[category]) categoryUsage[category] = 0;
+                    categoryUsage[category] += duration;
                     
                     if (dailyStats[d]) {
                         dailyStats[d].active += duration;
+                        if(!dailyStats[d].categorySeconds[category]) dailyStats[d].categorySeconds[category] = 0;
+                        dailyStats[d].categorySeconds[category] += duration;
+
+                        // Heatmap logic: Extract hour
+                        let hour = 0;
+                        if (typeof timeRaw === 'number') {
+                            let totalSecs = Math.round(timeRaw * 86400);
+                            hour = Math.floor(totalSecs / 3600);
+                        } else if (typeof timeRaw === 'string' && timeRaw.includes(':')) {
+                            hour = parseInt(timeRaw.split(':')[0]);
+                        }
+                        if(hour >= 0 && hour < 24) {
+                            dailyStats[d].hourlyActivity[hour] += duration;
+                        }
                     }
                 }
             });
@@ -869,6 +1030,7 @@
                 totalSeconds,
                 totalActiveSeconds,
                 appUsage,
+                categoryUsage,
                 dailyStats,
                 daysCount: Object.keys(dailyStats).filter(d => dailyStats[d].total > 0).length,
                 rangeRows
@@ -878,15 +1040,13 @@
         // --- Update UI Functions ---
 
         function updateDailyUI(dateKey) {
-            // Re-using existing processDataForDate logic but wrapping efficiently
-            const result = processDataForDate(dateKey); // Keeps original logic for timeline precision
+            const result = processDataForDate(dateKey); 
             updateDashboardUI(result);
         }
 
         function updateWeeklyUI(dateKey) {
             const { start, end, mondayObj } = getWeekRange(dateKey);
             
-            // Formatting Date Range Title
             const formatDate = (d) => {
                 const parts = d.split('-');
                 return `${parts[2]}/${parts[1]}`;
@@ -896,7 +1056,7 @@
 
             const data = processDataForRange(start, end);
 
-            // 1. KPIs
+            // 1. Basic KPIs
             const daysInWeek = 7;
             const avgDailyTime = data.totalSeconds / daysInWeek;
             const prodRate = data.totalSeconds > 0 ? (data.totalActiveSeconds / data.totalSeconds) * 100 : 0;
@@ -905,7 +1065,38 @@
             document.getElementById('kpi-weekly-avg-prod').textContent = `${Math.round(prodRate)}%`;
             document.getElementById('kpi-weekly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
 
-            // Find Best Day
+            // 2. Advanced KPIs
+            // 2a. Focus Consistency (Standard Deviation of daily prod %)
+            let dailyProds = [];
+            Object.keys(data.dailyStats).forEach(d => {
+                const s = data.dailyStats[d];
+                if(s.total > 0) dailyProds.push(s.active / s.total);
+            });
+            let consistencyScore = 0;
+            if(dailyProds.length > 1) {
+                const mean = dailyProds.reduce((a,b)=>a+b,0) / dailyProds.length;
+                const variance = dailyProds.reduce((a,b)=>a+Math.pow(b-mean,2),0) / dailyProds.length;
+                const stdDev = Math.sqrt(variance); // range 0.0 to 0.5 approx
+                // Transform to 0-100 score where 0 dev is 100 consistency
+                consistencyScore = Math.max(0, 100 - (stdDev * 200)); 
+            } else if (dailyProds.length === 1) {
+                consistencyScore = 100;
+            }
+            document.getElementById('kpi-weekly-consistency').textContent = `${Math.round(consistencyScore)}%`;
+
+            // 2b. Top Category
+            let topCat = "Nenhuma";
+            let topCatTime = 0;
+            Object.entries(data.categoryUsage).forEach(([cat, dur]) => {
+                if(dur > topCatTime) {
+                    topCatTime = dur;
+                    topCat = cat;
+                }
+            });
+            document.getElementById('kpi-weekly-top-cat').textContent = topCat;
+            document.getElementById('kpi-weekly-top-cat-time').textContent = formatSecondsToTime(topCatTime);
+
+            // 2c. Best Day
             let bestDay = "-";
             let bestVal = 0;
             const weekDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
@@ -921,22 +1112,82 @@
             document.getElementById('kpi-weekly-best-day').textContent = bestDay;
             document.getElementById('kpi-weekly-best-val').textContent = `${Math.round(bestVal)}% Produtividade`;
 
-            // 2. Trend Chart (Line)
-            const labels = weekDays;
-            const trendData = Object.keys(data.dailyStats).sort().map(d => {
+            // 3. Charts
+            const sortedDays = Object.keys(data.dailyStats).sort();
+            
+            // 3a. Trend Chart
+            const trendData = sortedDays.map(d => {
                 const s = data.dailyStats[d];
                 return s.total > 0 ? Math.round((s.active / s.total) * 100) : 0;
             });
-
-            charts.weeklyTrend.data.labels = labels;
+            charts.weeklyTrend.data.labels = weekDays;
             charts.weeklyTrend.data.datasets[0].data = trendData;
             charts.weeklyTrend.update();
 
-            // 3. App Distribution (Donut)
+            // 3b. App Distribution
             const sortedApps = Object.entries(data.appUsage).sort((a, b) => b[1] - a[1]).slice(0, 5);
             charts.weeklyApp.data.labels = sortedApps.map(i => i[0]);
             charts.weeklyApp.data.datasets[0].data = sortedApps.map(i => i[1]);
             charts.weeklyApp.update();
+
+            // 3c. Stacked Category Bar Chart (Comparativo de Categorias)
+            const categories = Object.keys(data.categoryUsage);
+            const datasets = categories.map((cat, i) => {
+                const colors = ['#4f46e5', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+                return {
+                    label: cat,
+                    data: sortedDays.map(d => data.dailyStats[d].categorySeconds[cat] || 0),
+                    backgroundColor: colors[i % colors.length]
+                };
+            });
+            charts.weeklyCat.data.labels = weekDays;
+            charts.weeklyCat.data.datasets = datasets;
+            charts.weeklyCat.update();
+
+            // 3d. Heatmap (HTML Grid)
+            renderHeatmap(data.dailyStats, sortedDays, weekDays);
+        }
+
+        function renderHeatmap(dailyStats, sortedDays, dayLabels) {
+            const container = document.getElementById('heatmap-container');
+            container.innerHTML = ''; // Clear
+
+            // Header Row (Days)
+            const emptyCorner = document.createElement('div');
+            container.appendChild(emptyCorner);
+            dayLabels.forEach(label => {
+                const header = document.createElement('div');
+                header.className = "text-center text-xs font-bold text-slate-500 py-1";
+                header.innerText = label.substring(0,3);
+                container.appendChild(header);
+            });
+
+            // Rows (Hours 0-23)
+            for(let h=0; h<24; h++) {
+                // Y Axis Label
+                const timeLabel = document.createElement('div');
+                timeLabel.className = "text-right text-xs text-slate-400 pr-2 pt-1";
+                timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
+                container.appendChild(timeLabel);
+
+                // Cells
+                sortedDays.forEach(d => {
+                    const duration = dailyStats[d].hourlyActivity[h] || 0;
+                    const cell = document.createElement('div');
+                    cell.className = "heatmap-cell";
+                    cell.title = `${d} ${h}:00 - ${formatSecondsToTimeShort(duration)}`;
+                    
+                    // Color scale (max expected ~3600s/hour, but practical active time max ~3000)
+                    const intensity = Math.min(1, duration / 3000); 
+                    if(duration === 0) cell.classList.add('bg-slate-50');
+                    else if(intensity < 0.2) cell.classList.add('bg-indigo-100');
+                    else if(intensity < 0.4) cell.classList.add('bg-indigo-300');
+                    else if(intensity < 0.7) cell.classList.add('bg-indigo-500');
+                    else cell.classList.add('bg-indigo-700');
+
+                    container.appendChild(cell);
+                });
+            }
         }
 
         function updateMonthlyUI(dateKey) {
@@ -948,33 +1199,64 @@
 
             const data = processDataForRange(start, end);
 
-            // 1. KPIs
+            // 1. Basic KPIs
             const prodRate = data.totalSeconds > 0 ? (data.totalActiveSeconds / data.totalSeconds) * 100 : 0;
-            const weeklyAvg = data.totalActiveSeconds / 4; // Approx 4 weeks
+            const weeklyAvg = data.totalActiveSeconds / 4; 
 
             document.getElementById('kpi-monthly-prod').textContent = `${Math.round(prodRate)}%`;
             document.getElementById('kpi-monthly-days').textContent = data.daysCount;
-            document.getElementById('kpi-monthly-weekly-avg').textContent = formatSecondsToTime(weeklyAvg);
+            // Removed Avg Weekly Hours KPI card to fit new ones, replacing logic where needed or just ignore unused logic.
+            // Using new IDs: kpi-monthly-burnout, kpi-monthly-goal-eff
 
-            // 2. Weekly Trend Logic
-            // Group days into weeks (1-7, 8-14, etc for simplicity or standard weeks)
-            // Using ISO weeks is complex, let's group by 7 day chunks from start of month
+            // 2. Advanced KPIs
+            // 2a. Burnout Trend (Streak of days > 10h total monitored)
+            let maxStreak = 0;
+            let currentStreak = 0;
+            const sortedDays = Object.keys(data.dailyStats).sort();
+            sortedDays.forEach(d => {
+                if(data.dailyStats[d].total > (10 * 3600)) {
+                    currentStreak++;
+                } else {
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                    currentStreak = 0;
+                }
+            });
+            maxStreak = Math.max(maxStreak, currentStreak);
+            
+            const burnoutEl = document.getElementById('kpi-monthly-burnout');
+            burnoutEl.textContent = maxStreak > 0 ? `${maxStreak} dias` : "0";
+            if(maxStreak >= 5) {
+                burnoutEl.classList.add('text-red-600');
+                document.getElementById('kpi-monthly-burnout-desc').textContent = "⚠️ Alerta: Carga Alta!";
+            } else {
+                burnoutEl.classList.remove('text-red-600');
+                burnoutEl.classList.add('text-slate-800');
+                document.getElementById('kpi-monthly-burnout-desc').textContent = "Nível Saudável";
+            }
+
+            // 2b. Goal Efficiency (Days > Goal)
+            const goalHours = parseFloat(document.getElementById('goalInput').value) || 8;
+            const goalSeconds = goalHours * 3600;
+            let goalsMet = 0;
+            sortedDays.forEach(d => {
+                if(data.dailyStats[d].active >= goalSeconds) goalsMet++;
+            });
+            const efficiency = data.daysCount > 0 ? (goalsMet / data.daysCount) * 100 : 0;
+            document.getElementById('kpi-monthly-goal-eff').textContent = `${Math.round(efficiency)}%`;
+
+            // 2c. Best Week Logic
             let weeklyScores = [];
             let weeklyLabels = [];
-            let currentWeekProd = 0;
-            let currentWeekTotal = 0;
-            let weekCounter = 1;
-            let dayCounter = 0;
-            let bestWeekIdx = -1;
-            let maxWeekProd = 0;
+            let currentWeekProd = 0, currentWeekTotal = 0, dayCounter = 0, weekCounter = 1;
+            let maxWeekProd = 0, bestWeekIdx = -1;
 
-            Object.keys(data.dailyStats).sort().forEach((d, i) => {
+            sortedDays.forEach((d, i) => {
                 const s = data.dailyStats[d];
                 currentWeekTotal += s.total;
                 currentWeekProd += s.active;
                 dayCounter++;
 
-                if (dayCounter === 7 || i === Object.keys(data.dailyStats).length - 1) {
+                if (dayCounter === 7 || i === sortedDays.length - 1) {
                     const wProd = currentWeekTotal > 0 ? (currentWeekProd / currentWeekTotal) * 100 : 0;
                     weeklyScores.push(Math.round(wProd));
                     weeklyLabels.push(`Semana ${weekCounter}`);
@@ -983,15 +1265,9 @@
                         maxWeekProd = wProd;
                         bestWeekIdx = weekCounter;
                     }
-
-                    // Reset
-                    currentWeekProd = 0;
-                    currentWeekTotal = 0;
-                    dayCounter = 0;
-                    weekCounter++;
+                    currentWeekProd = 0; currentWeekTotal = 0; dayCounter = 0; weekCounter++;
                 }
             });
-
             document.getElementById('kpi-monthly-best-week').textContent = bestWeekIdx > -1 ? `Semana ${bestWeekIdx}` : "--";
             document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWeekProd)}% Produtividade`;
 
@@ -999,19 +1275,34 @@
             charts.monthlyWeekly.data.datasets[0].data = weeklyScores;
             charts.monthlyWeekly.update();
 
-            // 3. Day of Week Distribution
-            // Aggregate totals by Monday, Tuesday...
-            let dowTotals = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+            // 3. Advanced Charts
+            // 3a. Trend Line (Smoothed weekly scores)
+            charts.monthlyTrendLine.data.labels = weeklyLabels;
+            charts.monthlyTrendLine.data.datasets[0].data = weeklyScores;
+            charts.monthlyTrendLine.update();
+
+            // 3b. Radar Chart (Category Balance)
+            const categories = Object.keys(data.categoryUsage);
+            const catData = Object.values(data.categoryUsage).map(s => s/3600); // Hours
             
-            Object.keys(data.dailyStats).forEach(d => {
+            charts.monthlyRadar.data.labels = categories;
+            charts.monthlyRadar.data.datasets = [{
+                label: 'Horas no Mês',
+                data: catData,
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                borderColor: '#6366f1',
+                pointBackgroundColor: '#6366f1'
+            }];
+            charts.monthlyRadar.update();
+
+            // 3c. Day of Week Dist
+            let dowTotals = [0, 0, 0, 0, 0, 0, 0]; 
+            sortedDays.forEach(d => {
                 const dateObj = new Date(d + 'T00:00:00');
-                let dayIdx = dateObj.getDay(); // 0=Sun, 1=Mon
-                // Convert to 0=Mon, 6=Sun
+                let dayIdx = dateObj.getDay(); 
                 let arrIdx = dayIdx === 0 ? 6 : dayIdx - 1;
-                // Accumulate seconds (data.dailyStats is now in seconds from processDataForRange)
                 dowTotals[arrIdx] += data.dailyStats[d].total; 
             });
-
             charts.monthlyDay.data.datasets[0].data = dowTotals;
             charts.monthlyDay.update();
         }

@@ -5,8 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Produtividade - Timesheet Sense</title>
     
+    <!-- Google Fonts: Playfair Display (Serif) & Montserrat (Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F9F8F6',
+                        charcoal: '#1F1F1F',
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            800: '#292524',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,122 +46,147 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: #F9F8F6; /* Creme Suave - Quiet Luxury Base */
+            color: #1F1F1F; /* Carvão Profundo */
         }
 
-        /* --- Card Styles Identity --- */
+        /* --- Card Styles: Editorial Design --- */
         
-        /* Tipo A: Card Padrão */
+        /* Tipo A: Card Padrão (Editorial Clean) */
         .card-type-a {
             background-color: #FFFFFF;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #E2E8F0; /* Slate-200 para mais definição de borda */
-            transition: transform 0.2s ease-in-out;
+            border-radius: 16px; /* Mantido conforme regra técnica */
+            border: 1px solid #E7E5E4; /* Stone-200: Borda fina e sutil */
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03); /* Sombra ultra difusa */
+            transition: all 0.3s ease;
         }
         .card-type-a:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.06);
+            border-color: #D6D3D1;
         }
         .card-type-a .label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #475569; /* Slate-600 */
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.875rem; /* um pouco maior para ser legível como serif */
+            font-weight: 600;
+            color: #57534E; /* Stone-600 */
+            letter-spacing: 0.02em;
+            margin-bottom: 0.75rem;
         }
         .card-type-a .value {
-            font-size: 1.875rem;
-            font-weight: 800;
-            color: #0F172A; /* Slate-900 (Preto suave) */
-            line-height: 1.2;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2rem;
+            font-weight: 600; /* Semi-bold para elegância, não extra-bold */
+            color: #1F1F1F;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
         }
         .card-type-a .subtext {
-            font-size: 0.75rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem;
             font-weight: 500;
-            color: #64748B; /* Slate-500 */
-            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #A8A29E; /* Stone-400 */
+            margin-top: 0.75rem;
         }
 
-        /* Tipo B: Card Destaque */
+        /* Tipo B: Card Destaque (Violet Tech Contrast) */
         .card-type-b {
+            /* Mantendo o gradiente roxo original conforme solicitado para contraste */
             background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);
             border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 12px 30px -5px rgba(124, 58, 237, 0.3);
             color: #FFFFFF;
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s ease-in-out;
+            transition: all 0.3s ease;
         }
         .card-type-b:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.35);
+            box-shadow: 0 20px 40px -5px rgba(124, 58, 237, 0.4);
         }
         .card-type-b .label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.95);
-            letter-spacing: 0.05em;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9rem;
+            font-style: italic; /* Toque editorial */
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 0.5rem;
             position: relative; z-index: 10;
         }
         .card-type-b .value {
-            font-size: 1.875rem;
-            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
             color: #FFFFFF;
-            line-height: 1.2;
+            letter-spacing: -0.02em;
             position: relative; z-index: 10;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .card-type-b .subtext {
+            font-family: 'Montserrat', sans-serif;
             font-size: 0.75rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.8);
             margin-top: 0.5rem;
             position: relative; z-index: 10;
         }
-        .card-type-b::after {
+        /* Decorator circle abstract */
+        .card-type-b::before {
             content: '';
             position: absolute;
-            bottom: -20px;
-            right: -20px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
+            top: -40px;
+            right: -40px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
             border-radius: 50%;
             z-index: 1;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* Custom Scrollbar - Slim & Elegant */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
         
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+            -webkit-appearance: none; margin: 0; 
         }
 
+        /* Navigation Tabs - Editorial Style */
+        .tab-btn {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            padding: 1rem 0.5rem;
+            margin-right: 2rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background-color: #7C3AED;
+            transition: width 0.3s ease;
+        }
         .tab-active {
-            border-bottom: 2px solid #7C3AED;
-            color: #5B21B6;
+            color: #1F1F1F;
             font-weight: 700;
         }
+        .tab-active::after {
+            width: 100%;
+        }
         .tab-inactive {
-            border-bottom: 2px solid transparent;
-            color: #64748b;
+            color: #A8A29E;
+            font-weight: 400;
         }
         .tab-inactive:hover {
-            color: #334155;
-            border-bottom: 2px solid #cbd5e1;
+            color: #57534E;
         }
 
         /* Heatmap Grid Styles */
@@ -143,88 +196,89 @@
             gap: 4px;
         }
         .heatmap-cell {
-            height: 28px;
-            border-radius: 4px;
+            height: 26px;
+            border-radius: 3px;
             transition: all 0.2s;
         }
         .heatmap-cell:hover {
-            transform: scale(1.15);
+            transform: scale(1.1);
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #6366f1;
+            border: 1px solid #7C3AED;
         }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="antialiased selection:bg-violet-200 selection:text-violet-900">
 
     <!-- Header Section -->
-    <div class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col xl:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3 w-full xl:w-auto">
-                    <div class="bg-violet-700 p-2.5 rounded-xl text-white shadow-md shadow-violet-200">
-                        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+    <div class="bg-white/60 backdrop-blur-md border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-5">
+            <div class="flex flex-col xl:flex-row justify-between items-center gap-6">
+                
+                <!-- Brand -->
+                <div class="flex items-center gap-4 w-full xl:w-auto">
+                    <div class="bg-violet-700 w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg shadow-violet-200">
+                        <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Timesheet Sense</h1>
-                        <p class="text-xs text-slate-600 font-semibold uppercase tracking-wider">Produtividade & Analytics</p>
+                        <h1 class="font-serif text-2xl font-bold text-charcoal tracking-tight leading-none">Timesheet Sense</h1>
+                        <p class="font-sans text-[10px] text-stone-500 font-semibold uppercase tracking-[0.15em] mt-1">Analytics Suite</p>
                     </div>
                 </div>
                 
                 <!-- Controls Area -->
-                <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
+                <div class="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-end font-sans">
                     
                     <!-- Compare Mode Toggle -->
-                    <div id="compare-controls" class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors" title="Comparar dois dias">
+                    <div id="compare-controls" class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-full border border-stone-200 hover:border-stone-300 transition-colors shadow-sm" title="Comparar dois dias">
                         <div class="flex items-center h-5">
-                            <input id="enableCompare" type="checkbox" class="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 cursor-pointer">
+                            <input id="enableCompare" type="checkbox" class="w-4 h-4 text-violet-600 bg-stone-100 border-stone-300 rounded focus:ring-violet-500 cursor-pointer accent-violet-600">
                         </div>
-                        <label for="enableCompare" class="text-xs font-bold text-slate-700 select-none cursor-pointer uppercase">Comparar</label>
-                        <div class="h-4 w-px bg-slate-300 mx-1"></div>
-                        <select id="compareDateSelect" disabled class="bg-transparent text-xs text-slate-700 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer w-28 font-semibold">
+                        <label for="enableCompare" class="text-xs font-semibold text-stone-600 select-none cursor-pointer uppercase tracking-wide">Comparar</label>
+                        <div class="h-4 w-px bg-stone-200 mx-1"></div>
+                        <select id="compareDateSelect" disabled class="bg-transparent text-xs text-charcoal focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer w-28 font-medium">
                             <option value="">Selecione...</option>
                         </select>
                     </div>
 
                     <!-- Month Selector -->
-                    <div id="month-control" class="hidden relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600">
+                    <div id="month-control" class="hidden relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600 group-hover:text-violet-700 transition-colors">
                             <i class="fa-regular fa-calendar-check"></i>
                         </div>
-                        <!-- CHANGED: Width increased from w-40 to w-52 to fit "Dezembro 2024" -->
-                        <select id="monthSelect" class="bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-52 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-violet-300 transition-colors">
+                        <select id="monthSelect" class="bg-white border border-stone-200 text-charcoal text-xs font-semibold rounded-full focus:ring-1 focus:ring-violet-500 focus:border-violet-500 block w-52 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-stone-300 transition-all uppercase tracking-wide">
                             <option value="">Mês...</option>
                         </select>
                     </div>
 
                     <!-- Week Selector -->
-                    <div id="week-control" class="hidden relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600">
+                    <div id="week-control" class="hidden relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600 group-hover:text-violet-700 transition-colors">
                             <i class="fa-solid fa-calendar-week"></i>
                         </div>
-                        <select id="weekSelect" class="bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-48 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-violet-300 transition-colors">
+                        <!-- Width increased from w-48 to w-64 to fit full date range -->
+                        <select id="weekSelect" class="bg-white border border-stone-200 text-charcoal text-xs font-semibold rounded-full focus:ring-1 focus:ring-violet-500 focus:border-violet-500 block w-64 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-stone-300 transition-all uppercase tracking-wide">
                             <option value="">Semana...</option>
                         </select>
                     </div>
 
                     <!-- Main Date Selector -->
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600 group-hover:text-violet-700 transition-colors">
                             <i class="fa-regular fa-calendar"></i>
                         </div>
-                        <select id="dateSelect" class="bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-44 pl-10 p-2.5 cursor-pointer disabled:bg-slate-50 disabled:text-slate-400 shadow-sm hover:border-violet-300 transition-colors">
+                        <select id="dateSelect" class="bg-white border border-stone-200 text-charcoal text-xs font-semibold rounded-full focus:ring-1 focus:ring-violet-500 focus:border-violet-500 block w-44 pl-10 p-2.5 cursor-pointer disabled:bg-stone-50 disabled:text-stone-400 shadow-sm hover:border-stone-300 transition-all uppercase tracking-wide">
                             <option value="">Carregue arquivo...</option>
                         </select>
                     </div>
 
                     <!-- File Upload -->
-                    <label for="fileUpload" class="cursor-pointer bg-violet-600 hover:bg-violet-700 text-white transition-colors px-4 py-2.5 rounded-xl shadow-md shadow-violet-200 flex items-center gap-2 text-sm font-bold active:scale-95 transform duration-150">
-                        <i class="fa-solid fa-file-excel"></i>
+                    <label for="fileUpload" class="cursor-pointer bg-violet-700 hover:bg-violet-800 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-violet-200 flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95">
+                        <i class="fa-solid fa-upload"></i>
                         <span class="hidden sm:inline">Importar</span>
                     </label>
                     <input type="file" id="fileUpload" accept=".xlsx, .xlsm, .xls" class="hidden">
                     
-                    <button onclick="loadDemoData()" class="text-xs text-slate-500 hover:text-violet-700 underline font-semibold ml-1">
+                    <button onclick="loadDemoData()" class="text-[10px] text-stone-400 hover:text-violet-700 font-bold uppercase tracking-widest ml-2 border-b border-transparent hover:border-violet-700 transition-all">
                         Demo
                     </button>
                 </div>
@@ -233,98 +287,88 @@
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-10 space-y-10">
 
         <!-- Status Message -->
-        <div id="statusMsg" class="hidden bg-blue-50 text-blue-900 p-4 rounded-xl border border-blue-200 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-solid fa-circle-info text-blue-600"></i>
-            <span id="statusText" class="font-semibold">Aguardando arquivo...</span>
+        <div id="statusMsg" class="hidden bg-white/50 backdrop-blur-sm text-stone-600 p-4 rounded-xl border border-stone-200 text-sm flex items-center gap-3 shadow-sm animate-pulse">
+            <div class="w-2 h-2 rounded-full bg-violet-500"></div>
+            <span id="statusText" class="font-medium font-sans">Aguardando arquivo...</span>
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="border-b border-slate-200">
-            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                <button onclick="switchView('daily')" id="tab-daily" class="tab-active whitespace-nowrap py-4 px-1 text-sm font-medium transition-colors">
-                    <i class="fa-solid fa-calendar-day mr-2"></i>Diário
+        <div class="border-b border-stone-200/60">
+            <nav class="flex" aria-label="Tabs">
+                <button onclick="switchView('daily')" id="tab-daily" class="tab-btn tab-active">
+                    Visão Diária
                 </button>
-                <button onclick="switchView('weekly')" id="tab-weekly" class="tab-inactive whitespace-nowrap py-4 px-1 text-sm font-medium transition-colors">
-                    <i class="fa-solid fa-calendar-week mr-2"></i>Semanal
+                <button onclick="switchView('weekly')" id="tab-weekly" class="tab-btn tab-inactive">
+                    Análise Semanal
                 </button>
-                <button onclick="switchView('monthly')" id="tab-monthly" class="tab-inactive whitespace-nowrap py-4 px-1 text-sm font-medium transition-colors">
-                    <i class="fa-solid fa-calendar mr-2"></i>Mensal
+                <button onclick="switchView('monthly')" id="tab-monthly" class="tab-btn tab-inactive">
+                    Relatório Mensal
                 </button>
             </nav>
         </div>
 
         <!-- ==================== DAILY VIEW CONTENT ==================== -->
-        <div id="daily-view-content" class="space-y-8 block">
+        <div id="daily-view-content" class="space-y-8 block animate-fade-in">
             <!-- KPI Cards Row -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Time (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-between">
+                <div class="card-type-a p-8 flex flex-col justify-between h-full">
                     <div>
                         <div class="flex justify-between items-start">
-                            <p class="label">Tempo Monitorado</p>
-                            <div class="bg-slate-100 p-2 rounded-lg text-slate-500">
-                                <i class="fa-regular fa-clock text-lg"></i>
-                            </div>
+                            <p class="label">Tempo Total</p>
+                            <i class="fa-regular fa-clock text-stone-300 text-xl"></i>
                         </div>
-                        <!-- CHANGED: Added text-slate-900 explicitly for max readability -->
-                        <h3 class="value text-slate-900" id="kpi-total-time">--</h3>
-                        <div id="diff-total-time" class="hidden mt-2 text-xs font-bold px-2 py-1 rounded inline-block"></div>
+                        <h3 class="value mt-2 text-charcoal" id="kpi-total-time">--</h3>
+                        <div id="diff-total-time" class="hidden mt-3 text-xs font-bold font-sans px-2.5 py-1 rounded-md inline-block"></div>
                     </div>
-                    <div class="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg w-fit">
-                        <i class="fa-solid fa-calendar-day"></i>
+                    <div class="mt-6 border-t border-stone-100 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
                         <span id="kpi-date">Hoje</span>
                     </div>
                 </div>
 
                 <!-- Productivity Rate (Type B Highlight) -->
-                <div class="card-type-b p-6 flex flex-col justify-between">
+                <div class="card-type-b p-8 flex flex-col justify-between h-full">
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Produtividade</p>
-                            <div class="bg-white/20 p-2 rounded-lg text-white">
-                                <i class="fa-solid fa-chart-line text-lg"></i>
-                            </div>
+                            <i class="fa-solid fa-chart-line text-white/40 text-xl"></i>
                         </div>
-                        <div class="flex items-baseline gap-2 mt-1">
+                        <div class="flex items-baseline gap-3 mt-2">
                              <h3 class="value" id="kpi-productivity">--%</h3>
-                             <span id="diff-productivity" class="hidden text-xs font-bold bg-white/20 px-2 py-1 rounded text-white shadow-sm"></span>
+                             <span id="diff-productivity" class="hidden text-[10px] font-bold font-sans bg-white/20 px-2 py-0.5 rounded-full text-white backdrop-blur-sm"></span>
                         </div>
                     </div>
-                    <div class="mt-4 w-full bg-black/20 rounded-full h-2 relative z-10">
-                        <div id="kpi-prod-bar" class="bg-white h-2 rounded-full shadow-sm transition-all duration-1000" style="width: 0%"></div>
+                    <div class="mt-6 w-full bg-black/20 rounded-full h-1 relative z-10">
+                        <div id="kpi-prod-bar" class="bg-white h-1 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
 
                 <!-- Total Activities (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-between">
+                <div class="card-type-a p-8 flex flex-col justify-between h-full">
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Atividades</p>
-                            <div class="bg-slate-100 p-2 rounded-lg text-slate-500">
-                                <i class="fa-solid fa-list-check text-lg"></i>
-                            </div>
+                            <i class="fa-solid fa-list-check text-stone-300 text-xl"></i>
                         </div>
-                        <div class="flex items-baseline gap-2 mt-1">
+                        <div class="flex items-baseline gap-2 mt-2">
                              <h3 class="value" id="kpi-activities">--</h3>
-                             <span id="diff-activities" class="hidden text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600"></span>
+                             <span id="diff-activities" class="hidden text-xs font-bold font-sans px-2 py-1 rounded bg-stone-100 text-stone-600"></span>
                         </div>
                     </div>
                     <p class="subtext">Registros processados</p>
                 </div>
 
                 <!-- Unique Apps (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-between">
+                <div class="card-type-a p-8 flex flex-col justify-between h-full">
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Apps Únicos</p>
-                            <div class="bg-slate-100 p-2 rounded-lg text-slate-500">
-                                <i class="fa-solid fa-window-restore text-lg"></i>
-                            </div>
+                            <i class="fa-solid fa-window-restore text-stone-300 text-xl"></i>
                         </div>
-                        <h3 class="value mt-1" id="kpi-apps">--</h3>
+                        <h3 class="value mt-2" id="kpi-apps">--</h3>
                     </div>
                     <p class="subtext">Softwares distintos</p>
                 </div>
@@ -333,29 +377,34 @@
             <!-- Charts Row 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- App Distribution Donut -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Distribuição de Apps</h3>
-                    <p class="text-xs text-slate-500 font-medium mb-6">Tempo de uso por aplicação</p>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Distribuição de Apps</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Alocação de tempo por aplicação</p>
+                    </div>
                     <div class="relative h-64 w-full flex justify-center">
                         <canvas id="appDistributionChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Activity Timeline Area -->
-                <div class="card-type-a p-6 lg:col-span-2">
-                    <div class="flex justify-between items-center mb-6">
+                <div class="card-type-a p-8 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-8">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                Linha do Tempo (30min)
+                            <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+                                Ritmo Diário
                             </h3>
-                            <p class="text-xs text-slate-500 font-medium">Tempo produtivo (horas) por intervalo</p>
+                            <p class="font-sans text-xs text-stone-400 mt-1">Produtividade em blocos de 30min</p>
                         </div>
-                        <div class="flex gap-2">
-                            <div id="legend-compare" class="hidden items-center gap-2 text-xs">
-                                 <span class="w-3 h-3 rounded-full bg-slate-400 block shadow-sm"></span>
-                                 <span class="text-slate-600 font-semibold">Anterior</span>
+                        <div class="flex gap-3">
+                            <div id="legend-compare" class="hidden items-center gap-2 text-xs font-sans">
+                                 <span class="w-2 h-2 rounded-full bg-stone-300 block shadow-sm"></span>
+                                 <span class="text-stone-500 font-medium uppercase tracking-wide">Anterior</span>
                             </div>
-                            <span class="text-xs font-bold bg-violet-100 text-violet-700 px-3 py-1 rounded-full shadow-sm">Atual</span>
+                            <div class="flex items-center gap-2 text-xs font-sans">
+                                <span class="w-2 h-2 rounded-full bg-violet-600 block"></span>
+                                <span class="text-violet-700 font-bold uppercase tracking-wide">Atual</span>
+                            </div>
                         </div>
                     </div>
                     <div class="relative h-64 w-full">
@@ -367,62 +416,66 @@
             <!-- Charts Row 2 & Insights -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Active vs Inactive Pie -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Status Geral</h3>
-                    <p class="text-xs text-slate-500 font-medium mb-6">Ativo vs Ausente (AFK)</p>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Composição</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Proporção Ativo vs Ausente</p>
+                    </div>
                     <div class="relative h-56 w-full flex justify-center">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Productivity Trend Bar -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Score de Foco</h3>
-                    <p class="text-xs text-slate-500 font-medium mb-6">Intensidade (0-100)</p>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Intensidade</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Score de Foco (0-100)</p>
+                    </div>
                     <div class="relative h-56 w-full">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Insights Panel -->
-                <div class="card-type-a p-6 flex flex-col justify-between">
+                <div class="card-type-a p-8 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <i class="fa-regular fa-lightbulb text-yellow-500"></i>
-                            Insights Rápidos
+                        <h3 class="font-serif text-lg font-bold text-charcoal mb-6 flex items-center gap-3">
+                            Insights
+                            <span class="text-[10px] font-sans font-normal text-stone-400 uppercase tracking-widest border border-stone-200 px-2 py-0.5 rounded-full">Hoje</span>
                         </h3>
                         
-                        <div class="space-y-3">
-                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500 shadow-sm">
-                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Top App</p>
-                                <p class="text-sm text-slate-800 font-bold" id="insight-top-app">--</p>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Top App</span>
+                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-top-app">--</span>
                             </div>
 
-                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-emerald-500 shadow-sm">
-                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Pico de Foco</p>
-                                <p class="text-sm text-slate-800 font-bold" id="insight-peak-time">--</p>
+                            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Pico de Foco</span>
+                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-peak-time">--</span>
                             </div>
 
-                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500 shadow-sm">
-                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Tempo Ausente</p>
-                                <p class="text-sm text-slate-800 font-bold" id="insight-afk-time">--</p>
+                            <div class="flex justify-between items-center pb-1">
+                                <span class="text-xs font-sans font-semibold text-stone-500 uppercase tracking-wide">Tempo Ausente</span>
+                                <span class="text-sm font-sans font-bold text-charcoal" id="insight-afk-time">--</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-4 border-t border-slate-100">
-                        <div class="flex justify-between items-end text-sm mb-2">
+                    <div class="mt-8 pt-6 border-t border-stone-100">
+                        <div class="flex justify-between items-end text-sm mb-3">
                             <div class="flex flex-col">
-                                <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Meta Diária</span>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-bold bg-transparent text-center transition-colors">
-                                    <span class="text-slate-500 font-bold">h</span>
+                                <span class="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-1">Meta Diária</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-12 border-b border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-sans font-bold text-lg bg-transparent text-center transition-colors placeholder-violet-300">
+                                    <span class="text-stone-400 font-serif italic">hrs</span>
                                 </div>
                             </div>
-                            <span class="font-extrabold text-slate-800 text-xl" id="insight-goal-percent">0%</span>
+                            <span class="font-sans font-extrabold text-charcoal text-2xl" id="insight-goal-percent">0%</span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
-                            <div id="insight-goal-bar" class="bg-violet-600 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                        <div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+                            <div id="insight-goal-bar" class="bg-violet-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -430,86 +483,89 @@
         </div>
 
         <!-- ==================== WEEKLY VIEW CONTENT ==================== -->
-        <div id="weekly-view-content" class="space-y-8 hidden">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+        <div id="weekly-view-content" class="space-y-8 hidden animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-2">
                 <div>
-                    <h2 class="text-xl font-extrabold text-slate-800 tracking-tight" id="weekly-title">Resumo da Semana</h2>
-                    <p class="text-xs text-slate-500 font-medium uppercase mt-1 tracking-wide" id="weekly-subtitle">Selecione uma data</p>
+                    <h2 class="font-serif text-3xl font-bold text-charcoal" id="weekly-title">Resumo da Semana</h2>
+                    <p class="font-sans text-xs text-stone-500 font-semibold uppercase tracking-widest mt-2" id="weekly-subtitle">Selecione uma data</p>
                 </div>
-                <div class="bg-violet-50 p-2 rounded-lg">
-                    <i class="fa-solid fa-calendar-week text-violet-600 text-xl"></i>
+                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0">
+                    Performance Semanal
                 </div>
             </div>
 
             <!-- Weekly KPIs Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 <!-- NEW: Total Active Hours (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Horas Ativas</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Horas Ativas</p>
                     <h3 class="value text-violet-700" id="kpi-weekly-total-active">--</h3>
-                    <p class="subtext">Total acumulado</p>
+                    <p class="subtext">Total Acumulado</p>
                 </div>
 
                 <!-- Avg Daily Time (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Média Diária</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Média Diária</p>
                     <h3 class="value" id="kpi-weekly-avg-time">--</h3>
-                    <p class="subtext">Baseado em 7 dias</p>
+                    <p class="subtext">Base 7 Dias</p>
                 </div>
 
                 <!-- Consistency (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-center relative overflow-hidden">
-                    <p class="label">Consistência</p>
-                    <h3 class="value text-slate-800" id="kpi-weekly-consistency">--%</h3>
+                <div class="card-type-a p-6 flex flex-col justify-center relative overflow-hidden text-center">
+                    <p class="label mb-2">Consistência</p>
+                    <h3 class="value text-charcoal" id="kpi-weekly-consistency">--%</h3>
                     <p class="subtext">Estabilidade</p>
-                    <i class="fa-solid fa-wave-square absolute right-4 bottom-4 text-5xl text-slate-100/80 -z-0"></i>
+                    <i class="fa-solid fa-wave-square absolute -right-2 -bottom-2 text-6xl text-stone-100 -z-0 opacity-50"></i>
                 </div>
 
                 <!-- Top Category (Type B Highlight) -->
-                <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label text-white/80">Top Categoria</p>
-                    <h3 class="value text-xl truncate" id="kpi-weekly-top-cat">--</h3>
-                    <p class="subtext text-white/70" id="kpi-weekly-top-cat-time">--</p>
+                <div class="card-type-b p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Foco Principal</p>
+                    <!-- CHANGED: Removed truncate, added padding bottom -->
+                    <h3 class="value text-xl px-2 pb-1" id="kpi-weekly-top-cat">--</h3>
+                    <p class="subtext" id="kpi-weekly-top-cat-time">--</p>
                 </div>
 
                 <!-- Best Day (Type B Highlight) -->
-                <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label text-white/80">Melhor Dia</p>
+                <div class="card-type-b p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Melhor Performance</p>
                     <h3 class="value text-xl" id="kpi-weekly-best-day">--</h3>
-                    <p class="subtext text-white/70" id="kpi-weekly-best-val">--</p>
+                    <p class="subtext" id="kpi-weekly-best-val">--</p>
                 </div>
             </div>
 
             <!-- Weekly Charts Row 2 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Productivity Heatmap -->
-                <div class="card-type-a p-6 lg:col-span-2">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold text-slate-800">Heatmap de Produtividade</h3>
-                        <div class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-lg">
+                <div class="card-type-a p-8 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Mapa de Calor</h3>
+                        <div class="text-[10px] uppercase font-bold text-stone-400 flex items-center gap-2 bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">
                             <span>Menos</span>
                             <div class="flex gap-1">
-                                <div class="w-3 h-3 bg-slate-100 rounded-[2px]"></div>
-                                <div class="w-3 h-3 bg-indigo-200 rounded-[2px]"></div>
-                                <div class="w-3 h-3 bg-indigo-400 rounded-[2px]"></div>
-                                <div class="w-3 h-3 bg-indigo-600 rounded-[2px]"></div>
-                                <div class="w-3 h-3 bg-indigo-900 rounded-[2px]"></div>
+                                <div class="w-3 h-3 bg-stone-100 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-200 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-400 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-600 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-900 rounded-[1px]"></div>
                             </div>
                             <span>Mais</span>
                         </div>
                     </div>
                     
                     <div class="overflow-x-auto pb-2">
-                        <div class="heatmap-grid" id="heatmap-container" style="min-width: 600px;">
+                        <div class="heatmap-grid font-sans text-xs" id="heatmap-container" style="min-width: 600px;">
                             <!-- Generated by JS -->
                         </div>
                     </div>
                 </div>
 
                 <!-- Daily Trend -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Tendência Diária</h3>
-                    <p class="text-xs text-slate-500 font-medium mb-6">Produtividade %</p>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Evolução Diária</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Produtividade %</p>
+                    </div>
                     <div class="relative h-64 w-full">
                         <canvas id="weeklyTrendChart"></canvas>
                     </div>
@@ -519,15 +575,19 @@
             <!-- Weekly Charts Row 3 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Stacked Bar -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Categorias por Dia</h3>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Categorias por Dia</h3>
+                    </div>
                     <div class="relative h-72 w-full">
                         <canvas id="weeklyCategoryChart"></canvas>
                     </div>
                 </div>
                 <!-- Donut -->
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Top Apps (Horas)</h3>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Top Apps (Horas)</h3>
+                    </div>
                     <div class="relative h-72 w-full flex justify-center">
                         <canvas id="weeklyAppChart"></canvas>
                     </div>
@@ -536,14 +596,14 @@
         </div>
 
         <!-- ==================== MONTHLY VIEW CONTENT ==================== -->
-        <div id="monthly-view-content" class="space-y-8 hidden">
-             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+        <div id="monthly-view-content" class="space-y-8 hidden animate-fade-in">
+             <div class="flex flex-col md:flex-row md:items-end justify-between mb-2">
                 <div>
-                    <h2 class="text-xl font-extrabold text-slate-800 tracking-tight" id="monthly-title">Resumo do Mês</h2>
-                    <p class="text-xs text-slate-500 font-semibold uppercase mt-1 tracking-wide" id="monthly-subtitle">Dados agregados</p>
+                    <h2 class="font-serif text-3xl font-bold text-charcoal" id="monthly-title">Resumo do Mês</h2>
+                    <p class="text-xs text-slate-500 font-semibold uppercase mt-2 tracking-widest" id="monthly-subtitle">Consolidado</p>
                 </div>
-                <div class="bg-violet-50 p-2 rounded-lg">
-                    <i class="fa-regular fa-calendar-check text-violet-600 text-xl"></i>
+                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0">
+                    Visão Macro
                 </div>
             </div>
 
@@ -551,93 +611,101 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 <!-- Row 1: Overview (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Horas Totais</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Horas Totais</p>
                     <h3 class="value text-violet-800" id="kpi-monthly-total-active">--</h3> <!-- NEW -->
-                    <p class="subtext">Soma do mês</p>
+                    <p class="subtext">Soma do Mês</p>
                 </div>
 
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Média Diária</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Média Diária</p>
                     <h3 class="value" id="kpi-monthly-avg-daily">--</h3>
-                    <p class="subtext">Tempo ativo / dias</p>
+                    <p class="subtext">Tempo Ativo / Dias</p>
                 </div>
 
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Dias Trabalhados</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Dias Úteis</p>
                     <h3 class="value" id="kpi-monthly-days">--</h3>
-                    <p class="subtext">Registros encontrados</p>
+                    <p class="subtext">Com Atividade</p>
                 </div>
 
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Consistência</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Consistência</p>
                     <h3 class="value text-violet-600" id="kpi-monthly-consistency">--%</h3>
                     <p class="subtext">Estabilidade mensal</p>
                 </div>
 
                 <!-- Row 2: Highlights (Type B) -->
-                <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label text-white/80">Melhor Dia</p>
+                <div class="card-type-b p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Melhor Dia</p>
                     <h3 class="value text-2xl capitalize" id="kpi-monthly-best-day-week">--</h3> <!-- NEW -->
-                    <p class="subtext" id="kpi-monthly-best-day-val">--% Produtividade Média</p>
+                    <p class="subtext" id="kpi-monthly-best-day-val">--% Média</p>
                 </div>
 
-                <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label">Melhor Semana</p>
+                <div class="card-type-b p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Melhor Semana</p>
                     <h3 class="value text-2xl" id="kpi-monthly-best-week">--</h3>
                     <p class="subtext" id="kpi-monthly-best-val">--% Produtividade</p>
                 </div>
 
-                <div class="card-type-b p-6 flex flex-col justify-center lg:col-span-2">
-                    <p class="label">Categoria Dominante</p>
-                    <div class="flex items-end justify-between">
-                        <h3 class="value text-3xl truncate max-w-[70%]" id="kpi-monthly-top-cat">--</h3>
-                        <p class="text-xl font-bold text-white/90 mb-1" id="kpi-monthly-top-cat-time">--</p>
+                <div class="card-type-b p-6 flex flex-col justify-center lg:col-span-2 relative text-center">
+                    <p class="label mb-3">Categoria Dominante</p>
+                    <div class="flex flex-col items-center justify-center relative z-10">
+                        <h3 class="value text-3xl truncate max-w-[90%]" id="kpi-monthly-top-cat">--</h3>
+                        <p class="font-sans font-bold text-white/80 mt-1" id="kpi-monthly-top-cat-time">--</p>
                     </div>
                 </div>
 
                 <!-- Row 3: Alerts/Stats (Type A) -->
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Alerta Burnout</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Alerta Burnout</p>
                     <h3 class="value" id="kpi-monthly-burnout">--</h3>
                     <p class="subtext" id="kpi-monthly-burnout-desc">Sequência > 10h</p>
                 </div>
 
-                <div class="card-type-a p-6 flex flex-col justify-center">
-                    <p class="label">Meta Atingida</p>
+                <div class="card-type-a p-6 flex flex-col justify-center text-center">
+                    <p class="label mb-2">Meta Atingida</p>
                     <h3 class="value text-emerald-600" id="kpi-monthly-goal-eff">--%</h3>
-                    <p class="subtext">Eficiência da meta</p>
+                    <p class="subtext">Eficiência</p>
                 </div>
                 
-                <div class="card-type-a p-6 flex flex-col justify-center lg:col-span-2">
-                    <p class="label">Média Semanal</p>
-                    <h3 class="value text-slate-700" id="kpi-monthly-avg-weekly">--</h3>
-                    <p class="subtext">Ritmo médio por semana</p>
+                <div class="card-type-a p-6 flex flex-col justify-center lg:col-span-2 text-center">
+                    <p class="label mb-2">Média Semanal</p>
+                    <h3 class="value text-charcoal" id="kpi-monthly-avg-weekly">--</h3>
+                    <p class="subtext">Ritmo Médio</p>
                 </div>
             </div>
 
             <!-- Monthly Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Tendência (Longo Prazo)</h3>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                         <h3 class="font-serif text-lg font-bold text-charcoal">Tendência (Longo Prazo)</h3>
+                    </div>
                     <div class="relative h-72 w-full">
                         <canvas id="monthlyTrendLineChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Equilíbrio (Radar)</h3>
+                <div class="card-type-a p-8">
+                    <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Equilíbrio (Radar)</h3>
+                    </div>
                     <div class="relative h-72 w-full flex justify-center">
                         <canvas id="monthlyRadarChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Semana a Semana</h3>
+                <div class="card-type-a p-8">
+                     <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Performance Semanal</h3>
+                    </div>
                     <div class="relative h-64 w-full">
                         <canvas id="monthlyWeeklyTrendChart"></canvas>
                     </div>
                 </div>
-                <div class="card-type-a p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">Padrão por Dia</h3>
+                <div class="card-type-a p-8">
+                     <div class="mb-6">
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Padrão por Dia</h3>
+                    </div>
                     <div class="relative h-64 w-full">
                         <canvas id="monthlyDayDistChart"></canvas>
                     </div>
@@ -648,26 +716,26 @@
         <!-- Raw Data Table -->
         <div class="card-type-a overflow-hidden mt-8">
             <details class="group">
-                <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Dados Brutos (Amostra)</span>
+                <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-stone-50 hover:bg-stone-100 transition-colors">
+                    <span class="font-serif font-bold text-charcoal uppercase text-sm tracking-widest">Dados Brutos (Amostra)</span>
                     <span class="transition group-open:rotate-180">
-                        <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                        <i class="fa-solid fa-chevron-down text-stone-400"></i>
                     </span>
                 </summary>
                 <div class="p-0 overflow-x-auto">
-                    <table class="min-w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-100 font-bold">
+                    <table class="min-w-full text-sm text-left text-charcoal font-sans">
+                        <thead class="text-xs text-stone-500 uppercase bg-stone-100 font-bold tracking-wider">
                             <tr>
-                                <th class="px-6 py-3">Hora</th>
-                                <th class="px-6 py-3">App</th>
-                                <th class="px-6 py-3">Duração</th>
-                                <th class="px-6 py-3">Status</th>
-                                <th class="px-6 py-3">Título</th>
+                                <th class="px-6 py-4 border-b border-stone-200">Hora</th>
+                                <th class="px-6 py-4 border-b border-stone-200">App</th>
+                                <th class="px-6 py-4 border-b border-stone-200">Duração</th>
+                                <th class="px-6 py-4 border-b border-stone-200">Status</th>
+                                <th class="px-6 py-4 border-b border-stone-200">Título</th>
                             </tr>
                         </thead>
-                        <tbody id="dataTableBody" class="divide-y divide-slate-100">
+                        <tbody id="dataTableBody" class="divide-y divide-stone-100 bg-white">
                             <tr>
-                                <td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">Carregue um arquivo para ver os dados.</td>
+                                <td colspan="5" class="px-6 py-8 text-center text-stone-400 italic">Carregue um arquivo para ver os dados.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -706,7 +774,7 @@
         function formatSecondsToTimeShort(seconds) {
              const h = Math.floor(seconds / 3600);
              const m = Math.floor((seconds % 3600) / 60);
-             return `${h}h ${String(m).padStart(2,'0')}m`; // Force hour unit display
+             return `${h}h ${String(m).padStart(2,'0')}m`; 
         }
 
         function formatExcelTime(serial) {
@@ -758,12 +826,29 @@
 
         // --- Charts ---
         function initCharts() {
+            // Apply Global Chart Fonts and Colors for Editorial Look
+            Chart.defaults.font.family = "'Montserrat', sans-serif";
+            Chart.defaults.color = '#57534E'; // Stone-600 for text
+            Chart.defaults.scale.grid.color = '#F5F5F4'; // Stone-100 for grid lines
+
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'Inter', size: 11 } } },
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { 
+                            usePointStyle: true, 
+                            font: { family: "'Montserrat', sans-serif", size: 11, weight: 500 },
+                            padding: 20
+                        } 
+                    },
                     tooltip: {
+                        backgroundColor: '#1F1F1F',
+                        titleFont: { family: "'Playfair Display', serif", size: 13 },
+                        bodyFont: { family: "'Montserrat', sans-serif", size: 12 },
+                        padding: 12,
+                        cornerRadius: 8,
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -773,28 +858,18 @@
                                 const id = context.chart.canvas.id;
                                 const raw = context.raw;
 
-                                // 1. Time-based charts (Seconds input)
-                                // Doughnuts, Pies, Monthly Day Dist
                                 if (type === 'doughnut' || type === 'pie' || id === 'monthlyDayDistChart') {
                                     return `${context.label || label.replace(': ','')}: ${formatSecondsToTimeShort(raw)}`;
                                 }
-
-                                // 2. Radar (Hours input)
                                 if (type === 'radar') {
                                     return `${context.label}: ${formatSecondsToTimeShort(raw * 3600)}`;
                                 }
-
-                                // 3. Timeline (Hours input)
                                 if (id === 'timelineChart') {
-                                    // context.parsed.y is hours. 
                                     return `${label}${context.parsed.y.toFixed(2)}h`;
                                 }
-
-                                // 4. Default (Scores, Percentages)
                                 if (context.parsed.y !== null) {
                                     return label + context.parsed.y;
                                 }
-                                
                                 return label + context.formattedValue;
                             }
                         }
@@ -803,24 +878,24 @@
             };
 
             // DAILY
-            charts.appDist = new Chart(document.getElementById('appDistributionChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#7C3AED', '#4C1D95', '#A78BFA', '#8B5CF6', '#C4B5FD', '#E2E8F0'] }] }, options: { ...commonOptions, cutout: '60%' } });
-            charts.timeline = new Chart(document.getElementById('timelineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tempo (h)', data: [], borderColor: '#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 0.5, grid: { borderDash: [2, 4] }, ticks: { stepSize: 0.1 } }, x: { grid: { display: false } } } } });
-            charts.status = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'pie', data: { labels: ['Ativo', 'AFK'], datasets: [{ data: [0, 0], backgroundColor: ['#8B5CF6', '#CBD5E1'], borderWidth: 0 }] }, options: commonOptions });
-            charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Score', data: [], backgroundColor: '#6D28D9', borderRadius: 4 }] }, options: { ...commonOptions, scales: { y: { max: 100, beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } } } });
+            charts.appDist = new Chart(document.getElementById('appDistributionChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#7C3AED', '#4C1D95', '#8B5CF6', '#A78BFA', '#C4B5FD', '#E2E8F0'] }] }, options: { ...commonOptions, cutout: '70%' } });
+            charts.timeline = new Chart(document.getElementById('timelineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tempo (h)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124, 58, 237, 0.05)', fill: true, tension: 0.4, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 0.5, grid: { borderDash: [4, 4] }, ticks: { stepSize: 0.1 } }, x: { grid: { display: false } } } } });
+            charts.status = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'pie', data: { labels: ['Ativo', 'AFK'], datasets: [{ data: [0, 0], backgroundColor: ['#7C3AED', '#E7E5E4'], borderWidth: 0 }] }, options: commonOptions });
+            charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Score', data: [], backgroundColor: '#4C1D95', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { max: 100, beginAtZero: true, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
 
             // WEEKLY
-            charts.weeklyTrend = new Chart(document.getElementById('weeklyTrendChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Produtividade (%)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124, 58, 237, 0.1)', fill: true, tension: 0.3 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } } } });
-            charts.weeklyApp = new Chart(document.getElementById('weeklyAppChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#6D28D9', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#E2E8F0'] }] }, options: { ...commonOptions, cutout: '50%' } });
-            charts.weeklyCat = new Chart(document.getElementById('weeklyCategoryChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [] }, options: { ...commonOptions, plugins: { tooltip: { callbacks: { label: function(c) { return `${c.dataset.label}: ${formatSecondsToTimeShort(c.raw)}`; } } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { borderDash: [2, 4] }, ticks: { callback: function(val) { return Math.floor(val/3600) + 'h'; } } } } } });
+            charts.weeklyTrend = new Chart(document.getElementById('weeklyTrendChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Produtividade (%)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124, 58, 237, 0.05)', fill: true, tension: 0.3, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+            charts.weeklyApp = new Chart(document.getElementById('weeklyAppChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#4C1D95', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#E7E5E4'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '60%' } });
+            charts.weeklyCat = new Chart(document.getElementById('weeklyCategoryChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [] }, options: { ...commonOptions, plugins: { tooltip: { callbacks: { label: function(c) { return `${c.dataset.label}: ${formatSecondsToTimeShort(c.raw)}`; } } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(val) { return Math.floor(val/3600) + 'h'; } } } } } });
 
             // MONTHLY
-            charts.monthlyWeekly = new Chart(document.getElementById('monthlyWeeklyTrendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Produtividade Média (%)', data: [], backgroundColor: '#8B5CF6', borderRadius: 4 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } } } });
-            charts.monthlyDay = new Chart(document.getElementById('monthlyDayDistChart').getContext('2d'), { type: 'bar', data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Horas Totais', data: [], backgroundColor: '#6D28D9', borderRadius: 4 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] }, ticks: { callback: function(value) { return Math.floor(value / 3600) + 'h'; } } }, x: { grid: { display: false } } } } });
-            charts.monthlyRadar = new Chart(document.getElementById('monthlyRadarChart').getContext('2d'), { type: 'radar', data: { labels: [], datasets: [] }, options: { ...commonOptions, scales: { r: { ticks: { display: false }, grid: { circular: true } } } } });
-            charts.monthlyTrendLine = new Chart(document.getElementById('monthlyTrendLineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tendência', data: [], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } } } });
+            charts.monthlyWeekly = new Chart(document.getElementById('monthlyWeeklyTrendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Produtividade Média (%)', data: [], backgroundColor: '#7C3AED', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+            charts.monthlyDay = new Chart(document.getElementById('monthlyDayDistChart').getContext('2d'), { type: 'bar', data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Horas Totais', data: [], backgroundColor: '#4C1D95', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(value) { return Math.floor(value / 3600) + 'h'; } } }, x: { grid: { display: false } } } } });
+            charts.monthlyRadar = new Chart(document.getElementById('monthlyRadarChart').getContext('2d'), { type: 'radar', data: { labels: [], datasets: [] }, options: { ...commonOptions, scales: { r: { ticks: { display: false }, grid: { circular: true, color: '#E7E5E4' }, pointLabels: { font: { family: "'Montserrat', sans-serif", size: 11 } } } } } });
+            charts.monthlyTrendLine = new Chart(document.getElementById('monthlyTrendLineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tendência', data: [], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.4, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
         }
 
-        // --- Data Processing ---
+        // --- Data Processing (Kept exactly as previous) ---
         function parseDateKey(rawDate) {
             if (typeof rawDate === 'number') {
                 const dateObj = XLSX.SSF.parse_date_code(rawDate);
@@ -892,7 +967,10 @@
             });
             const sortedWeeks = Array.from(weeks).map(w => JSON.parse(w)).sort((a,b) => b.start.localeCompare(a.start));
             sortedWeeks.forEach((range, idx) => {
-                const label = `Semana ${sortedWeeks.length - idx}`;
+                const sParts = range.start.split('-');
+                const eParts = range.end.split('-');
+                // Editorial style for weeks:
+                const label = `Semana ${sortedWeeks.length - idx} (${sParts[2]}/${sParts[1]} - ${eParts[2]}/${eParts[1]})`;
                 const opt = document.createElement('option');
                 opt.value = range.start; opt.text = label; weekSelect.add(opt);
             });
@@ -1045,13 +1123,13 @@
             container.appendChild(document.createElement('div')); // Empty Corner
             dayLabels.forEach(label => {
                 const header = document.createElement('div');
-                header.className = "text-center text-[10px] font-bold text-slate-400 py-1 uppercase";
+                header.className = "text-center text-[10px] font-sans font-bold text-stone-400 py-1 uppercase tracking-wide";
                 header.innerText = label.substring(0,3);
                 container.appendChild(header);
             });
             for(let h=0; h<24; h++) {
                 const timeLabel = document.createElement('div');
-                timeLabel.className = "text-right text-[10px] text-slate-300 pr-2 pt-1 font-mono";
+                timeLabel.className = "text-right text-[10px] text-stone-300 pr-2 pt-1 font-sans";
                 timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
                 container.appendChild(timeLabel);
                 sortedDays.forEach(d => {
@@ -1059,11 +1137,11 @@
                     const cell = document.createElement('div');
                     cell.className = "heatmap-cell";
                     const intensity = Math.min(1, duration / 3000); 
-                    if(duration === 0) cell.classList.add('bg-slate-100');
-                    else if(intensity < 0.2) cell.classList.add('bg-indigo-200');
-                    else if(intensity < 0.4) cell.classList.add('bg-indigo-300');
-                    else if(intensity < 0.7) cell.classList.add('bg-indigo-500');
-                    else cell.classList.add('bg-indigo-800');
+                    if(duration === 0) cell.classList.add('bg-stone-50');
+                    else if(intensity < 0.2) cell.classList.add('bg-violet-100');
+                    else if(intensity < 0.4) cell.classList.add('bg-violet-300');
+                    else if(intensity < 0.7) cell.classList.add('bg-violet-500');
+                    else cell.classList.add('bg-violet-700');
                     const hVal = Math.floor(duration/3600), mVal = Math.floor((duration%3600)/60);
                     cell.title = `${d} ${h}:00 - ${hVal}h ${mVal}m`;
                     container.appendChild(cell);
@@ -1076,9 +1154,14 @@
             updateDashboardUI(result, compareData);
         }
 
+        // ********** RESTORED updateWeeklyUI **********
         function updateWeeklyUI(dateKey) {
             const { start, end } = getWeekRange(dateKey);
-            document.getElementById('weekly-title').textContent = `Semana ${start.split('-')[2]}/${start.split('-')[1]} a ${end.split('-')[2]}/${end.split('-')[1]}`;
+            // Formatting Date Range Title
+            const formatDate = (d) => d.split('-').reverse().slice(0,2).join('/');
+            document.getElementById('weekly-title').textContent = `Semana ${formatDate(start)} - ${formatDate(end)}`;
+            document.getElementById('weekly-subtitle').textContent = `Baseado em ${dateKey.split('-').reverse().join('/')}`;
+
             const data = processDataForRange(start, end);
 
             // KPIs
@@ -1086,7 +1169,10 @@
             document.getElementById('kpi-weekly-avg-time').textContent = formatSecondsToTime(data.totalSeconds / 7);
             
             // Consistency
-            let dailyProds = []; Object.keys(data.dailyStats).forEach(d => { if(data.dailyStats[d].total > 0) dailyProds.push(data.dailyStats[d].active / data.dailyStats[d].total); });
+            let dailyProds = []; 
+            Object.keys(data.dailyStats).forEach(d => { 
+                if(data.dailyStats[d].total > 0) dailyProds.push(data.dailyStats[d].active / data.dailyStats[d].total); 
+            });
             let consistencyScore = 0;
             if(dailyProds.length > 1) {
                 const mean = dailyProds.reduce((a,b)=>a+b,0)/dailyProds.length;
@@ -1097,41 +1183,66 @@
 
             // Top Category & Best Day
             let topCat = "N/A", topCatTime = 0;
-            Object.entries(data.categoryUsage).forEach(([cat, dur]) => { if(dur > topCatTime) { topCatTime = dur; topCat = cat; } });
+            Object.entries(data.categoryUsage).forEach(([cat, dur]) => { 
+                if(dur > topCatTime) { topCatTime = dur; topCat = cat; } 
+            });
             document.getElementById('kpi-weekly-top-cat').textContent = topCat;
             document.getElementById('kpi-weekly-top-cat-time').textContent = formatSecondsToTime(topCatTime);
 
             let bestDay = "-", bestVal = 0;
             const weekDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+            
             const sortedDays = Object.keys(data.dailyStats).sort();
-            sortedDays.forEach((d, i) => {
+            
+            sortedDays.forEach((d) => {
                 const s = data.dailyStats[d];
                 const p = s.total > 0 ? (s.active / s.total) * 100 : 0;
-                if(p > bestVal) { bestVal = p; bestDay = weekDays[i] || d; }
+                if(p > bestVal) { 
+                    bestVal = p; 
+                    const dateObj = new Date(d + 'T00:00:00');
+                    const dayIdx = dateObj.getDay(); // 0=Sun
+                    const ptDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                    bestDay = ptDays[dayIdx];
+                }
             });
             document.getElementById('kpi-weekly-best-day').textContent = bestDay;
             document.getElementById('kpi-weekly-best-val').textContent = `${Math.round(bestVal)}% Produtividade`;
 
-            // Charts
-            charts.weeklyTrend.data.labels = weekDays;
-            charts.weeklyTrend.data.datasets[0].data = sortedDays.map(d => data.dailyStats[d].total > 0 ? Math.round((data.dailyStats[d].active/data.dailyStats[d].total)*100) : 0);
+            // Update Charts
+            // Labels for Trend Chart
+            const labels = sortedDays.map(d => {
+                const parts = d.split('-');
+                return `${parts[2]}/${parts[1]}`;
+            });
+
+            charts.weeklyTrend.data.labels = labels;
+            charts.weeklyTrend.data.datasets[0].data = sortedDays.map(d => {
+                const s = data.dailyStats[d];
+                return s.total > 0 ? Math.round((s.active/s.total)*100) : 0;
+            });
             charts.weeklyTrend.update();
 
+            // App Dist
             const sortedApps = Object.entries(data.appUsage).sort((a,b)=>b[1]-a[1]).slice(0,5);
             charts.weeklyApp.data.labels = sortedApps.map(i=>i[0]);
             charts.weeklyApp.data.datasets[0].data = sortedApps.map(i=>i[1]);
             charts.weeklyApp.update();
 
+            // Category Stack
             const cats = Object.keys(data.categoryUsage);
-            charts.weeklyCat.data.labels = weekDays;
+            charts.weeklyCat.data.labels = labels;
             charts.weeklyCat.data.datasets = cats.map((cat, i) => ({
-                label: cat, data: sortedDays.map(d => data.dailyStats[d].categorySeconds[cat] || 0),
-                backgroundColor: ['#8A2BE2', '#4B0082', '#9333EA', '#7C3AED', '#6D28D9'][i%5]
+                label: cat, 
+                data: sortedDays.map(d => data.dailyStats[d].categorySeconds[cat] || 0),
+                backgroundColor: ['#7C3AED', '#4C1D95', '#8B5CF6', '#A78BFA', '#C4B5FD'][i%5]
             }));
             charts.weeklyCat.update();
-            renderHeatmap(data.dailyStats, sortedDays, weekDays);
-        }
 
+            // Heatmap
+            renderHeatmap(data.dailyStats, sortedDays, labels); 
+        }
+        
+        // ********** RESTORED updateMonthlyUI **********
         function updateMonthlyUI(dateKey) {
             const { start, end } = getMonthRange(dateKey);
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -1140,15 +1251,14 @@
 
             // KPIs
             const daysInMonth = (new Date(end) - new Date(start)) / (86400000) + 1;
-            document.getElementById('kpi-monthly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds); // NEW KPI
+            document.getElementById('kpi-monthly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds); 
             document.getElementById('kpi-monthly-avg-daily').textContent = formatSecondsToTime(data.totalSeconds / daysInMonth);
             document.getElementById('kpi-monthly-days').textContent = data.daysCount;
             document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(data.totalSeconds / (daysInMonth/7));
 
-            // Best Day of Week (NEW)
+            // Best Day of Week
             let dowStats = Array(7).fill(null).map(() => ({ active: 0, total: 0 }));
             Object.keys(data.dailyStats).forEach(d => {
-                // Fix timezone offset for getDay
                 const dayIdx = new Date(d + 'T00:00:00').getDay(); 
                 dowStats[dayIdx].active += data.dailyStats[d].active;
                 dowStats[dayIdx].total += data.dailyStats[d].total;
@@ -1190,7 +1300,7 @@
                 document.getElementById('kpi-monthly-burnout').className = "value text-red-600"; 
                 document.getElementById('kpi-monthly-burnout-desc').textContent = "⚠️ Cuidado!";
             } else {
-                document.getElementById('kpi-monthly-burnout').className = "value text-slate-800";
+                document.getElementById('kpi-monthly-burnout').className = "value text-charcoal";
                 document.getElementById('kpi-monthly-burnout-desc').textContent = "Saudável";
             }
 
@@ -1218,7 +1328,7 @@
             charts.monthlyWeekly.data.labels = weeklyLabels; charts.monthlyWeekly.data.datasets[0].data = weeklyScores; charts.monthlyWeekly.update();
             
             charts.monthlyRadar.data.labels = Object.keys(data.categoryUsage);
-            charts.monthlyRadar.data.datasets = [{ label: 'Horas', data: Object.values(data.categoryUsage).map(v=>v/3600), backgroundColor: 'rgba(138, 43, 226, 0.2)', borderColor: '#8A2BE2', pointBackgroundColor: '#8A2BE2' }];
+            charts.monthlyRadar.data.datasets = [{ label: 'Horas', data: Object.values(data.categoryUsage).map(v=>v/3600), backgroundColor: 'rgba(124, 58, 237, 0.2)', borderColor: '#7C3AED', pointBackgroundColor: '#7C3AED' }];
             charts.monthlyRadar.update();
 
             let dowT = [0,0,0,0,0,0,0];
@@ -1250,13 +1360,12 @@
                  let m = Math.floor((absDiff % 3600) / 60);
                  let timeStr = h > 0 ? `${h}h${m}m` : `${m}m`;
                  el.textContent = `${icon} ${timeStr}`;
-                 // FIXED COLORS HERE
-                 el.className = `mt-2 text-xs font-bold px-2 py-1 rounded inline-block ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
+                 el.className = `mt-2 text-xs font-bold font-sans px-2 py-1 rounded inline-block ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
                  el.classList.remove('hidden');
             } else {
                  // CHANGED: Removed .toFixed(1) to show integer percentage (e.g. 75%)
                  el.textContent = `${icon} ${Math.round(Math.abs(diffPercent))}%`;
-                 el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
+                 el.className = `text-xs font-bold font-sans px-2 py-1 rounded ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
                  el.classList.remove('hidden');
             }
         }
@@ -1311,23 +1420,25 @@
             // CHANGED: Convert minutes to hours for display
             charts.timeline.data.datasets = [{ 
                 label: 'Dia Atual', 
-                data: activityData.map(v => v/60), // Convert min to hours
-                borderColor: '#3b82f6', 
-                backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                data: activityData.map(v => v/60), 
+                borderColor: '#7C3AED', 
+                backgroundColor: 'rgba(124, 58, 237, 0.05)', 
                 fill: true, 
-                tension: 0.4 
+                tension: 0.4,
+                borderWidth: 2
             }];
 
             if (comparisonObj) {
                 const compActivityData = sortedTimes.map(t => comparisonObj.metrics.timelineBuckets[t] || 0);
                 charts.timeline.data.datasets.push({
                     label: 'Dia Comparado', 
-                    data: compActivityData.map(v => v/60), // Convert min to hours
-                    borderColor: '#94a3b8', 
-                    backgroundColor: 'rgba(148, 163, 184, 0.05)', 
+                    data: compActivityData.map(v => v/60),
+                    borderColor: '#A8A29E', 
+                    backgroundColor: 'rgba(168, 162, 158, 0.05)', 
                     fill: true, 
                     borderDash: [5, 5], 
-                    tension: 0.4
+                    tension: 0.4,
+                    borderWidth: 2
                 });
                 document.getElementById('legend-compare').classList.remove('hidden');
                 document.getElementById('legend-compare').classList.add('flex');
@@ -1376,11 +1487,11 @@
             bar.style.width = `${goalPercent}%`;
             
             if (goalPercent >= 100) {
-                bar.classList.add('bg-green-500');
-                bar.classList.remove('bg-indigo-600');
+                bar.classList.add('bg-emerald-500');
+                bar.classList.remove('bg-violet-600');
             } else {
-                bar.classList.add('bg-indigo-600');
-                bar.classList.remove('bg-green-500');
+                bar.classList.add('bg-violet-600');
+                bar.classList.remove('bg-emerald-500');
             }
         }
 

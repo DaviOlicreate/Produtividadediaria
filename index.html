@@ -1186,6 +1186,49 @@
             renderHeatmap(data.dailyStats, sortedDays, weekDays);
         }
 
+        function renderHeatmap(dailyStats, sortedDays, dayLabels) {
+            const container = document.getElementById('heatmap-container');
+            if(!container) return;
+            container.innerHTML = ''; 
+
+            const emptyCorner = document.createElement('div');
+            container.appendChild(emptyCorner);
+            dayLabels.forEach(label => {
+                const header = document.createElement('div');
+                header.className = "text-center text-xs font-bold text-slate-500 py-1";
+                header.innerText = label.substring(0,3);
+                container.appendChild(header);
+            });
+
+            for(let h=0; h<24; h++) {
+                const timeLabel = document.createElement('div');
+                timeLabel.className = "text-right text-xs text-slate-400 pr-2 pt-1";
+                timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
+                container.appendChild(timeLabel);
+
+                sortedDays.forEach(d => {
+                    const duration = dailyStats[d].hourlyActivity[h] || 0;
+                    const cell = document.createElement('div');
+                    cell.className = "heatmap-cell";
+                    
+                    const hVal = Math.floor(duration / 3600);
+                    const mVal = Math.floor((duration % 3600) / 60);
+                    const durStr = hVal > 0 ? `${hVal}h ${mVal}m` : `${mVal}m`;
+
+                    cell.title = `${d} ${String(h).padStart(2,'0')}:00 - ${durStr}`;
+                    
+                    const intensity = Math.min(1, duration / 3000); 
+                    if(duration === 0) cell.classList.add('bg-slate-50');
+                    else if(intensity < 0.2) cell.classList.add('bg-indigo-100');
+                    else if(intensity < 0.4) cell.classList.add('bg-indigo-300');
+                    else if(intensity < 0.7) cell.classList.add('bg-indigo-500');
+                    else cell.classList.add('bg-indigo-700');
+
+                    container.appendChild(cell);
+                });
+            }
+        }
+
         function updateMonthlyUI(dateKey) {
             const { start, end } = getMonthRange(dateKey);
             const [y, m] = dateKey.split('-');

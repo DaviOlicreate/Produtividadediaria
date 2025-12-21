@@ -18,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
@@ -32,7 +32,7 @@
             background-color: #FFFFFF;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #F1F5F9;
+            border: 1px solid #E2E8F0; /* Slate-200 para mais definição de borda */
             transition: transform 0.2s ease-in-out;
         }
         .card-type-a:hover {
@@ -41,28 +41,28 @@
         }
         .card-type-a .label {
             font-size: 0.75rem;
-            font-weight: 700; /* Aumentado peso para legibilidade */
+            font-weight: 700;
             text-transform: uppercase;
-            color: #475569; /* Slate-600 (Mais escuro que o anterior 500) */
+            color: #475569; /* Slate-600 */
             letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
         }
         .card-type-a .value {
             font-size: 1.875rem;
             font-weight: 800;
-            color: #0F172A; /* Slate-900 (Preto suave para máximo contraste) */
+            color: #0F172A; /* Slate-900 (Preto suave) */
             line-height: 1.2;
         }
         .card-type-a .subtext {
             font-size: 0.75rem;
             font-weight: 500;
-            color: #64748B; /* Slate-500 (Mais escuro que o anterior 400) */
+            color: #64748B; /* Slate-500 */
             margin-top: 0.5rem;
         }
 
         /* Tipo B: Card Destaque */
         .card-type-b {
-            background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%); /* Roxo um pouco mais profundo */
+            background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
             color: #FFFFFF;
@@ -78,7 +78,7 @@
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.95); /* Quase branco total */
+            color: rgba(255, 255, 255, 0.95);
             letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
             position: relative; z-index: 10;
@@ -94,7 +94,7 @@
         .card-type-b .subtext {
             font-size: 0.75rem;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.9); /* Aumentado contraste */
+            color: rgba(255, 255, 255, 0.9);
             margin-top: 0.5rem;
             position: relative; z-index: 10;
         }
@@ -191,7 +191,8 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-violet-600">
                             <i class="fa-regular fa-calendar-check"></i>
                         </div>
-                        <select id="monthSelect" class="bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-40 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-violet-300 transition-colors">
+                        <!-- CHANGED: Width increased from w-40 to w-52 to fit "Dezembro 2024" -->
+                        <select id="monthSelect" class="bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-52 pl-10 p-2.5 cursor-pointer shadow-sm hover:border-violet-300 transition-colors">
                             <option value="">Mês...</option>
                         </select>
                     </div>
@@ -268,7 +269,8 @@
                                 <i class="fa-regular fa-clock text-lg"></i>
                             </div>
                         </div>
-                        <h3 class="value" id="kpi-total-time">--</h3>
+                        <!-- CHANGED: Added text-slate-900 explicitly for max readability -->
+                        <h3 class="value text-slate-900" id="kpi-total-time">--</h3>
                         <div id="diff-total-time" class="hidden mt-2 text-xs font-bold px-2 py-1 rounded inline-block"></div>
                     </div>
                     <div class="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg w-fit">
@@ -432,7 +434,7 @@
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-extrabold text-slate-800 tracking-tight" id="weekly-title">Resumo da Semana</h2>
-                    <p class="text-xs text-slate-500 font-semibold uppercase mt-1 tracking-wide" id="weekly-subtitle">Selecione uma data</p>
+                    <p class="text-xs text-slate-500 font-medium uppercase mt-1 tracking-wide" id="weekly-subtitle">Selecione uma data</p>
                 </div>
                 <div class="bg-violet-50 p-2 rounded-lg">
                     <i class="fa-solid fa-calendar-week text-violet-600 text-xl"></i>

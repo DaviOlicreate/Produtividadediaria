@@ -467,16 +467,16 @@
 
                 <!-- Top Category (Type B Highlight) -->
                 <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label">Top Categoria</p>
+                    <p class="label text-white/80">Top Categoria</p>
                     <h3 class="value text-xl truncate" id="kpi-weekly-top-cat">--</h3>
-                    <p class="subtext" id="kpi-weekly-top-cat-time">--</p>
+                    <p class="subtext text-white/70" id="kpi-weekly-top-cat-time">--</p>
                 </div>
 
                 <!-- Best Day (Type B Highlight) -->
                 <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label">Melhor Dia</p>
+                    <p class="label text-white/80">Melhor Dia</p>
                     <h3 class="value text-xl" id="kpi-weekly-best-day">--</h3>
-                    <p class="subtext" id="kpi-weekly-best-val">--</p>
+                    <p class="subtext text-white/70" id="kpi-weekly-best-val">--</p>
                 </div>
             </div>
 
@@ -577,7 +577,7 @@
 
                 <!-- Row 2: Highlights (Type B) -->
                 <div class="card-type-b p-6 flex flex-col justify-center">
-                    <p class="label">Melhor Dia</p>
+                    <p class="label text-white/80">Melhor Dia</p>
                     <h3 class="value text-2xl capitalize" id="kpi-monthly-best-day-week">--</h3> <!-- NEW -->
                     <p class="subtext" id="kpi-monthly-best-day-val">--% Produtividade Média</p>
                 </div>
@@ -1250,7 +1250,8 @@
                  let m = Math.floor((absDiff % 3600) / 60);
                  let timeStr = h > 0 ? `${h}h${m}m` : `${m}m`;
                  el.textContent = `${icon} ${timeStr}`;
-                 el.className = `mt-1 text-xs font-bold inline-block px-1.5 py-0.5 rounded backdrop-blur-sm ${diff >= 0 ? 'bg-green-500/30 text-green-100' : 'bg-rose-500/30 text-rose-100'}`;
+                 // FIXED COLORS HERE
+                 el.className = `mt-2 text-xs font-bold px-2 py-1 rounded inline-block ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
                  el.classList.remove('hidden');
             } else {
                  // CHANGED: Removed .toFixed(1) to show integer percentage (e.g. 75%)

@@ -25,34 +25,36 @@
             background-color: #f3f4f6;
         }
 
-        .card-gradient-pink {
-            background: linear-gradient(135deg, #FF6FD8 0%, #3813C2 100%);
-        }
-        
-        .card-gradient-blue {
-            background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
-        }
+        .card-gradient-pink { background: linear-gradient(135deg, #FF6FD8 0%, #3813C2 100%); }
+        .card-gradient-blue { background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%); }
+        .card-gradient-purple { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); }
+        .card-gradient-green { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* Input number arrow hide */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+        }
+        .tab-inactive:hover {
+            color: #334155;
+            border-bottom: 2px solid #cbd5e1;
         }
     </style>
 </head>
@@ -75,8 +77,8 @@
                 <!-- Controls Area -->
                 <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-end">
                     
-                    <!-- Compare Mode Toggle & Select -->
-                    <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200" title="Comparar dois dias">
+                    <!-- Compare Mode Toggle & Select (Only visible in Daily view via JS) -->
+                    <div id="compare-controls" class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200" title="Comparar dois dias">
                         <div class="flex items-center h-5">
                             <input id="enableCompare" type="checkbox" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
                         </div>
@@ -121,193 +123,325 @@
             <span id="statusText">Aguardando arquivo...</span>
         </div>
 
-        <!-- KPI Cards Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Total Time -->
-            <div class="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white shadow-lg shadow-pink-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
-                <div class="flex justify-between items-start z-10 relative">
-                    <div>
-                        <p class="text-pink-100 text-sm font-medium mb-1">Tempo Total Monitorado</p>
-                        <h3 class="text-3xl font-bold" id="kpi-total-time">--</h3>
-                        <div id="diff-total-time" class="hidden mt-1 text-xs font-bold bg-white/20 inline-block px-1.5 py-0.5 rounded backdrop-blur-sm"></div>
-                    </div>
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                        <i class="fa-regular fa-clock text-xl"></i>
-                    </div>
-                </div>
-                <div class="mt-4 text-sm text-pink-100 bg-white/10 inline-block px-2 py-1 rounded z-10 relative">
-                    <i class="fa-solid fa-calendar-day mr-1"></i>
-                    <span id="kpi-date">Selecione uma data</span>
-                </div>
-                <!-- Decorator -->
-                <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </div>
-
-            <!-- Productivity Rate -->
-            <div class="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg shadow-cyan-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
-                <div class="flex justify-between items-start z-10 relative">
-                    <div>
-                        <p class="text-cyan-100 text-sm font-medium mb-1">Taxa de Produtividade</p>
-                        <div class="flex items-baseline gap-2">
-                             <h3 class="text-3xl font-bold" id="kpi-productivity">--%</h3>
-                             <span id="diff-productivity" class="hidden text-xs font-bold bg-black/20 px-1.5 py-0.5 rounded"></span>
-                        </div>
-                    </div>
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                        <i class="fa-solid fa-chart-line text-xl"></i>
-                    </div>
-                </div>
-                <div class="mt-4 w-full bg-black/20 rounded-full h-1.5 z-10 relative">
-                    <div id="kpi-prod-bar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
-                </div>
-                <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </div>
-
-            <!-- Total Activities -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Atividades Registradas</p>
-                        <div class="flex items-baseline gap-2">
-                             <h3 class="text-3xl font-bold text-slate-800" id="kpi-activities">--</h3>
-                             <span id="diff-activities" class="hidden text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100"></span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-100 p-2 rounded-lg text-slate-600">
-                        <i class="fa-solid fa-list-check text-xl"></i>
-                    </div>
-                </div>
-                <p class="mt-4 text-xs text-slate-400">Linhas processadas neste dia</p>
-            </div>
-
-            <!-- Unique Apps -->
-            <div class="bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl p-6 text-white shadow-lg shadow-orange-200">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-orange-100 text-sm font-medium mb-1">Aplicações Diferentes</p>
-                        <h3 class="text-3xl font-bold" id="kpi-apps">--</h3>
-                    </div>
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                        <i class="fa-solid fa-window-restore text-xl"></i>
-                    </div>
-                </div>
-                <p class="mt-4 text-xs text-orange-100 opacity-80">Softwares utilizados</p>
-            </div>
+        <!-- Navigation Tabs -->
+        <div class="border-b border-slate-200 mb-6">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button onclick="switchView('daily')" id="tab-daily" class="tab-active whitespace-nowrap py-4 px-1 text-sm font-medium">
+                    <i class="fa-solid fa-calendar-day mr-2"></i>Diário
+                </button>
+                <button onclick="switchView('weekly')" id="tab-weekly" class="tab-inactive whitespace-nowrap py-4 px-1 text-sm font-medium">
+                    <i class="fa-solid fa-calendar-week mr-2"></i>Semanal
+                </button>
+                <button onclick="switchView('monthly')" id="tab-monthly" class="tab-inactive whitespace-nowrap py-4 px-1 text-sm font-medium">
+                    <i class="fa-solid fa-calendar mr-2"></i>Mensal
+                </button>
+            </nav>
         </div>
 
-        <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- App Distribution Donut -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-semibold text-slate-800 mb-2">Distribuição de Aplicações</h3>
-                <p class="text-xs text-slate-500 mb-6">Top 5 aplicações + 'Outros' por tempo de uso</p>
-                <div class="relative h-64 w-full flex justify-center">
-                    <canvas id="appDistributionChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Activity Timeline Area -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                            Atividade por 30 minutos
-                            <span class="group relative">
-                                <i class="fa-regular fa-circle-question text-slate-400 cursor-help"></i>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg hidden group-hover:block z-10">
-                                    Soma dos minutos produtivos dentro de cada janela de 30 minutos (Máx: 30min).
-                                </span>
-                            </span>
-                        </h3>
-                        <p class="text-xs text-slate-500">Minutos produtivos por intervalo de tempo</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <div id="legend-compare" class="hidden items-center gap-1 text-xs">
-                             <span class="w-3 h-3 rounded-full bg-slate-400 block"></span>
-                             <span class="text-slate-500">Dia Comparado</span>
+        <!-- ==================== DAILY VIEW CONTENT ==================== -->
+        <div id="daily-view-content" class="space-y-6 block">
+            <!-- KPI Cards Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Total Time -->
+                <div class="bg-gradient-to-br from-pink-500 to-rose-400 rounded-2xl p-6 text-white shadow-lg shadow-pink-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
+                    <div class="flex justify-between items-start z-10 relative">
+                        <div>
+                            <p class="text-pink-100 text-sm font-medium mb-1">Tempo Total Monitorado</p>
+                            <h3 class="text-3xl font-bold" id="kpi-total-time">--</h3>
+                            <div id="diff-total-time" class="hidden mt-1 text-xs font-bold bg-white/20 inline-block px-1.5 py-0.5 rounded backdrop-blur-sm"></div>
                         </div>
-                        <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Dia Atual</span>
-                    </div>
-                </div>
-                <div class="relative h-64 w-full">
-                    <canvas id="timelineChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 & Insights -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Active vs Inactive Pie -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-semibold text-slate-800 mb-2">Status de Atividade</h3>
-                <p class="text-xs text-slate-500 mb-6">Produtivo (Ativo) vs Improdutivo (AFK)</p>
-                <div class="relative h-56 w-full flex justify-center">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Productivity Trend Bar -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência de Produtividade</h3>
-                <p class="text-xs text-slate-500 mb-6">Score (0-100) baseado na intensidade do foco</p>
-                <div class="relative h-56 w-full">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Insights Panel -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                        <i class="fa-regular fa-lightbulb text-yellow-500 mr-2"></i>Insights do Dia
-                    </h3>
-                    
-                    <div class="space-y-4">
-                        <!-- Insight 1 -->
-                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500">
-                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Aplicação Mais Usada</p>
-                            <p class="text-sm text-slate-800 font-medium" id="insight-top-app">--</p>
-                        </div>
-
-                        <!-- Insight 2 -->
-                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-green-500">
-                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Pico de Produtividade</p>
-                            <p class="text-sm text-slate-800 font-medium" id="insight-peak-time">--</p>
-                        </div>
-
-                        <!-- Insight 3 -->
-                        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500">
-                            <p class="text-xs text-slate-500 font-bold uppercase mb-1">Tempo Ausente (AFK)</p>
-                            <p class="text-sm text-slate-800 font-medium" id="insight-afk-time">--</p>
+                        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                            <i class="fa-regular fa-clock text-xl"></i>
                         </div>
                     </div>
+                    <div class="mt-4 text-sm text-pink-100 bg-white/10 inline-block px-2 py-1 rounded z-10 relative">
+                        <i class="fa-solid fa-calendar-day mr-1"></i>
+                        <span id="kpi-date">Selecione uma data</span>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                 </div>
-                
-                <div class="mt-4 pt-4 border-t border-slate-100">
-                    <div class="flex justify-between items-end text-sm mb-2">
-                        <div class="flex flex-col">
-                            <span class="text-slate-500 text-xs">Meta de Foco Diário</span>
-                            <div class="flex items-center gap-1">
-                                <span class="text-slate-400 font-light">Meta:</span>
-                                <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-12 border-b border-indigo-200 focus:border-indigo-600 focus:outline-none text-indigo-700 font-bold bg-transparent text-center">
-                                <span class="text-slate-500">h</span>
+
+                <!-- Productivity Rate -->
+                <div class="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg shadow-cyan-200 transform hover:scale-[1.02] transition-transform relative overflow-hidden group">
+                    <div class="flex justify-between items-start z-10 relative">
+                        <div>
+                            <p class="text-cyan-100 text-sm font-medium mb-1">Taxa de Produtividade</p>
+                            <div class="flex items-baseline gap-2">
+                                 <h3 class="text-3xl font-bold" id="kpi-productivity">--%</h3>
+                                 <span id="diff-productivity" class="hidden text-xs font-bold bg-black/20 px-1.5 py-0.5 rounded"></span>
                             </div>
                         </div>
-                        <span class="font-bold text-slate-700 text-lg" id="insight-goal-percent">0%</span>
+                        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                            <i class="fa-solid fa-chart-line text-xl"></i>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-3">
-                        <div id="insight-goal-bar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    <div class="mt-4 w-full bg-black/20 rounded-full h-1.5 z-10 relative">
+                        <div id="kpi-prod-bar" class="bg-white h-1.5 rounded-full" style="width: 0%"></div>
                     </div>
-                    <p class="text-xs text-slate-400 mt-2 text-right">Baseado em tempo ativo (não total)</p>
+                    <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                </div>
+
+                <!-- Total Activities -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">Atividades Registradas</p>
+                            <div class="flex items-baseline gap-2">
+                                 <h3 class="text-3xl font-bold text-slate-800" id="kpi-activities">--</h3>
+                                 <span id="diff-activities" class="hidden text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100"></span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-100 p-2 rounded-lg text-slate-600">
+                            <i class="fa-solid fa-list-check text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs text-slate-400">Linhas processadas neste dia</p>
+                </div>
+
+                <!-- Unique Apps -->
+                <div class="bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl p-6 text-white shadow-lg shadow-orange-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium mb-1">Aplicações Diferentes</p>
+                            <h3 class="text-3xl font-bold" id="kpi-apps">--</h3>
+                        </div>
+                        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                            <i class="fa-solid fa-window-restore text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs text-orange-100 opacity-80">Softwares utilizados</p>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- App Distribution Donut -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Distribuição de Aplicações</h3>
+                    <p class="text-xs text-slate-500 mb-6">Top 5 aplicações + 'Outros' por tempo de uso</p>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="appDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Activity Timeline Area -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                Atividade por 30 minutos
+                                <span class="group relative">
+                                    <i class="fa-regular fa-circle-question text-slate-400 cursor-help"></i>
+                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg hidden group-hover:block z-10">
+                                        Soma dos minutos produtivos dentro de cada janela de 30 minutos (Máx: 30min).
+                                    </span>
+                                </span>
+                            </h3>
+                            <p class="text-xs text-slate-500">Minutos produtivos por intervalo de tempo</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <div id="legend-compare" class="hidden items-center gap-1 text-xs">
+                                 <span class="w-3 h-3 rounded-full bg-slate-400 block"></span>
+                                 <span class="text-slate-500">Dia Comparado</span>
+                            </div>
+                            <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Dia Atual</span>
+                        </div>
+                    </div>
+                    <div class="relative h-64 w-full">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 & Insights -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Active vs Inactive Pie -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Status de Atividade</h3>
+                    <p class="text-xs text-slate-500 mb-6">Produtivo (Ativo) vs Improdutivo (AFK)</p>
+                    <div class="relative h-56 w-full flex justify-center">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Productivity Trend Bar -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência de Produtividade</h3>
+                    <p class="text-xs text-slate-500 mb-6">Score (0-100) baseado na intensidade do foco</p>
+                    <div class="relative h-56 w-full">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Insights Panel -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                            <i class="fa-regular fa-lightbulb text-yellow-500 mr-2"></i>Insights do Dia
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Insight 1 -->
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500">
+                                <p class="text-xs text-slate-500 font-bold uppercase mb-1">Aplicação Mais Usada</p>
+                                <p class="text-sm text-slate-800 font-medium" id="insight-top-app">--</p>
+                            </div>
+
+                            <!-- Insight 2 -->
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-green-500">
+                                <p class="text-xs text-slate-500 font-bold uppercase mb-1">Pico de Produtividade</p>
+                                <p class="text-sm text-slate-800 font-medium" id="insight-peak-time">--</p>
+                            </div>
+
+                            <!-- Insight 3 -->
+                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500">
+                                <p class="text-xs text-slate-500 font-bold uppercase mb-1">Tempo Ausente (AFK)</p>
+                                <p class="text-sm text-slate-800 font-medium" id="insight-afk-time">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-end text-sm mb-2">
+                            <div class="flex flex-col">
+                                <span class="text-slate-500 text-xs">Meta de Foco Diário</span>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-slate-400 font-light">Meta:</span>
+                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-12 border-b border-indigo-200 focus:border-indigo-600 focus:outline-none text-indigo-700 font-bold bg-transparent text-center">
+                                    <span class="text-slate-500">h</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-slate-700 text-lg" id="insight-goal-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div id="insight-goal-bar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2 text-right">Baseado em tempo ativo (não total)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== WEEKLY VIEW CONTENT ==================== -->
+        <div id="weekly-view-content" class="space-y-6 hidden">
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-indigo-800" id="weekly-title">Resumo da Semana</h2>
+                    <p class="text-sm text-indigo-600" id="weekly-subtitle">Selecione uma data para ver a semana correspondente</p>
+                </div>
+            </div>
+
+            <!-- Weekly KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Avg Daily Time -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Média Diária (Tempo Total)</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-weekly-avg-time">--</h3>
+                    <div class="mt-2 text-xs text-slate-400">Total da semana / 7</div>
+                </div>
+                <!-- Avg Productivity -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Média Produtividade</p>
+                    <h3 class="text-2xl font-bold text-indigo-600" id="kpi-weekly-avg-prod">--%</h3>
+                    <div class="mt-2 text-xs text-slate-400">Consistência do foco</div>
+                </div>
+                <!-- Total Active Hours -->
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200">
+                    <p class="text-indigo-100 text-sm font-medium mb-1">Total Horas Ativas</p>
+                    <h3 class="text-3xl font-bold" id="kpi-weekly-total-active">--</h3>
+                    <div class="mt-2 text-xs text-indigo-100 opacity-80">Soma acumulada da semana</div>
+                </div>
+                <!-- Best Day -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Dia Mais Produtivo</p>
+                    <h3 class="text-xl font-bold text-emerald-600" id="kpi-weekly-best-day">--</h3>
+                    <p class="text-sm text-slate-600" id="kpi-weekly-best-val">--</p>
+                </div>
+            </div>
+
+            <!-- Weekly Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Daily Productivity Trend -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Tendência Diária da Semana</h3>
+                    <p class="text-xs text-slate-500 mb-6">Taxa de produtividade (%) dia a dia</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="weeklyTrendChart"></canvas>
+                    </div>
+                </div>
+                <!-- Weekly App Distribution -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Top Apps da Semana</h3>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="weeklyAppChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MONTHLY VIEW CONTENT ==================== -->
+        <div id="monthly-view-content" class="space-y-6 hidden">
+             <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 mb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-purple-800" id="monthly-title">Resumo do Mês</h2>
+                    <p class="text-sm text-purple-600" id="monthly-subtitle">Dados agregados do mês selecionado</p>
+                </div>
+            </div>
+
+            <!-- Monthly KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                 <!-- Monthly Productivity -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Produtividade Mensal</p>
+                    <h3 class="text-2xl font-bold text-purple-600" id="kpi-monthly-prod">--%</h3>
+                    <div class="mt-2 text-xs text-slate-400">Média global do mês</div>
+                </div>
+                <!-- Days Worked -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Dias Trabalhados</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-days">--</h3>
+                    <div class="mt-2 text-xs text-slate-400">Dias com registro de atividade</div>
+                </div>
+                 <!-- Avg Weekly Hours -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Média Horas/Semana</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="kpi-monthly-weekly-avg">--</h3>
+                    <div class="mt-2 text-xs text-slate-400">Ritmo semanal</div>
+                </div>
+                <!-- Best Week -->
+                <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg shadow-purple-200">
+                    <p class="text-purple-100 text-sm font-medium mb-1">Melhor Semana</p>
+                    <h3 class="text-xl font-bold" id="kpi-monthly-best-week">--</h3>
+                    <p class="text-xs text-purple-100 opacity-80 mt-1" id="kpi-monthly-best-val">--</p>
+                </div>
+            </div>
+
+            <!-- Monthly Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Weekly Trend Bar -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Evolução Semanal</h3>
+                    <p class="text-xs text-slate-500 mb-6">Produtividade Média por Semana</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="monthlyWeeklyTrendChart"></canvas>
+                    </div>
+                </div>
+                <!-- Day of Week Distribution -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Padrão por Dia da Semana</h3>
+                    <p class="text-xs text-slate-500 mb-6">Volume total de horas por dia (Seg-Dom)</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="monthlyDayDistChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Raw Data Table Preview (Collapsible) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mt-8">
             <details class="group">
                 <summary class="flex justify-between items-center p-6 cursor-pointer list-none bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <span class="font-semibold text-slate-700">Visualizar Dados Brutos (Amostra)</span>
+                    <span class="font-semibold text-slate-700">Visualizar Dados Brutos (Amostra do Dia Selecionado)</span>
                     <span class="transition group-open:rotate-180">
                         <i class="fa-solid fa-chevron-down text-slate-400"></i>
                     </span>
@@ -340,6 +474,7 @@
         let charts = {}; 
         let globalRawData = []; // Store all loaded data
         let globalDates = []; // Store available dates
+        let currentView = 'daily'; // 'daily', 'weekly', 'monthly'
         
         // --- Format Helpers ---
         function formatSecondsToTime(seconds) {
@@ -348,14 +483,11 @@
             const m = Math.floor((seconds % 3600) / 60);
             
             if (h > 0) {
-                // Returns "2h e 30m"
                 return `${h}h e ${String(m).padStart(2,'0')}m`;
             }
-            // Returns "45m"
             return `${m}m`;
         }
         
-        // Helper to get raw hour for tooltips
         function formatSecondsToTimeShort(seconds) {
              const h = Math.floor(seconds / 3600);
              const m = Math.floor((seconds % 3600) / 60);
@@ -364,7 +496,6 @@
         }
 
         function formatExcelTime(serial) {
-            // Excel time is fractional days. 0.5 = 12:00 PM
             if(typeof serial === 'string') return serial;
             const totalSeconds = Math.floor(serial * 86400);
             const h = Math.floor(totalSeconds / 3600);
@@ -372,9 +503,39 @@
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
+        // --- View Switching Logic ---
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            // Toggle Tabs
+            ['daily', 'weekly', 'monthly'].forEach(v => {
+                const btn = document.getElementById(`tab-${v}`);
+                const content = document.getElementById(`${v}-view-content`);
+                
+                if (v === viewName) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive');
+                    content.classList.remove('hidden');
+                    content.classList.add('block');
+                } else {
+                    btn.classList.add('tab-inactive');
+                    btn.classList.remove('tab-active');
+                    content.classList.add('hidden');
+                    content.classList.remove('block');
+                }
+            });
+
+            // Toggle Compare Controls (Only relevant for Daily)
+            const compareControls = document.getElementById('compare-controls');
+            if(viewName === 'daily') compareControls.classList.remove('hidden');
+            else compareControls.classList.add('hidden');
+
+            // Trigger Update based on current selection
+            onDateChange();
+        }
+
         // --- Chart Initialization ---
         function initCharts() {
-            // Common Options
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -385,27 +546,20 @@
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
-                                if (context.parsed.y !== null) {
-                                    // Custom tooltip formatting based on context
-                                    if(context.chart.canvas.id === 'timelineChart') {
-                                        return `${label}${context.parsed.y} minutos`;
-                                    }
-                                    if(context.chart.canvas.id === 'appDistributionChart') {
-                                         return `${context.label}: ${formatSecondsToTimeShort(context.parsed)}`;
-                                    }
-                                    if(context.chart.canvas.id === 'statusChart') {
+                                if (context.parsed.y !== null && typeof context.parsed.y === 'number') {
+                                    if(context.chart.config.type === 'doughnut' || context.chart.canvas.id.includes('Dist')) {
                                          return `${context.label}: ${formatSecondsToTimeShort(context.parsed)}`;
                                     }
                                     return label + context.parsed.y;
                                 }
-                                return label;
+                                return label + context.formattedValue;
                             }
                         }
                     }
                 }
             };
 
-            // 1. App Distribution (Donut)
+            // --- DAILY CHARTS ---
             const ctxApp = document.getElementById('appDistributionChart').getContext('2d');
             charts.appDist = new Chart(ctxApp, {
                 type: 'doughnut',
@@ -413,95 +567,331 @@
                 options: { ...commonOptions, cutout: '60%' }
             });
 
-            // 2. Timeline (Line/Area) - NOW SHOWS MINUTES
             const ctxTime = document.getElementById('timelineChart').getContext('2d');
             charts.timeline = new Chart(ctxTime, {
                 type: 'line',
-                data: { labels: [], datasets: [{ 
-                    label: 'Tempo Produtivo (min)', 
-                    data: [], 
-                    borderColor: '#3b82f6', 
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-                    fill: true, 
-                    tension: 0.4 
-                }] },
+                data: { labels: [], datasets: [{ label: 'Tempo Produtivo (min)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] },
                 options: {
                     ...commonOptions,
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 30, // Max 30 mins in a 30 min bucket
-                            title: { display: true, text: 'Minutos' },
-                            grid: { borderDash: [2, 4] } 
-                        },
+                        y: { beginAtZero: true, max: 30, title: { display: true, text: 'Minutos' }, grid: { borderDash: [2, 4] } },
                         x: { grid: { display: false } }
                     }
                 }
             });
 
-            // 3. Status (Pie)
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             charts.status = new Chart(ctxStatus, {
                 type: 'pie',
-                data: { 
-                    labels: ['Ativo (Produtivo)', 'Inativo (AFK)'], 
-                    datasets: [{ 
-                        data: [0, 0], 
-                        backgroundColor: ['#3b82f6', '#f43f5e'],
-                        borderWidth: 0
-                    }] 
-                },
+                data: { labels: ['Ativo (Produtivo)', 'Inativo (AFK)'], datasets: [{ data: [0, 0], backgroundColor: ['#3b82f6', '#f43f5e'], borderWidth: 0 }] },
                 options: commonOptions
             });
 
-            // 4. Trend (Bar)
             const ctxTrend = document.getElementById('trendChart').getContext('2d');
             charts.trend = new Chart(ctxTrend, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ 
-                    label: 'Score Produtividade', 
-                    data: [], 
-                    backgroundColor: '#0ea5e9', 
-                    borderRadius: 4 
-                }] },
+                data: { labels: [], datasets: [{ label: 'Score Produtividade', data: [], backgroundColor: '#0ea5e9', borderRadius: 4 }] },
                 options: {
                     ...commonOptions,
-                    scales: {
-                        y: { max: 100, beginAtZero: true, grid: { borderDash: [2, 4] } },
-                        x: { grid: { display: false } }
-                    }
+                    scales: { y: { max: 100, beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
+                }
+            });
+
+            // --- WEEKLY CHARTS ---
+            const ctxWeeklyTrend = document.getElementById('weeklyTrendChart').getContext('2d');
+            charts.weeklyTrend = new Chart(ctxWeeklyTrend, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Produtividade (%)', data: [], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3 }] },
+                options: {
+                    ...commonOptions,
+                    scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
+                }
+            });
+
+            const ctxWeeklyApp = document.getElementById('weeklyAppChart').getContext('2d');
+            charts.weeklyApp = new Chart(ctxWeeklyApp, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#4f46e5', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#cbd5e1'] }] },
+                options: { ...commonOptions, cutout: '50%' }
+            });
+
+            // --- MONTHLY CHARTS ---
+            const ctxMonthlyWeekly = document.getElementById('monthlyWeeklyTrendChart').getContext('2d');
+            charts.monthlyWeekly = new Chart(ctxMonthlyWeekly, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Produtividade Média (%)', data: [], backgroundColor: '#8b5cf6', borderRadius: 4 }] },
+                options: {
+                    ...commonOptions,
+                    scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
+                }
+            });
+
+            const ctxMonthlyDay = document.getElementById('monthlyDayDistChart').getContext('2d');
+            charts.monthlyDay = new Chart(ctxMonthlyDay, {
+                type: 'bar',
+                data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Horas Totais', data: [], backgroundColor: '#ec4899', borderRadius: 4 }] },
+                options: {
+                    ...commonOptions,
+                    scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }
                 }
             });
         }
 
         // --- Date Handling ---
         function parseDateKey(rawDate) {
-            // Returns YYYY-MM-DD
             if (typeof rawDate === 'number') {
-                // Excel serial date
                 const dateObj = XLSX.SSF.parse_date_code(rawDate);
-                // SSF returns object {y, m, d, ...}
                 return `${dateObj.y}-${String(dateObj.m).padStart(2,'0')}-${String(dateObj.d).padStart(2,'0')}`;
             }
             if (typeof rawDate === 'string') {
-                // Try to parse "DD/MM/YYYY" or "MM/DD/YYYY"
-                // Assuming "12/09/2025" (DD/MM/YYYY) based on context (PT-BR)
                 const parts = rawDate.split('/');
                 if (parts.length === 3) {
-                    if (parts[0].length === 4) return rawDate; // Already YYYY-MM-DD? Unlikely with /
-                    // Assuming DD/MM/YYYY
+                    if (parts[0].length === 4) return rawDate; 
                     return `${parts[2]}-${String(parts[1]).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`;
                 }
-                // Fallback: try JS Date
                 const d = new Date(rawDate);
                 if (!isNaN(d)) return d.toISOString().split('T')[0];
             }
             return "Indefinido";
         }
 
-        // --- Data Processing Logic ---
+        function getWeekRange(dateString) {
+            const current = new Date(dateString + 'T00:00:00'); // Append time to fix Timezone issues
+            const day = current.getDay(); // 0 (Sun) to 6 (Sat)
+            const diff = current.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is sunday
+            
+            const monday = new Date(current.setDate(diff));
+            const sunday = new Date(new Date(monday).setDate(monday.getDate() + 6));
+            
+            return {
+                start: monday.toISOString().split('T')[0],
+                end: sunday.toISOString().split('T')[0],
+                mondayObj: monday
+            };
+        }
+
+        function getMonthRange(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            const start = new Date(date.getFullYear(), date.getMonth(), 1);
+            const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            return {
+                start: start.toISOString().split('T')[0],
+                end: end.toISOString().split('T')[0]
+            };
+        }
+
+        function getDatesInRange(startDate, endDate) {
+            const dateArray = [];
+            let currentDate = new Date(startDate);
+            const stopDate = new Date(endDate);
+            while (currentDate <= stopDate) {
+                dateArray.push(currentDate.toISOString().split('T')[0]);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            return dateArray;
+        }
+
+        // --- Aggregation Logic (Multi-period) ---
+        function processDataForRange(startDateKey, endDateKey) {
+            // Find Headers
+            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
+
+            // Filter Rows within Range
+            const rangeRows = globalRawData.filter(row => {
+                const d = parseDateKey(row[keyDate]);
+                return d >= startDateKey && d <= endDateKey;
+            });
+
+            // Aggregation Objects
+            let totalSeconds = 0;
+            let totalActiveSeconds = 0;
+            let appUsage = {};
+            let dailyStats = {}; // { 'YYYY-MM-DD': { total: 0, active: 0 } }
+            
+            // Initialize daily buckets for the range
+            const allDates = getDatesInRange(startDateKey, endDateKey);
+            allDates.forEach(d => dailyStats[d] = { total: 0, active: 0 });
+
+            rangeRows.forEach(row => {
+                let duration = parseFloat(row[keyDuration]) || 0;
+                let process = row[keyProcess] || "Desconhecido";
+                let status = (row[keyStatus] || "").toUpperCase();
+                let d = parseDateKey(row[keyDate]);
+
+                process = process.replace('.exe', '').replace('.EXE', '').toLowerCase();
+                
+                totalSeconds += duration;
+                
+                if (dailyStats[d]) {
+                    dailyStats[d].total += duration;
+                }
+
+                if (status.includes('ATIVO')) {
+                    totalActiveSeconds += duration;
+                    if (!appUsage[process]) appUsage[process] = 0;
+                    appUsage[process] += duration;
+                    
+                    if (dailyStats[d]) {
+                        dailyStats[d].active += duration;
+                    }
+                }
+            });
+
+            return {
+                totalSeconds,
+                totalActiveSeconds,
+                appUsage,
+                dailyStats,
+                daysCount: Object.keys(dailyStats).filter(d => dailyStats[d].total > 0).length,
+                rangeRows
+            };
+        }
+
+        // --- Update UI Functions ---
+
+        function updateDailyUI(dateKey) {
+            // Re-using existing processDataForDate logic but wrapping efficiently
+            const result = processDataForDate(dateKey); // Keeps original logic for timeline precision
+            updateDashboardUI(result);
+        }
+
+        function updateWeeklyUI(dateKey) {
+            const { start, end, mondayObj } = getWeekRange(dateKey);
+            
+            // Formatting Date Range Title
+            const formatDate = (d) => {
+                const parts = d.split('-');
+                return `${parts[2]}/${parts[1]}`;
+            }
+            document.getElementById('weekly-title').textContent = `Semana de ${formatDate(start)} a ${formatDate(end)}`;
+            document.getElementById('weekly-subtitle').textContent = `Baseado na data selecionada: ${formatDate(dateKey)}`;
+
+            const data = processDataForRange(start, end);
+
+            // 1. KPIs
+            const daysInWeek = 7;
+            const avgDailyTime = data.totalSeconds / daysInWeek;
+            const prodRate = data.totalSeconds > 0 ? (data.totalActiveSeconds / data.totalSeconds) * 100 : 0;
+            
+            document.getElementById('kpi-weekly-avg-time').textContent = formatSecondsToTime(avgDailyTime);
+            document.getElementById('kpi-weekly-avg-prod').textContent = `${Math.round(prodRate)}%`;
+            document.getElementById('kpi-weekly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
+
+            // Find Best Day
+            let bestDay = "-";
+            let bestVal = 0;
+            const weekDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+            
+            Object.keys(data.dailyStats).sort().forEach((dateStr, idx) => {
+                const stats = data.dailyStats[dateStr];
+                const dayProd = stats.total > 0 ? (stats.active / stats.total) * 100 : 0;
+                if (dayProd > bestVal) {
+                    bestVal = dayProd;
+                    bestDay = weekDays[idx] || dateStr;
+                }
+            });
+            document.getElementById('kpi-weekly-best-day').textContent = bestDay;
+            document.getElementById('kpi-weekly-best-val').textContent = `${Math.round(bestVal)}% Produtividade`;
+
+            // 2. Trend Chart (Line)
+            const labels = weekDays;
+            const trendData = Object.keys(data.dailyStats).sort().map(d => {
+                const s = data.dailyStats[d];
+                return s.total > 0 ? Math.round((s.active / s.total) * 100) : 0;
+            });
+
+            charts.weeklyTrend.data.labels = labels;
+            charts.weeklyTrend.data.datasets[0].data = trendData;
+            charts.weeklyTrend.update();
+
+            // 3. App Distribution (Donut)
+            const sortedApps = Object.entries(data.appUsage).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            charts.weeklyApp.data.labels = sortedApps.map(i => i[0]);
+            charts.weeklyApp.data.datasets[0].data = sortedApps.map(i => i[1]);
+            charts.weeklyApp.update();
+        }
+
+        function updateMonthlyUI(dateKey) {
+            const { start, end } = getMonthRange(dateKey);
+            const [y, m] = dateKey.split('-');
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            
+            document.getElementById('monthly-title').textContent = `Mês de ${monthNames[parseInt(m)-1] || ''} ${y}`;
+
+            const data = processDataForRange(start, end);
+
+            // 1. KPIs
+            const prodRate = data.totalSeconds > 0 ? (data.totalActiveSeconds / data.totalSeconds) * 100 : 0;
+            const weeklyAvg = data.totalActiveSeconds / 4; // Approx 4 weeks
+
+            document.getElementById('kpi-monthly-prod').textContent = `${Math.round(prodRate)}%`;
+            document.getElementById('kpi-monthly-days').textContent = data.daysCount;
+            document.getElementById('kpi-monthly-weekly-avg').textContent = formatSecondsToTime(weeklyAvg);
+
+            // 2. Weekly Trend Logic
+            // Group days into weeks (1-7, 8-14, etc for simplicity or standard weeks)
+            // Using ISO weeks is complex, let's group by 7 day chunks from start of month
+            let weeklyScores = [];
+            let weeklyLabels = [];
+            let currentWeekProd = 0;
+            let currentWeekTotal = 0;
+            let weekCounter = 1;
+            let dayCounter = 0;
+            let bestWeekIdx = -1;
+            let maxWeekProd = 0;
+
+            Object.keys(data.dailyStats).sort().forEach((d, i) => {
+                const s = data.dailyStats[d];
+                currentWeekTotal += s.total;
+                currentWeekProd += s.active;
+                dayCounter++;
+
+                if (dayCounter === 7 || i === Object.keys(data.dailyStats).length - 1) {
+                    const wProd = currentWeekTotal > 0 ? (currentWeekProd / currentWeekTotal) * 100 : 0;
+                    weeklyScores.push(Math.round(wProd));
+                    weeklyLabels.push(`Semana ${weekCounter}`);
+                    
+                    if (wProd > maxWeekProd) {
+                        maxWeekProd = wProd;
+                        bestWeekIdx = weekCounter;
+                    }
+
+                    // Reset
+                    currentWeekProd = 0;
+                    currentWeekTotal = 0;
+                    dayCounter = 0;
+                    weekCounter++;
+                }
+            });
+
+            document.getElementById('kpi-monthly-best-week').textContent = bestWeekIdx > -1 ? `Semana ${bestWeekIdx}` : "--";
+            document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWeekProd)}% Produtividade`;
+
+            charts.monthlyWeekly.data.labels = weeklyLabels;
+            charts.monthlyWeekly.data.datasets[0].data = weeklyScores;
+            charts.monthlyWeekly.update();
+
+            // 3. Day of Week Distribution
+            // Aggregate totals by Monday, Tuesday...
+            let dowTotals = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+            
+            Object.keys(data.dailyStats).forEach(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                let dayIdx = dateObj.getDay(); // 0=Sun, 1=Mon
+                // Convert to 0=Mon, 6=Sun
+                let arrIdx = dayIdx === 0 ? 6 : dayIdx - 1;
+                dowTotals[arrIdx] += (data.dailyStats[d].total / 3600); // Hours
+            });
+
+            charts.monthlyDay.data.datasets[0].data = dowTotals;
+            charts.monthlyDay.update();
+        }
+
+        // --- Original Process Function (Kept for Daily Detail) ---
         function processDataForDate(targetDateKey) {
-            // Filter global rows
             const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
             const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
@@ -514,9 +904,8 @@
             let totalActiveSeconds = 0;
             let totalAfkSeconds = 0;
             let appUsage = {}; 
-            let timelineBuckets = {}; // { "08:00": minutes_active }
+            let timelineBuckets = {}; 
             
-            // Generate standard buckets 00:00 to 23:30 for clean comparing
             for(let h=0; h<24; h++) {
                 timelineBuckets[`${String(h).padStart(2,'0')}:00`] = 0;
                 timelineBuckets[`${String(h).padStart(2,'0')}:30`] = 0;
@@ -540,7 +929,6 @@
                     totalAfkSeconds += duration;
                 }
 
-                // Timeline Logic: Sum MINUTES of activity
                 let hour = 0, minute = 0;
                 if (typeof timeRaw === 'number') {
                     let totalSecs = Math.round(timeRaw * 86400);
@@ -553,9 +941,6 @@
                 let bucketMinute = minute >= 30 ? "30" : "00";
                 let bucketKey = `${String(hour).padStart(2,'0')}:${bucketMinute}`;
 
-                // if (!timelineBuckets[bucketKey]) timelineBuckets[bucketKey] = 0; // Already initialized
-                
-                // If Active, add duration to bucket (converted to minutes)
                 if (status.includes('ATIVO')) {
                     if (timelineBuckets[bucketKey] !== undefined) {
                          timelineBuckets[bucketKey] += (duration / 60); 
@@ -563,7 +948,6 @@
                 }
             });
 
-            // Cap buckets at 30 minutes
             Object.keys(timelineBuckets).forEach(k => {
                 if(timelineBuckets[k] > 30) timelineBuckets[k] = 30;
                 timelineBuckets[k] = parseFloat(timelineBuckets[k].toFixed(1));
@@ -571,18 +955,15 @@
 
             return {
                 metrics: {
-                    totalSeconds,
-                    totalActiveSeconds,
-                    totalAfkSeconds,
+                    totalSeconds, totalActiveSeconds, totalAfkSeconds,
                     activitiesCount: filteredRows.length,
-                    appUsage,
-                    timelineBuckets
+                    appUsage, timelineBuckets
                 },
                 rows: filteredRows
             };
         }
 
-        // Helper to update diffs
+        // --- Helper to update diffs (Daily Only) ---
         function updateDiffBadge(elementId, currentVal, prevVal, isPercentage = false) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -595,13 +976,8 @@
             let diff = currentVal - prevVal;
             let diffPercent = (diff / prevVal) * 100;
             let icon = diff >= 0 ? '▲' : '▼';
-            let colorClass = diff >= 0 ? 'text-green-300' : 'text-rose-300';
-            
-            // For negative metrics like "Total Time" if "more is better" then green. 
-            // Assuming more time/prod/activities is generally "Active" -> better.
             
             if(elementId === 'diff-total-time') {
-                 // Format: +1h 30m
                  let absDiff = Math.abs(diff);
                  let h = Math.floor(absDiff / 3600);
                  let m = Math.floor((absDiff % 3600) / 60);
@@ -611,13 +987,7 @@
                  el.classList.remove('hidden');
             } else {
                  el.textContent = `${icon} ${Math.abs(diffPercent).toFixed(1)}%`;
-                 if(elementId === 'diff-productivity') {
-                     // Productivity diff inside blue card
-                     el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-500/30 text-green-100' : 'bg-rose-500/30 text-rose-100'}`;
-                 } else {
-                     // Standard gray card
-                     el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
-                 }
+                 el.className = `text-xs font-bold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`;
                  el.classList.remove('hidden');
             }
         }
@@ -635,7 +1005,7 @@
             document.getElementById('kpi-productivity').textContent = `${prodRate}%`;
             document.getElementById('kpi-prod-bar').style.width = `${prodRate}%`;
 
-            // Comparison Logic for KPIs
+            // Comparison Logic
             if (comparisonObj) {
                 const compMetrics = comparisonObj.metrics;
                 const compProdRate = compMetrics.totalSeconds > 0 ? Math.round((compMetrics.totalActiveSeconds / compMetrics.totalSeconds) * 100) : 0;
@@ -648,8 +1018,6 @@
             }
 
             // 2. Update Charts
-            
-            // App Distribution
             const sortedApps = Object.entries(metrics.appUsage).sort((a, b) => b[1] - a[1]);
             const top5 = sortedApps.slice(0, 5);
             const othersTotal = sortedApps.slice(5).reduce((acc, curr) => acc + curr[1], 0);
@@ -665,33 +1033,17 @@
             charts.appDist.data.datasets[0].data = appData;
             charts.appDist.update();
 
-            // Timeline & Trend
             const sortedTimes = Object.keys(metrics.timelineBuckets).sort();
             const activityData = sortedTimes.map(t => metrics.timelineBuckets[t]);
             const scoreData = sortedTimes.map(t => Math.round((metrics.timelineBuckets[t] / 30) * 100));
 
             charts.timeline.data.labels = sortedTimes;
-            // Primary Dataset
-            charts.timeline.data.datasets = [{ 
-                label: 'Dia Atual', 
-                data: activityData, 
-                borderColor: '#3b82f6', 
-                backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-                fill: true, 
-                tension: 0.4 
-            }];
+            charts.timeline.data.datasets = [{ label: 'Dia Atual', data: activityData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }];
 
-            // Comparison Dataset
             if (comparisonObj) {
                 const compActivityData = sortedTimes.map(t => comparisonObj.metrics.timelineBuckets[t] || 0);
                 charts.timeline.data.datasets.push({
-                    label: 'Dia Comparado',
-                    data: compActivityData,
-                    borderColor: '#94a3b8',
-                    backgroundColor: 'rgba(148, 163, 184, 0.05)',
-                    fill: true,
-                    borderDash: [5, 5],
-                    tension: 0.4
+                    label: 'Dia Comparado', data: compActivityData, borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.05)', fill: true, borderDash: [5, 5], tension: 0.4
                 });
                 document.getElementById('legend-compare').classList.remove('hidden');
                 document.getElementById('legend-compare').classList.add('flex');
@@ -706,7 +1058,6 @@
             charts.trend.data.datasets[0].data = scoreData;
             charts.trend.update();
 
-            // Status Pie
             charts.status.data.datasets[0].data = [metrics.totalActiveSeconds, metrics.totalAfkSeconds];
             charts.status.update();
 
@@ -723,18 +1074,13 @@
                 }
             });
             document.getElementById('insight-peak-time').textContent = `${peakTime} (Score: ${maxScore})`;
-
             document.getElementById('insight-afk-time').textContent = formatSecondsToTime(metrics.totalAfkSeconds);
 
-            // Goal Logic with User Input
             updateGoal(metrics.totalActiveSeconds);
-            
-            // Update Table
             populateTablePreview(dataObj.rows.slice(0, 100));
         }
 
         function updateGoal(currentActiveSeconds) {
-            // Get value from input
             let goalHours = parseFloat(document.getElementById('goalInput').value) || 8;
             if(goalHours <= 0) goalHours = 1;
             
@@ -754,26 +1100,30 @@
             }
         }
 
-        // --- Loading & Event Handlers ---
+        // --- Event Handlers ---
         
         function onDateChange() {
             const selectedDate = document.getElementById('dateSelect').value;
-            const compareDate = document.getElementById('compareDateSelect').value;
-            const isCompareEnabled = document.getElementById('enableCompare').checked;
-
             if(!selectedDate) return;
-            
-            const data = processDataForDate(selectedDate);
-            
-            let compareData = null;
-            if (isCompareEnabled && compareDate && compareDate !== "") {
-                compareData = processDataForDate(compareDate);
-            }
 
-            updateDashboardUI(data, compareData);
+            // Route based on View
+            if (currentView === 'daily') {
+                const compareDate = document.getElementById('compareDateSelect').value;
+                const isCompareEnabled = document.getElementById('enableCompare').checked;
+                let compareData = null;
+                if (isCompareEnabled && compareDate && compareDate !== "") {
+                    compareData = processDataForDate(compareDate);
+                }
+                updateDailyUI(selectedDate, compareData);
+            } 
+            else if (currentView === 'weekly') {
+                updateWeeklyUI(selectedDate);
+            }
+            else if (currentView === 'monthly') {
+                updateMonthlyUI(selectedDate);
+            }
         }
 
-        // Listeners for new controls
         document.getElementById('dateSelect').addEventListener('change', onDateChange);
         document.getElementById('compareDateSelect').addEventListener('change', onDateChange);
         document.getElementById('enableCompare').addEventListener('change', (e) => {
@@ -785,14 +1135,7 @@
             }
         });
         
-        // Listener for Goal Input
-        document.getElementById('goalInput').addEventListener('input', () => {
-             // We need to re-run updateGoal, but we need the current active seconds.
-             // Simplest is to just re-trigger onDateChange to refresh UI or store active seconds globally.
-             // Let's store a temp var on UI update to make this efficient.
-             // Or just trigger onDateChange, it's fast enough.
-             onDateChange();
-        });
+        document.getElementById('goalInput').addEventListener('input', () => { onDateChange(); });
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -820,40 +1163,9 @@
                         if(d !== "Indefinido") datesSet.add(d);
                     });
                     
-                    globalDates = Array.from(datesSet).sort().reverse(); // Newest first
+                    globalDates = Array.from(datesSet).sort().reverse();
+                    populateDateSelects();
                     
-                    // Populate Selects
-                    const select = document.getElementById('dateSelect');
-                    const compSelect = document.getElementById('compareDateSelect');
-                    
-                    select.innerHTML = '';
-                    compSelect.innerHTML = '<option value="">Selecione...</option>';
-
-                    if(globalDates.length === 0) {
-                        const opt = document.createElement('option');
-                        opt.text = "Sem datas válidas";
-                        select.add(opt);
-                    } else {
-                        globalDates.forEach(d => {
-                            const [y, m, day] = d.split('-');
-                            const dateLabel = `${day}/${m}/${y}`;
-                            
-                            const opt1 = document.createElement('option');
-                            opt1.value = d;
-                            opt1.text = dateLabel;
-                            select.add(opt1);
-                            
-                            const opt2 = document.createElement('option');
-                            opt2.value = d;
-                            opt2.text = dateLabel;
-                            compSelect.add(opt2);
-                        });
-                        
-                        // Select first date
-                        select.value = globalDates[0];
-                        onDateChange();
-                    }
-
                     document.getElementById('statusMsg').classList.add('hidden');
                 } catch (error) {
                     console.error(error);
@@ -862,6 +1174,33 @@
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function populateDateSelects() {
+            const select = document.getElementById('dateSelect');
+            const compSelect = document.getElementById('compareDateSelect');
+            
+            select.innerHTML = '';
+            compSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            if(globalDates.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "Sem datas válidas";
+                select.add(opt);
+            } else {
+                globalDates.forEach(d => {
+                    const [y, m, day] = d.split('-');
+                    const dateLabel = `${day}/${m}/${y}`;
+                    
+                    const opt1 = document.createElement('option');
+                    opt1.value = d; opt1.text = dateLabel; select.add(opt1);
+                    
+                    const opt2 = document.createElement('option');
+                    opt2.value = d; opt2.text = dateLabel; compSelect.add(opt2);
+                });
+                select.value = globalDates[0];
+                onDateChange();
+            }
         }
         
         function populateTablePreview(rows) {
@@ -903,20 +1242,28 @@
 
         function loadDemoData() {
             document.getElementById('statusMsg').classList.remove('hidden');
-            document.getElementById('statusText').textContent = "Carregando Demo...";
+            document.getElementById('statusText').textContent = "Gerando dados demo (30 dias)...";
             
             globalRawData = [];
-            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer'];
-            const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO'];
+            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer', 'outlook', 'word'];
+            const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO', 'AUSENTE'];
             
-            let dateToday = new Date().toISOString().split('T')[0];
-            let dYest = new Date(); dYest.setDate(dYest.getDate() - 1);
-            let dateYest = dYest.toISOString().split('T')[0];
+            // Generate last 30 days
+            const datesToGen = [];
+            for(let i=0; i<30; i++) {
+                let d = new Date();
+                d.setDate(d.getDate() - i);
+                datesToGen.push(d.toISOString().split('T')[0]);
+            }
 
-            [dateToday, dateYest].forEach(dateStr => {
+            datesToGen.forEach(dateStr => {
                  let currentTime = 8 * 3600; 
                  const endTime = 18 * 3600;
                  
+                 // Skip some Sundays mostly
+                 const dateObj = new Date(dateStr);
+                 if (dateObj.getDay() === 0 && Math.random() > 0.2) return; 
+
                  while(currentTime < endTime) {
                     const duration = Math.floor(Math.random() * 300) + 60; 
                     const app = apps[Math.floor(Math.random() * apps.length)];
@@ -939,25 +1286,10 @@
                 }
             });
 
-            // Populate Select
-            const select = document.getElementById('dateSelect');
-            const compSelect = document.getElementById('compareDateSelect');
-            select.innerHTML = '';
-            compSelect.innerHTML = '<option value="">Selecione...</option>';
-            
-            [dateToday, dateYest].forEach(d => {
-                const [y, m, day] = d.split('-');
-                const label = `${day}/${m}/${y} (Demo)`;
-                
-                const opt1 = document.createElement('option');
-                opt1.value = d; opt1.text = label; select.add(opt1);
-                
-                const opt2 = document.createElement('option');
-                opt2.value = d; opt2.text = label; compSelect.add(opt2);
-            });
-            
-            select.value = dateToday;
-            onDateChange();
+            const datesSet = new Set();
+            globalRawData.forEach(r => datesSet.add(r["Data Início"]));
+            globalDates = Array.from(datesSet).sort().reverse();
+            populateDateSelects();
             
             setTimeout(() => { document.getElementById('statusMsg').classList.add('hidden'); }, 500);
         }

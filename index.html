@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
                 extend: {
                     colors: {
@@ -26,6 +27,8 @@
                             300: '#d6d3d1',
                             500: '#78716c',
                             800: '#292524',
+                            900: '#1C1917',
+                            950: '#0C0A09'
                         }
                     },
                     fontFamily: {
@@ -50,6 +53,7 @@
         body {
             background-color: #F9F8F6;
             color: #1F1F1F;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* --- Card Styles --- */
@@ -193,14 +197,39 @@
             gap: 4px;
         }
         .heatmap-cell {
-            height: 26px;
-            border-radius: 3px;
+            height: 32px;
+            border-radius: 4px;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700; /* Bolder for visibility */
+            color: white;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 0 4px;
+            cursor: default;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .heatmap-cell:hover {
-            transform: scale(1.1);
-            z-index: 10;
-            border: 1px solid #7C3AED;
+            transform: scale(1.2);
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        /* Utilitário para texto escuro em fundos claros do heatmap */
+        .text-dark-contrast {
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+        /* Dark Mode Override para Heatmap */
+        html.dark .heatmap-cell {
+            color: #FFFFFF !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        html.dark .text-dark-contrast {
+            color: #FFFFFF !important;
         }
 
         /* Zoom Overlay */
@@ -210,18 +239,89 @@
         .cursor-zoom-in {
             cursor: zoom-in;
         }
+
+        /* --- DARK MODE OVERRIDES (MANUAL) --- */
+        html.dark body {
+            background-color: #0C0A09; /* Stone 950 */
+            color: #E7E5E4; /* Stone 200 */
+        }
+        html.dark .bg-white\/60 {
+            background-color: rgba(28, 25, 23, 0.85); 
+            border-bottom-color: #292524;
+        }
+        html.dark .card-type-a {
+            background-color: #1C1917; 
+            border-color: #292524; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        html.dark .card-type-a:hover {
+            border-color: #44403C;
+            background-color: #292524;
+        }
+        html.dark .card-type-a .label { color: #A8A29E; } 
+        html.dark .card-type-a .value { color: #F5F5F4; } 
+        html.dark .card-type-a .subtext { color: #78716C; } 
+        html.dark .text-charcoal { color: #F5F5F4; }
+        html.dark .text-stone-500 { color: #A8A29E; }
+        html.dark .text-stone-600 { color: #D6D3D1; }
+        html.dark .border-stone-200 { border-color: #292524; }
+        
+        /* Inputs & Selects Dark */
+        html.dark select, html.dark input {
+            background-color: #292524;
+            color: #E7E5E4;
+            border-color: #44403C;
+        }
+        html.dark option { background-color: #1C1917; }
+        
+        /* Tabs Dark */
+        html.dark .tab-active { color: #F5F5F4; }
+        html.dark .tab-inactive { color: #78716C; }
+        html.dark .tab-inactive:hover { color: #D6D3D1; }
+        html.dark .border-b { border-color: #292524; }
+
+        /* Modal Dark */
+        html.dark #zoomModal > div {
+            background-color: #1C1917;
+            border: 1px solid #292524;
+        }
+        html.dark #modalTitle { color: #F5F5F4; }
+        html.dark #zoomModal button { color: #A8A29E; }
+        html.dark #zoomModal button:hover { color: #F5F5F4; }
+
+        /* Table Dark */
+        html.dark details summary { background-color: #1C1917; color: #F5F5F4; }
+        html.dark details summary:hover { background-color: #292524; }
+        html.dark table thead th { background-color: #292524; color: #A8A29E; border-bottom-color: #44403C; }
+        html.dark table tbody { background-color: #1C1917; }
+        html.dark table td { border-bottom-color: #292524; color: #D6D3D1; }
+        html.dark table tr:hover { background-color: #292524; }
+
+        /* Custom Scrollbar Dark */
+        html.dark ::-webkit-scrollbar-thumb { background: #44403C; }
+        html.dark ::-webkit-scrollbar-thumb:hover { background: #57534E; }
+
+        /* Insights Cards Dark */
+        html.dark .bg-slate-50, html.dark .bg-stone-50 {
+            background-color: #292524;
+            border-color: #44403C;
+        }
+        html.dark .text-slate-800, html.dark .text-stone-800 { color: #F5F5F4; }
+        html.dark .text-slate-500, html.dark .text-stone-500 { color: #A8A29E; }
+        html.dark .text-slate-600, html.dark .text-stone-600 { color: #D6D3D1; }
+        html.dark .bg-violet-50 { background-color: rgba(124, 58, 237, 0.1); border-color: #7C3AED; }
     </style>
 </head>
-<body class="antialiased selection:bg-violet-200 selection:text-violet-900">
+<body class="antialiased selection:bg-violet-200 selection:text-violet-900 transition-colors duration-300">
 
     <!-- Header Section -->
-    <div class="bg-white/60 backdrop-blur-md border-b border-stone-200 sticky top-0 z-50">
+    <div class="bg-white/60 backdrop-blur-md border-b border-stone-200 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 py-5">
             <div class="flex flex-col xl:flex-row justify-between items-center gap-6">
                 
                 <!-- Brand -->
                 <div class="flex items-center gap-4 w-full xl:w-auto">
-                    <div class="bg-violet-700 w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg shadow-violet-200">
+                    <div class="bg-violet-700 w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg shadow-violet-200 dark:shadow-none">
                         <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                     </div>
                     <div>
@@ -233,14 +333,19 @@
                 <!-- Controls Area -->
                 <div class="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-end font-sans">
                     
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" id="themeToggleBtn" class="w-10 h-10 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-violet-700 dark:text-yellow-400 shadow-sm hover:shadow-md transition-all flex items-center justify-center" title="Alternar Tema">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+
                     <!-- Compare Mode Toggle -->
-                    <div id="compare-controls" class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-full border border-stone-200 hover:border-stone-300 transition-colors shadow-sm" title="Comparar dois dias">
+                    <div id="compare-controls" class="flex items-center gap-3 bg-white dark:bg-stone-800 px-4 py-2.5 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 transition-colors shadow-sm" title="Comparar dois dias">
                         <div class="flex items-center h-5">
                             <input id="enableCompare" type="checkbox" class="w-4 h-4 text-violet-600 bg-stone-100 border-stone-300 rounded focus:ring-violet-500 cursor-pointer accent-violet-600">
                         </div>
-                        <label for="enableCompare" class="text-xs font-semibold text-stone-600 select-none cursor-pointer uppercase tracking-wide">Comparar</label>
-                        <div class="h-4 w-px bg-stone-200 mx-1"></div>
-                        <select id="compareDateSelect" disabled class="bg-transparent text-xs text-charcoal focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer w-28 font-medium">
+                        <label for="enableCompare" class="text-xs font-semibold text-stone-600 dark:text-stone-300 select-none cursor-pointer uppercase tracking-wide">Comparar</label>
+                        <div class="h-4 w-px bg-stone-200 dark:bg-stone-700 mx-1"></div>
+                        <select id="compareDateSelect" disabled class="bg-transparent text-xs text-charcoal dark:text-stone-200 focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer w-28 font-medium">
                             <option value="">Selecione...</option>
                         </select>
                     </div>
@@ -276,7 +381,7 @@
                     </div>
 
                     <!-- File Upload -->
-                    <label for="fileUpload" class="cursor-pointer bg-violet-700 hover:bg-violet-800 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-violet-200 flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95">
+                    <label for="fileUpload" class="cursor-pointer bg-violet-700 hover:bg-violet-800 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-violet-200 dark:shadow-none flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95">
                         <i class="fa-solid fa-upload"></i>
                         <span class="hidden sm:inline">Importar</span>
                     </label>
@@ -294,13 +399,13 @@
     <main class="max-w-7xl mx-auto px-6 lg:px-8 py-10 space-y-10">
 
         <!-- Status Message -->
-        <div id="statusMsg" class="hidden bg-white/50 backdrop-blur-sm text-stone-600 p-4 rounded-xl border border-stone-200 text-sm flex items-center gap-3 shadow-sm animate-pulse">
+        <div id="statusMsg" class="hidden bg-white/50 dark:bg-stone-900/50 backdrop-blur-sm text-stone-600 dark:text-stone-300 p-4 rounded-xl border border-stone-200 dark:border-stone-800 text-sm flex items-center gap-3 shadow-sm animate-pulse">
             <div class="w-2 h-2 rounded-full bg-violet-500"></div>
             <span id="statusText" class="font-medium font-sans">Aguardando arquivo...</span>
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="border-b border-stone-200/60">
+        <div class="border-b border-stone-200/60 transition-colors duration-300">
             <nav class="flex" aria-label="Tabs">
                 <button onclick="switchView('daily')" id="tab-daily" class="tab-btn tab-active">
                     Visão Diária
@@ -323,12 +428,12 @@
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Tempo Total</p>
-                            <i class="fa-regular fa-clock text-stone-300 text-xl"></i>
+                            <i class="fa-regular fa-clock text-stone-300 dark:text-stone-600 text-xl"></i>
                         </div>
                         <h3 class="value mt-2 text-slate-900" id="kpi-total-time">--</h3>
                         <div id="diff-total-time" class="hidden mt-3 text-xs font-bold font-sans px-2.5 py-1 rounded-md inline-block"></div>
                     </div>
-                    <div class="mt-6 border-t border-stone-100 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    <div class="mt-6 border-t border-stone-100 dark:border-stone-800 pt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
                         <span id="kpi-date">Hoje</span>
                     </div>
                 </div>
@@ -355,11 +460,11 @@
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Atividades</p>
-                            <i class="fa-solid fa-list-check text-stone-300 text-xl"></i>
+                            <i class="fa-solid fa-list-check text-stone-300 dark:text-stone-600 text-xl"></i>
                         </div>
                         <div class="flex items-baseline gap-2 mt-2">
                              <h3 class="value" id="kpi-activities">--</h3>
-                             <span id="diff-activities" class="hidden text-xs font-bold font-sans px-2 py-1 rounded bg-stone-100 text-stone-600"></span>
+                             <span id="diff-activities" class="hidden text-xs font-bold font-sans px-2 py-1 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400"></span>
                         </div>
                     </div>
                     <p class="subtext">Registros processados</p>
@@ -370,7 +475,7 @@
                     <div>
                         <div class="flex justify-between items-start">
                             <p class="label">Apps Únicos</p>
-                            <i class="fa-solid fa-window-restore text-stone-300 text-xl"></i>
+                            <i class="fa-solid fa-window-restore text-stone-300 dark:text-stone-600 text-xl"></i>
                         </div>
                         <h3 class="value mt-2" id="kpi-apps">--</h3>
                     </div>
@@ -380,36 +485,45 @@
 
             <!-- Charts Row 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- App Distribution Donut -->
-                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('appDist')">
-                    <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Distribuição de Apps</h3>
-                        <p class="font-sans text-xs text-stone-400 mt-1">Alocação de tempo por aplicação</p>
+                <!-- Focus vs Distraction (Tasks) -->
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('focusTask')">
+                    <div class="mb-6 flex justify-between items-start">
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-charcoal">Foco & Performance</h3>
+                            <p class="font-sans text-xs text-stone-400 mt-1">Top Tarefas (Título da Janela)</p>
+                        </div>
+                        <div class="flex gap-2 text-[10px] font-bold uppercase">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-violet-600"></span>Foco</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-stone-300 dark:bg-stone-600"></span>Distração</span>
+                        </div>
                     </div>
                     <div class="relative h-64 w-full flex justify-center">
-                        <canvas id="appDistributionChart"></canvas>
+                        <canvas id="focusTaskChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Activity Timeline Area -->
-                <div class="card-type-a p-8 lg:col-span-2 cursor-zoom-in" onclick="expandChart('timeline')">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
-                                Ritmo Diário
-                            </h3>
-                            <p class="font-sans text-xs text-stone-500 font-medium">Tempo produtivo (horas) por intervalo</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <div id="legend-compare" class="hidden items-center gap-2 text-xs font-sans">
-                                 <span class="w-3 h-3 rounded-full bg-stone-300 block shadow-sm"></span>
-                                 <span class="text-slate-600 font-semibold">Anterior</span>
-                            </div>
-                            <span class="text-xs font-bold bg-violet-100 text-violet-700 px-3 py-1 rounded-full shadow-sm">Atual</span>
-                        </div>
+                <!-- Instructions Panel -->
+                <div class="card-type-a p-8 lg:col-span-2 flex flex-col justify-center relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 w-32 h-32 bg-violet-50 dark:bg-violet-900/30 rounded-bl-full -mr-10 -mt-10 opacity-50 transition-transform group-hover:scale-110"></div>
+                    <div class="absolute right-8 top-8 text-violet-200 dark:text-violet-800 text-6xl opacity-20">
+                        <i class="fa-solid fa-circle-info"></i>
                     </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="timelineChart"></canvas>
+                    
+                    <h3 class="font-serif text-xl font-bold text-charcoal mb-4 relative z-10">Guia de Análise</h3>
+                    
+                    <div class="space-y-4 font-sans text-sm text-stone-600 relative z-10">
+                        <p>
+                            <strong class="text-violet-700 dark:text-violet-400">1. Interatividade:</strong> Passe o mouse sobre qualquer barra ou gráfico para revelar detalhes granulares, como scores específicos e nomes de tarefas.
+                        </p>
+                        <p>
+                            <strong class="text-violet-700 dark:text-violet-400">2. Foco & Performance:</strong> O gráfico à esquerda mostra suas tarefas mais produtivas baseadas no título da janela. O gráfico abaixo ("Top Performance (Horário)") revela seus picos de produtividade ao longo do dia.
+                        </p>
+                        <p>
+                            <strong class="text-violet-700 dark:text-violet-400">3. Comparação:</strong> Use o botão "Comparar" no topo para ver sua evolução em relação a dias anteriores.
+                        </p>
+                        <p class="text-xs text-stone-400 italic mt-2 border-t border-stone-100 dark:border-stone-800 pt-2">
+                            *Dica: Clique na lupa para expandir qualquer visualização.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -427,11 +541,11 @@
                     </div>
                 </div>
 
-                <!-- Productivity Trend Bar -->
+                <!-- Performance by Hour Bar Chart -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('trend')">
                     <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Intensidade</h3>
-                        <p class="font-sans text-xs text-stone-400 mt-1">Score de Foco (0-100)</p>
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Top Performance (Horário)</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Score de Foco vs Horário do Dia</p>
                     </div>
                     <div class="relative h-56 w-full">
                         <canvas id="trendChart"></canvas>
@@ -447,16 +561,17 @@
                         </h3>
                         
                         <div class="space-y-3">
-                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500 shadow-sm">
-                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Top App</p>
-                                <p class="text-sm text-slate-800 font-bold" id="insight-top-app">--</p>
+                            <!-- Top Performance Task Card -->
+                            <div class="bg-violet-50 p-3 rounded-lg border-l-4 border-violet-500 shadow-sm">
+                                <p class="text-[10px] text-violet-500 dark:text-violet-300 font-bold uppercase mb-0.5 tracking-wide">🏆 Top Performance</p>
+                                <p class="text-sm text-slate-800 font-bold truncate" id="insight-top-task">--</p>
+                                <div class="flex gap-3 mt-1 text-xs text-slate-600">
+                                    <span><i class="fa-regular fa-clock mr-1"></i><span id="insight-top-task-time">--</span></span>
+                                    <span><i class="fa-solid fa-star text-yellow-500 mr-1"></i><span id="insight-top-task-score">--</span></span>
+                                </div>
                             </div>
 
-                            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-emerald-500 shadow-sm">
-                                <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Pico de Foco</p>
-                                <p class="text-sm text-slate-800 font-bold" id="insight-peak-time">--</p>
-                            </div>
-
+                            <!-- Absent Time -->
                             <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-rose-500 shadow-sm">
                                 <p class="text-[10px] text-slate-500 font-bold uppercase mb-0.5 tracking-wide">Tempo Ausente</p>
                                 <p class="text-sm text-slate-800 font-bold" id="insight-afk-time">--</p>
@@ -464,18 +579,18 @@
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-stone-800">
                         <div class="flex justify-between items-end text-sm mb-2">
                             <div class="flex flex-col">
                                 <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Meta Diária</span>
                                 <div class="flex items-center gap-1 mt-1">
-                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 font-bold bg-transparent text-center transition-colors placeholder-violet-300">
+                                    <input type="number" id="goalInput" value="8" step="0.5" min="1" max="24" class="w-10 border-b-2 border-violet-300 focus:border-violet-600 focus:outline-none text-violet-700 dark:text-violet-400 font-bold bg-transparent text-center transition-colors placeholder-violet-300">
                                     <span class="text-slate-500 font-bold">h</span>
                                 </div>
                             </div>
                             <span class="font-extrabold text-slate-800 text-xl" id="insight-goal-percent">0%</span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
+                        <div class="w-full bg-slate-100 dark:bg-stone-800 rounded-full h-2.5 overflow-hidden shadow-inner">
                             <div id="insight-goal-bar" class="bg-violet-600 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                         </div>
                     </div>
@@ -490,17 +605,17 @@
                     <h2 class="font-serif text-3xl font-bold text-charcoal" id="weekly-title">Resumo da Semana</h2>
                     <p class="font-sans text-xs text-stone-500 font-semibold uppercase tracking-widest mt-2" id="weekly-subtitle">Selecione uma data</p>
                 </div>
-                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0">
+                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0 dark:bg-stone-800 dark:border-stone-700 dark:text-violet-400">
                     Performance Semanal
                 </div>
             </div>
 
             <!-- Weekly KPIs Row 1 (Updated Grid) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                <!-- NEW: Total Active Hours (Type A) -->
+                <!-- Total Active Hours (Type A) -->
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Horas Ativas</p>
-                    <h3 class="value text-violet-700" id="kpi-weekly-total-active">--</h3>
+                    <h3 class="value text-violet-700 dark:text-violet-400" id="kpi-weekly-total-active">--</h3>
                     <p class="subtext">Total Acumulado</p>
                 </div>
 
@@ -515,11 +630,11 @@
                 <div class="card-type-a p-6 flex flex-col justify-center relative overflow-hidden text-center">
                     <p class="label mb-2">Consistência</p>
                     <h3 class="value text-charcoal" id="kpi-weekly-consistency">--%</h3>
-                    <p class="subtext">Estabilidade</p>
+                    <p class="subtext">Foco Estável</p>
                     <i class="fa-solid fa-wave-square absolute -right-2 -bottom-2 text-6xl text-stone-100 -z-0 opacity-50"></i>
                 </div>
 
-                <!-- Top Category (Type B Highlight) - INCREASED WIDTH -->
+                <!-- Top Category (Type B Highlight) -->
                 <div class="card-type-b p-6 flex flex-col justify-center text-center xl:col-span-2">
                     <p class="label mb-2">Foco Principal</p>
                     <h3 class="value text-xl px-2 pb-1" id="kpi-weekly-top-cat">--</h3>
@@ -540,14 +655,14 @@
                 <div class="card-type-a p-8 lg:col-span-2">
                     <div class="flex justify-between items-center mb-8">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Mapa de Calor</h3>
-                        <div class="text-[10px] uppercase font-bold text-stone-400 flex items-center gap-2 bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">
+                        <div class="text-[10px] uppercase font-bold text-stone-400 flex items-center gap-2 bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100 dark:bg-stone-800 dark:border-stone-700">
                             <span>Menos</span>
                             <div class="flex gap-1">
-                                <div class="w-3 h-3 bg-stone-100 rounded-[1px]"></div>
-                                <div class="w-3 h-3 bg-indigo-200 rounded-[1px]"></div>
-                                <div class="w-3 h-3 bg-indigo-400 rounded-[1px]"></div>
-                                <div class="w-3 h-3 bg-indigo-600 rounded-[1px]"></div>
-                                <div class="w-3 h-3 bg-indigo-900 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-stone-100 dark:bg-stone-700 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-200 dark:bg-indigo-900 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-400 dark:bg-indigo-700 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-600 dark:bg-indigo-500 rounded-[1px]"></div>
+                                <div class="w-3 h-3 bg-indigo-900 dark:bg-indigo-300 rounded-[1px]"></div>
                             </div>
                             <span>Mais</span>
                         </div>
@@ -560,36 +675,86 @@
                     </div>
                 </div>
 
-                <!-- Daily Trend -->
-                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyTrend')">
-                    <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Evolução Diária</h3>
-                        <p class="font-sans text-xs text-stone-400 mt-1">Produtividade %</p>
+                <!-- Weekly Focus & Performance -->
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyFocusTask')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-charcoal">Foco & Performance (Semanal)</h3>
+                            <p class="font-sans text-xs text-stone-400 mt-1">Top Tarefas da Semana</p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                             <div class="text-xs font-bold text-violet-700 bg-violet-50 dark:bg-violet-900/30 dark:text-violet-300 px-2 py-1 rounded">
+                                Ativo: <span id="weekly-metric-active">--</span>
+                             </div>
+                             <div class="text-xs font-bold text-stone-500 bg-stone-100 dark:bg-stone-800 dark:text-stone-400 px-2 py-1 rounded">
+                                AFK: <span id="weekly-metric-afk">--</span>
+                             </div>
+                        </div>
                     </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="weeklyTrendChart"></canvas>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="weeklyFocusTaskChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- Weekly Charts Row 3 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Stacked Bar -->
+                <!-- Stacked Bar (Reverted to Categories) -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyCat')">
                     <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Categorias por Dia</h3>
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Top 5 Categorias/Apps</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Distribuição de tempo na semana</p>
                     </div>
                     <div class="relative h-72 w-full">
                         <canvas id="weeklyCategoryChart"></canvas>
                     </div>
                 </div>
-                <!-- Donut -->
-                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyApp')">
-                    <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Top Apps (Horas)</h3>
+                
+                <!-- NEW: Protocolo de Performance Guide -->
+                <div class="card-type-a p-8 relative overflow-hidden flex flex-col justify-between">
+                    <div class="mb-6 z-10 relative">
+                        <h3 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-violet-600"></i>
+                            Protocolo de Alta Performance
+                        </h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Guia para maximizar seu Score Diário</p>
                     </div>
-                    <div class="relative h-72 w-full flex justify-center">
-                        <canvas id="weeklyAppChart"></canvas>
+                    
+                    <div class="space-y-5 font-sans text-sm text-stone-600 relative z-10 flex-grow">
+                        <div class="flex gap-4 items-start">
+                            <div class="bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fa-solid fa-brain text-xs"></i>
+                            </div>
+                            <div>
+                                <strong class="text-charcoal block mb-0.5">Deep Work (Bloco de Foco)</strong>
+                                <span class="text-xs leading-relaxed">Agrupe tarefas de alto valor (Ex: Excel, VSCode) em blocos de 90min sem interrupções. Isso eleva drasticamente seu Score.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 items-start">
+                            <div class="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fa-regular fa-clock text-xs"></i>
+                            </div>
+                            <div>
+                                <strong class="text-charcoal block mb-0.5">Pausas Estratégicas</strong>
+                                <span class="text-xs leading-relaxed">Pausas curtas (5-10min) após ciclos intensos mantêm a consistência. Evite "distração passiva" (YouTube) durante o expediente.</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 items-start">
+                             <div class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fa-solid fa-magnifying-glass-chart text-xs"></i>
+                            </div>
+                            <div>
+                                <strong class="text-charcoal block mb-0.5">Análise Assertiva</strong>
+                                <span class="text-xs leading-relaxed">Use o "Mapa de Calor" para identificar seus horários de pico e proteja esses momentos de reuniões ou e-mails.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative background element -->
+                    <div class="absolute -right-6 -bottom-6 text-9xl text-violet-50 dark:text-violet-900/10 opacity-60 -z-0 pointer-events-none">
+                        <i class="fa-regular fa-compass"></i>
                     </div>
                 </div>
             </div>
@@ -602,7 +767,7 @@
                     <h2 class="font-serif text-3xl font-bold text-charcoal" id="monthly-title">Resumo do Mês</h2>
                     <p class="text-xs text-slate-500 font-semibold uppercase mt-2 tracking-widest" id="monthly-subtitle">Consolidado</p>
                 </div>
-                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0">
+                <div class="bg-white border border-stone-200 px-4 py-2 rounded-full text-violet-700 text-sm font-serif italic shadow-sm mt-4 md:mt-0 dark:bg-stone-800 dark:border-stone-700 dark:text-violet-400">
                     Visão Macro
                 </div>
             </div>
@@ -611,14 +776,14 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Horas Totais</p>
-                    <h3 class="value text-violet-800" id="kpi-monthly-total-active">--</h3>
+                    <h3 class="value text-violet-800 dark:text-violet-400" id="kpi-monthly-total-active">--</h3>
                     <p class="subtext">Soma do Mês</p>
                 </div>
 
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Média Diária</p>
                     <h3 class="value" id="kpi-monthly-avg-daily">--</h3>
-                    <p class="subtext">Tempo Ativo / Dias</p>
+                    <p class="subtext">Produtivo / Dias Úteis</p>
                 </div>
 
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
@@ -629,8 +794,8 @@
 
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Consistência</p>
-                    <h3 class="value text-violet-600" id="kpi-monthly-consistency">--%</h3>
-                    <p class="subtext">Estabilidade mensal</p>
+                    <h3 class="value text-violet-600 dark:text-violet-300" id="kpi-monthly-consistency">--%</h3>
+                    <p class="subtext">Score Diário Estável</p>
                 </div>
 
                 <div class="card-type-b p-6 flex flex-col justify-center text-center">
@@ -646,9 +811,9 @@
                 </div>
 
                 <div class="card-type-b p-6 flex flex-col justify-center lg:col-span-2 relative text-center">
-                    <p class="label mb-3">Categoria Dominante</p>
+                    <p class="label mb-3">Tarefa Principal</p>
                     <div class="flex flex-col items-center justify-center relative z-10">
-                        <h3 class="value text-3xl truncate max-w-[90%]" id="kpi-monthly-top-cat">--</h3>
+                        <h3 class="value text-2xl truncate max-w-[95%] px-2" id="kpi-monthly-top-cat">--</h3>
                         <p class="font-sans font-bold text-white/80 mt-1" id="kpi-monthly-top-cat-time">--</p>
                     </div>
                 </div>
@@ -661,38 +826,48 @@
 
                 <div class="card-type-a p-6 flex flex-col justify-center text-center">
                     <p class="label mb-2">Meta Atingida</p>
-                    <h3 class="value text-emerald-600" id="kpi-monthly-goal-eff">--%</h3>
+                    <h3 class="value text-emerald-600 dark:text-emerald-400" id="kpi-monthly-goal-eff">--%</h3>
                     <p class="subtext">Eficiência</p>
                 </div>
                 
                 <div class="card-type-a p-6 flex flex-col justify-center lg:col-span-2 text-center">
                     <p class="label mb-2">Média Semanal</p>
-                    <h3 class="value text-slate-700" id="kpi-monthly-avg-weekly">--</h3>
+                    <h3 class="value text-slate-700 dark:text-slate-300" id="kpi-monthly-avg-weekly">--</h3>
                     <p class="subtext">Ritmo Médio</p>
                 </div>
             </div>
 
             <!-- Monthly Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyTrendLine')">
-                    <div class="mb-6">
-                         <h3 class="font-serif text-lg font-bold text-charcoal">Tendência (Longo Prazo)</h3>
+                <!-- Focus & Performance (Monthly) -->
+                <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyFocusTask')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-charcoal">Foco & Performance (Mensal)</h3>
+                            <p class="font-sans text-xs text-stone-400 mt-1">Top Tarefas do Mês</p>
+                        </div>
                     </div>
-                    <div class="relative h-72 w-full">
-                        <canvas id="monthlyTrendLineChart"></canvas>
+                    <div class="relative h-72 w-full flex justify-center">
+                        <canvas id="monthlyFocusTaskChart"></canvas>
                     </div>
                 </div>
+
+                <!-- Radar Chart -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyRadar')">
                     <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Equilíbrio (Radar)</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Top 6 Tarefas de Maior Impacto</p>
                     </div>
                     <div class="relative h-72 w-full flex justify-center">
                         <canvas id="monthlyRadarChart"></canvas>
                     </div>
                 </div>
+                
+                <!-- Performance Semanal (SCORE RULE APPLIED HERE) -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('monthlyWeekly')">
                      <div class="mb-6">
                         <h3 class="font-serif text-lg font-bold text-charcoal">Performance Semanal</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Evolução do Score (Regra de Cores)</p>
                     </div>
                     <div class="relative h-64 w-full">
                         <canvas id="monthlyWeeklyTrendChart"></canvas>
@@ -729,7 +904,7 @@
                                 <th class="px-6 py-4 border-b border-stone-200">Título</th>
                             </tr>
                         </thead>
-                        <tbody id="dataTableBody" class="divide-y divide-stone-100 bg-white">
+                        <tbody id="dataTableBody" class="divide-y divide-stone-100 dark:divide-stone-800 bg-white">
                             <tr>
                                 <td colspan="5" class="px-6 py-8 text-center text-stone-400 italic">Carregue um arquivo para ver os dados.</td>
                             </tr>
@@ -759,9 +934,69 @@
         let globalDates = []; 
         let currentView = 'daily'; 
         let modalChart = null;
+        let activeModalChartKey = null;
+
+        // --- Theme Toggle Functionality ---
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            // Update Chart Globals
+            const textColor = isDark ? '#A8A29E' : '#000000';
+            const gridColor = isDark ? '#292524' : '#E5E5E5';
+            
+            Chart.defaults.color = textColor;
+            Chart.defaults.scale.grid.color = gridColor;
+            
+            const fontWeight = isDark ? 400 : 700;
+
+            Object.values(charts).forEach(chart => {
+                if(chart.options.scales.x) {
+                    chart.options.scales.x.ticks.color = textColor;
+                    chart.options.scales.x.ticks.font = { weight: fontWeight };
+                    if(chart.options.scales.x.grid) chart.options.scales.x.grid.color = gridColor;
+                }
+                if(chart.options.scales.y) {
+                    chart.options.scales.y.ticks.color = textColor;
+                    chart.options.scales.y.ticks.font = { weight: fontWeight };
+                    if(chart.options.scales.y.grid) chart.options.scales.y.grid.color = gridColor;
+                }
+                if(chart.options.scales.r) {
+                    chart.options.scales.r.grid.color = isDark ? '#44403C' : '#E7E5E4';
+                    chart.options.scales.r.pointLabels.color = textColor;
+                    chart.options.scales.r.ticks.backdropColor = isDark ? '#1C1917' : '#FFFFFF';
+                }
+                if(chart.options.plugins.tooltip) {
+                    chart.options.plugins.tooltip.backgroundColor = isDark ? '#292524' : '#1F1F1F';
+                    chart.options.plugins.tooltip.titleColor = '#F5F5F4';
+                    chart.options.plugins.tooltip.bodyColor = '#F5F5F4';
+                }
+                chart.update();
+            });
+
+            if(modalChart) {
+                modalChart.options.scales.x.ticks.color = textColor;
+                modalChart.options.scales.x.ticks.font = { weight: fontWeight };
+                modalChart.options.scales.y.ticks.color = textColor;
+                modalChart.options.scales.y.ticks.font = { weight: fontWeight };
+                if(modalChart.options.scales.x.grid) modalChart.options.scales.x.grid.color = gridColor;
+                if(modalChart.options.scales.y.grid) modalChart.options.scales.y.grid.color = gridColor;
+                modalChart.update();
+            }
+
+            const btn = document.getElementById('themeToggleBtn');
+            if(isDark) {
+                btn.innerHTML = '<i class="fa-solid fa-sun text-yellow-400 text-lg"></i>';
+                btn.title = "Tema Claro";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-moon text-violet-700 text-lg"></i>';
+                btn.title = "Tema Escuro";
+            }
+        }
 
         // --- Helper Function: Expand Chart ---
         function expandChart(chartKey) {
+            activeModalChartKey = chartKey;
             const sourceChart = charts[chartKey];
             if(!sourceChart) return;
 
@@ -769,14 +1004,13 @@
             modal.classList.remove('hidden');
             
             let title = "Gráfico Detalhado";
-            if(chartKey === 'appDist') title = "Distribuição de Aplicativos (Diário)";
-            else if(chartKey === 'timeline') title = "Linha do Tempo (Diário)";
-            else if(chartKey === 'weeklyTrend') title = "Evolução Diária (Semanal)";
-            else if(chartKey === 'weeklyCat') title = "Categorias por Dia (Semanal)";
-            else if(chartKey === 'weeklyApp') title = "Top Apps (Semanal)";
-            else if(chartKey === 'monthlyTrendLine') title = "Tendência Mensal";
+            if(chartKey === 'focusTask') title = "Análise de Foco: Tarefas & Distrações";
+            else if(chartKey === 'trend') title = "Performance por Horário";
+            else if(chartKey === 'weeklyFocusTask') title = "Foco & Performance Semanal";
+            else if(chartKey === 'weeklyCat') title = "Top 5 Categorias/Apps";
+            else if(chartKey === 'monthlyFocusTask') title = "Foco & Performance Mensal";
             else if(chartKey === 'monthlyRadar') title = "Equilíbrio de Atividades (Mensal)";
-            else if(chartKey === 'monthlyWeekly') title = "Performance Semanal (Mensal)";
+            else if(chartKey === 'monthlyWeekly') title = "Performance Semanal (Score)";
             else if(chartKey === 'monthlyDay') title = "Padrão Diário (Mensal)";
 
             document.getElementById('modalTitle').innerText = title;
@@ -785,6 +1019,11 @@
 
             const ctx = document.getElementById('modalCanvas').getContext('2d');
             
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#A8A29E' : '#000000';
+            const gridColor = isDark ? '#292524' : '#E5E5E5';
+            const fontWeight = isDark ? 400 : 700;
+
             const newConfig = {
                 type: sourceChart.config.type,
                 data: JSON.parse(JSON.stringify(sourceChart.config.data)),
@@ -794,7 +1033,7 @@
                     responsive: true,
                     plugins: {
                         ...sourceChart.config.options.plugins,
-                        legend: { position: 'top', labels: { font: { size: 14 } } },
+                        legend: { position: 'top', labels: { font: { size: 14 }, color: textColor } },
                         tooltip: {
                             ...sourceChart.config.options.plugins.tooltip,
                             titleFont: { size: 16 },
@@ -804,12 +1043,24 @@
                     scales: sourceChart.config.options.scales
                 }
             };
+            
+            if(newConfig.options.scales.x) {
+                newConfig.options.scales.x.ticks.color = textColor;
+                newConfig.options.scales.x.ticks.font = { weight: fontWeight };
+                if(newConfig.options.scales.x.grid) newConfig.options.scales.x.grid.color = gridColor;
+            }
+            if(newConfig.options.scales.y) {
+                newConfig.options.scales.y.ticks.color = textColor;
+                newConfig.options.scales.y.ticks.font = { weight: fontWeight };
+                if(newConfig.options.scales.y.grid) newConfig.options.scales.y.grid.color = gridColor;
+            }
 
             modalChart = new Chart(ctx, newConfig);
         }
 
         function closeZoom() {
             document.getElementById('zoomModal').classList.add('hidden');
+            activeModalChartKey = null;
             if(modalChart) {
                 modalChart.destroy();
                 modalChart = null;
@@ -890,9 +1141,12 @@
 
         // --- Charts ---
         function initCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
             Chart.defaults.font.family = "'Montserrat', sans-serif";
-            Chart.defaults.color = '#57534E'; 
-            Chart.defaults.scale.grid.color = '#F5F5F4'; 
+            Chart.defaults.color = isDark ? '#A8A29E' : '#000000'; 
+            Chart.defaults.scale.grid.color = isDark ? '#292524' : '#F5F5F4'; 
+            Chart.defaults.scale.ticks.color = isDark ? '#A8A29E' : '#000000';
+            Chart.defaults.scale.ticks.font = { weight: isDark ? 400 : 700 };
 
             const commonOptions = {
                 responsive: true,
@@ -907,7 +1161,7 @@
                         } 
                     },
                     tooltip: {
-                        backgroundColor: '#1F1F1F',
+                        backgroundColor: isDark ? '#292524' : '#1F1F1F',
                         titleFont: { family: "'Playfair Display', serif", size: 13 },
                         bodyFont: { family: "'Montserrat', sans-serif", size: 12 },
                         padding: 12,
@@ -916,19 +1170,42 @@
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
-                                
                                 const type = context.chart.config.type;
                                 const id = context.chart.canvas.id;
                                 const raw = context.raw;
 
-                                if (type === 'doughnut' || type === 'pie' || id === 'monthlyDayDistChart') {
+                                let checkId = id;
+                                if(id === 'modalCanvas' && activeModalChartKey) {
+                                    if(activeModalChartKey === 'focusTask') checkId = 'focusTaskChart';
+                                    else if(activeModalChartKey === 'weeklyFocusTask') checkId = 'weeklyFocusTaskChart';
+                                    else if(activeModalChartKey === 'weeklyCat') checkId = 'weeklyCategoryChart'; // Map correct ID for modal
+                                    else if(activeModalChartKey === 'monthlyFocusTask') checkId = 'monthlyFocusTaskChart';
+                                    else if(activeModalChartKey === 'trend') checkId = 'trendChart';
+                                    else if(activeModalChartKey === 'monthlyDay') checkId = 'monthlyDayDistChart';
+                                }
+
+                                if (type === 'doughnut' || type === 'pie' || checkId === 'monthlyDayDistChart') {
                                     return `${context.label || label.replace(': ','')}: ${formatSecondsToTimeShort(raw)}`;
+                                }
+                                if (checkId === 'focusTaskChart' || checkId === 'weeklyFocusTaskChart' || checkId === 'monthlyFocusTaskChart' || checkId === 'weeklyCategoryChart') {
+                                    return `Tempo: ${formatSecondsToTimeShort(raw)}`;
+                                }
+                                if (checkId === 'trendChart') {
+                                    const meta = context.dataset.metaData ? context.dataset.metaData[context.dataIndex] : null;
+                                    if (meta) {
+                                        return [
+                                            `Score: ${raw}/100`,
+                                            `Aplicação Principal: ${meta.topTask || 'N/A'}`,
+                                            `Tempo Focado: ${formatSecondsToTimeShort(meta.topTaskDuration || 0)}`
+                                        ];
+                                    }
+                                    return `Score: ${raw}`;
+                                }
+                                if (checkId === 'monthlyWeeklyTrendChart') { // Correct ID for Monthly Score Chart
+                                    return `Score Médio: ${raw}/100`;
                                 }
                                 if (type === 'radar') {
                                     return `${context.label}: ${formatSecondsToTimeShort(raw * 3600)}`;
-                                }
-                                if (id === 'timelineChart') {
-                                    return `${label}${context.parsed.y.toFixed(2)}h`;
                                 }
                                 if (context.parsed.y !== null) {
                                     return label + context.parsed.y;
@@ -941,21 +1218,126 @@
             };
 
             // DAILY
-            charts.appDist = new Chart(document.getElementById('appDistributionChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#7C3AED', '#4C1D95', '#8B5CF6', '#A78BFA', '#C4B5FD', '#E2E8F0'] }] }, options: { ...commonOptions, cutout: '70%' } });
-            charts.timeline = new Chart(document.getElementById('timelineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tempo (h)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124, 58, 237, 0.05)', fill: true, tension: 0.4, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 0.5, grid: { borderDash: [4, 4] }, ticks: { stepSize: 0.1 } }, x: { grid: { display: false } } } } });
+            charts.focusTask = new Chart(document.getElementById('focusTaskChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { labels: [], datasets: [{ label: 'Tempo', data: [], backgroundColor: [], borderRadius: 4 }] }, 
+                options: { 
+                    ...commonOptions, 
+                    indexAxis: 'y', 
+                    plugins: { ...commonOptions.plugins, legend: { display: false } },
+                    scales: {
+                         x: { display: false },
+                         y: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } }
+                    }
+                } 
+            });
+
             charts.status = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'pie', data: { labels: ['Ativo', 'AFK'], datasets: [{ data: [0, 0], backgroundColor: ['#7C3AED', '#E7E5E4'], borderWidth: 0 }] }, options: commonOptions });
-            charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Score', data: [], backgroundColor: '#4C1D95', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { max: 100, beginAtZero: true, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+            
+            charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), { 
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: 'Score', 
+                        data: [], 
+                        backgroundColor: [], 
+                        borderRadius: 4,
+                        metaData: []
+                    }] 
+                }, 
+                options: { 
+                    ...commonOptions, 
+                    plugins: { ...commonOptions.plugins, legend: { display: false } },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100, 
+                            grid: { borderDash: [4, 4] },
+                            ticks: { stepSize: 20 }
+                        }, 
+                        x: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } } 
+                    } 
+                } 
+            });
 
             // WEEKLY
-            charts.weeklyTrend = new Chart(document.getElementById('weeklyTrendChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Produtividade (%)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124, 58, 237, 0.05)', fill: true, tension: 0.3, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
-            charts.weeklyApp = new Chart(document.getElementById('weeklyAppChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#4C1D95', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#E7E5E4'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '60%' } });
-            charts.weeklyCat = new Chart(document.getElementById('weeklyCategoryChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [] }, options: { ...commonOptions, plugins: { tooltip: { callbacks: { label: function(c) { return `${c.dataset.label}: ${formatSecondsToTimeShort(c.raw)}`; } } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(val) { return Math.floor(val/3600) + 'h'; } } } } } });
+            charts.weeklyFocusTask = new Chart(document.getElementById('weeklyFocusTaskChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { labels: [], datasets: [{ label: 'Tempo', data: [], backgroundColor: [], borderRadius: 4 }] }, 
+                options: { 
+                    ...commonOptions, 
+                    indexAxis: 'y', 
+                    plugins: { ...commonOptions.plugins, legend: { display: false } },
+                    scales: {
+                         x: { display: false },
+                         y: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } }
+                    }
+                } 
+            });
+
+            // REVERTED: Now showing Top 5 Categories (Volume) instead of Daily Score
+            charts.weeklyCat = new Chart(document.getElementById('weeklyCategoryChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { labels: [], datasets: [{ label: 'Tempo', data: [], backgroundColor: [], borderRadius: 4 }] }, 
+                options: { 
+                    ...commonOptions, 
+                    indexAxis: 'y',
+                    plugins: { ...commonOptions.plugins, legend: { display: false } },
+                    scales: { 
+                        x: { display: false }, 
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { autoSkip: false, font: { size: 10 } } 
+                        } 
+                    } 
+                } 
+            });
 
             // MONTHLY
-            charts.monthlyWeekly = new Chart(document.getElementById('monthlyWeeklyTrendChart').getContext('2d'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Produtividade Média (%)', data: [], backgroundColor: '#7C3AED', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+            // UPDATED: Now shows Score (0-100) with proper coloring
+            charts.monthlyWeekly = new Chart(document.getElementById('monthlyWeeklyTrendChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: 'Score Semanal (0-100)', 
+                        data: [], 
+                        backgroundColor: [], 
+                        borderRadius: 4 
+                    }] 
+                }, 
+                options: { 
+                    ...commonOptions, 
+                    plugins: { ...commonOptions.plugins, legend: { display: false } }, 
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100, 
+                            grid: { borderDash: [4, 4] },
+                            ticks: { stepSize: 20 }
+                        }, 
+                        x: { grid: { display: false } } 
+                    } 
+                } 
+            });
+
             charts.monthlyDay = new Chart(document.getElementById('monthlyDayDistChart').getContext('2d'), { type: 'bar', data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Horas Totais', data: [], backgroundColor: '#4C1D95', borderRadius: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(value) { return Math.floor(value / 3600) + 'h'; } } }, x: { grid: { display: false } } } } });
             charts.monthlyRadar = new Chart(document.getElementById('monthlyRadarChart').getContext('2d'), { type: 'radar', data: { labels: [], datasets: [] }, options: { ...commonOptions, scales: { r: { ticks: { display: false }, grid: { circular: true, color: '#E7E5E4' }, pointLabels: { font: { family: "'Montserrat', sans-serif", size: 11 } } } } } });
-            charts.monthlyTrendLine = new Chart(document.getElementById('monthlyTrendLineChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Tendência', data: [], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.4, borderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+            
+            charts.monthlyFocusTask = new Chart(document.getElementById('monthlyFocusTaskChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { labels: [], datasets: [{ label: 'Tempo', data: [], backgroundColor: [], borderRadius: 4 }] }, 
+                options: { 
+                    ...commonOptions, 
+                    indexAxis: 'y', 
+                    plugins: { ...commonOptions.plugins, legend: { display: false } },
+                    scales: {
+                         x: { display: false },
+                         y: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } }
+                    }
+                } 
+            });
         }
 
         // --- Data Processing ---
@@ -1055,6 +1437,7 @@
             const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
             const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
             const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
             const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
 
@@ -1063,13 +1446,31 @@
                 return d >= startDateKey && d <= endDateKey;
             });
 
-            let totalSeconds = 0, totalActiveSeconds = 0, appUsage = {}, categoryUsage = {}, dailyStats = {};
+            let totalSeconds = 0, totalActiveSeconds = 0, totalAfkSeconds = 0; 
+            let appUsage = {}, categoryUsage = {}, dailyStats = {};
+            let taskStats = {}; 
+            let dailyScores = {};
+
             const allDates = getDatesInRange(startDateKey, endDateKey);
-            allDates.forEach(d => dailyStats[d] = { total: 0, active: 0, categorySeconds: {}, hourlyActivity: new Array(24).fill(0) });
+            allDates.forEach(d => {
+                dailyStats[d] = { 
+                    total: 0, 
+                    active: 0, 
+                    categorySeconds: {}, 
+                    taskSeconds: {}, 
+                    hourlyActivity: new Array(24).fill(0),
+                    hourlyTasks: {} 
+                };
+                dailyScores[d] = { weightedScore: 0, totalDuration: 0 };
+            });
+
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign', 'excel', 'vscode', 'teams', 'word'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
 
             rangeRows.forEach(row => {
                 let duration = parseFloat(row[keyDuration]) || 0;
                 let process = row[keyProcess] || "Desconhecido";
+                let rawTitle = row[keyTitle] || ""; 
                 let status = (row[keyStatus] || "").toUpperCase();
                 let d = parseDateKey(row[keyDate]);
                 let timeRaw = row[keyStartTime];
@@ -1085,19 +1486,67 @@
                     if (!appUsage[process]) appUsage[process] = 0; appUsage[process] += duration;
                     if (!categoryUsage[category]) categoryUsage[category] = 0; categoryUsage[category] += duration;
                     
+                    let taskName = process;
+                    if (['chrome', 'brave', 'edge', 'firefox', 'opera'].some(b => process.includes(b)) && rawTitle.length > 2) {
+                        taskName = rawTitle.split(' - ')[0].trim(); 
+                    } else if (rawTitle.length > 2) {
+                        taskName = rawTitle.split(' - ')[0].trim();
+                        if(taskName.toLowerCase() === process) taskName = process;
+                    }
+                    
+                    let rowScore = 50; 
+                    const titleLower = rawTitle.toLowerCase();
+                    if (focusKeywords.some(k => titleLower.includes(k) || process.includes(k))) rowScore = 100;
+                    else if (distractionKeywords.some(k => titleLower.includes(k))) rowScore = 10;
+                    else if (['spotify'].some(k => process.includes(k))) rowScore = 80;
+
+                    if(!taskStats[taskName]) taskStats[taskName] = { duration: 0, weightedScore: 0 };
+                    taskStats[taskName].duration += duration;
+                    taskStats[taskName].weightedScore += (rowScore * duration);
+
+                    if (dailyScores[d]) {
+                        dailyScores[d].weightedScore += (rowScore * duration);
+                        dailyScores[d].totalDuration += duration;
+                    }
+
                     if (dailyStats[d]) {
                         dailyStats[d].active += duration;
                         if(!dailyStats[d].categorySeconds[category]) dailyStats[d].categorySeconds[category] = 0;
                         dailyStats[d].categorySeconds[category] += duration;
+                        
+                        if(!dailyStats[d].taskSeconds[taskName]) dailyStats[d].taskSeconds[taskName] = 0;
+                        dailyStats[d].taskSeconds[taskName] += duration;
+
                         let hour = 0;
                         if (typeof timeRaw === 'number') hour = Math.floor((Math.round(timeRaw * 86400)) / 3600);
                         else if (typeof timeRaw === 'string' && timeRaw.includes(':')) hour = parseInt(timeRaw.split(':')[0]);
-                        if(hour >= 0 && hour < 24) dailyStats[d].hourlyActivity[hour] += duration;
+                        
+                        if(hour >= 0 && hour < 24) {
+                            dailyStats[d].hourlyActivity[hour] += duration;
+                            
+                            if(!dailyStats[d].hourlyTasks[hour]) dailyStats[d].hourlyTasks[hour] = {};
+                            if(!dailyStats[d].hourlyTasks[hour][taskName]) dailyStats[d].hourlyTasks[hour][taskName] = { dur: 0, wScore: 0 };
+                            dailyStats[d].hourlyTasks[hour][taskName].dur += duration;
+                            dailyStats[d].hourlyTasks[hour][taskName].wScore += (rowScore * duration);
+                        }
                     }
+                } else if (status.includes('AFK') || status.includes('AUSENTE')) {
+                    totalAfkSeconds += duration;
                 }
             });
 
-            return { totalSeconds, totalActiveSeconds, appUsage, categoryUsage, dailyStats, daysCount: Object.keys(dailyStats).filter(d => dailyStats[d].total > 0).length, rangeRows };
+            return { 
+                totalSeconds, 
+                totalActiveSeconds, 
+                totalAfkSeconds,
+                appUsage, 
+                categoryUsage, 
+                dailyStats, 
+                taskStats, 
+                dailyScores, 
+                daysCount: Object.keys(dailyStats).filter(d => dailyStats[d].total > 0).length, 
+                rangeRows 
+            };
         }
 
         // --- Daily Data Processing ---
@@ -1105,6 +1554,7 @@
             const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
             const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
             const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
             const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
 
@@ -1114,16 +1564,25 @@
             let totalActiveSeconds = 0;
             let totalAfkSeconds = 0;
             let appUsage = {}; 
-            let timelineBuckets = {}; 
+            let taskUsage = {};
+            let appStats = {};
             
-            for(let h=0; h<24; h++) {
-                timelineBuckets[`${String(h).padStart(2,'0')}:00`] = 0;
-                timelineBuckets[`${String(h).padStart(2,'0')}:30`] = 0;
+            let hourlyStats = {};
+            for(let i=0; i<24; i++) {
+                hourlyStats[i] = { 
+                    totalDuration: 0, 
+                    weightedScore: 0, 
+                    tasks: {} 
+                };
             }
             
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign', 'excel', 'vscode', 'teams', 'word'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+
             filteredRows.forEach(row => {
                 let duration = parseFloat(row[keyDuration]) || 0;
                 let process = row[keyProcess] || "Desconhecido";
+                let rawTitle = row[keyTitle] || ""; 
                 let status = (row[keyStatus] || "").toUpperCase();
                 let timeRaw = row[keyStartTime]; 
 
@@ -1131,14 +1590,6 @@
 
                 totalSeconds += duration;
                 
-                if (status.includes('ATIVO')) {
-                    totalActiveSeconds += duration;
-                    if (!appUsage[process]) appUsage[process] = 0;
-                    appUsage[process] += duration;
-                } else if (status.includes('AFK') || status.includes('AUSENTE')) {
-                    totalAfkSeconds += duration;
-                }
-
                 let hour = 0, minute = 0;
                 if (typeof timeRaw === 'number') {
                     let totalSecs = Math.round(timeRaw * 86400);
@@ -1148,20 +1599,44 @@
                     [hour, minute] = timeRaw.split(':').map(Number);
                 }
 
-                let bucketMinute = minute >= 30 ? "30" : "00";
-                let bucketKey = `${String(hour).padStart(2,'0')}:${bucketMinute}`;
-
                 if (status.includes('ATIVO')) {
-                    if (timelineBuckets[bucketKey] !== undefined) {
-                         timelineBuckets[bucketKey] += (duration / 60); 
-                    }
-                }
-            });
+                    totalActiveSeconds += duration;
+                    if (!appUsage[process]) appUsage[process] = 0;
+                    appUsage[process] += duration;
 
-            // Ensure bucket max is logical
-            Object.keys(timelineBuckets).forEach(k => {
-                if(timelineBuckets[k] > 30) timelineBuckets[k] = 30;
-                timelineBuckets[k] = parseFloat(timelineBuckets[k].toFixed(1));
+                    let taskName = process;
+                    if (['chrome', 'brave', 'edge', 'firefox', 'opera'].some(b => process.includes(b)) && rawTitle.length > 2) {
+                        taskName = rawTitle.split(' - ')[0].trim(); 
+                    } else if (rawTitle.length > 2) {
+                        taskName = rawTitle.split(' - ')[0].trim();
+                        if(taskName.toLowerCase() === process) taskName = process;
+                    }
+                    if(taskName.length > 30) taskName = taskName.substring(0,30) + '...'; 
+                    
+                    if (!taskUsage[taskName]) taskUsage[taskName] = 0;
+                    taskUsage[taskName] += duration;
+
+                    let rowScore = 50; 
+                    const titleLower = rawTitle.toLowerCase();
+                    
+                    if (focusKeywords.some(k => titleLower.includes(k) || process.includes(k))) rowScore = 100;
+                    else if (distractionKeywords.some(k => titleLower.includes(k))) rowScore = 10;
+                    else if (['spotify'].some(k => process.includes(k))) rowScore = 80;
+
+                    if(!appStats[taskName]) appStats[taskName] = { duration: 0, weightedScore: 0 };
+                    appStats[taskName].duration += duration;
+                    appStats[taskName].weightedScore += (rowScore * duration);
+
+                    if (hour >= 0 && hour < 24) {
+                        hourlyStats[hour].totalDuration += duration;
+                        hourlyStats[hour].weightedScore += (rowScore * duration);
+                        if (!hourlyStats[hour].tasks[taskName]) hourlyStats[hour].tasks[taskName] = 0;
+                        hourlyStats[hour].tasks[taskName] += duration;
+                    }
+
+                } else if (status.includes('AFK') || status.includes('AUSENTE')) {
+                    totalAfkSeconds += duration;
+                }
             });
 
             return {
@@ -1171,7 +1646,9 @@
                     totalAfkSeconds,
                     activitiesCount: filteredRows.length,
                     appUsage, 
-                    timelineBuckets
+                    taskUsage, 
+                    appStats,
+                    hourlyStats
                 },
                 rows: filteredRows
             };
@@ -1182,30 +1659,72 @@
             const container = document.getElementById('heatmap-container');
             if(!container) return;
             container.innerHTML = ''; 
-            container.appendChild(document.createElement('div')); // Empty Corner
+            container.appendChild(document.createElement('div'));
+            
             dayLabels.forEach(label => {
                 const header = document.createElement('div');
                 header.className = "text-center text-[10px] font-sans font-bold text-stone-400 py-1 uppercase tracking-wide";
                 header.innerText = label.substring(0,3);
                 container.appendChild(header);
             });
+
             for(let h=0; h<24; h++) {
                 const timeLabel = document.createElement('div');
-                timeLabel.className = "text-right text-[10px] text-stone-300 pr-2 pt-1 font-sans";
+                timeLabel.className = "text-right text-[10px] text-stone-300 pr-2 pt-1 font-sans flex items-center justify-end";
                 timeLabel.innerText = `${String(h).padStart(2,'0')}:00`;
                 container.appendChild(timeLabel);
+                
                 sortedDays.forEach(d => {
-                    const duration = dailyStats[d].hourlyActivity[h] || 0;
                     const cell = document.createElement('div');
                     cell.className = "heatmap-cell";
-                    const intensity = Math.min(1, duration / 3000); 
-                    if(duration === 0) cell.classList.add('bg-stone-50');
-                    else if(intensity < 0.2) cell.classList.add('bg-violet-100');
-                    else if(intensity < 0.4) cell.classList.add('bg-violet-300');
-                    else if(intensity < 0.7) cell.classList.add('bg-violet-500');
-                    else cell.classList.add('bg-violet-700');
-                    const hVal = Math.floor(duration/3600), mVal = Math.floor((duration%3600)/60);
-                    cell.title = `${d} ${h}:00 - ${hVal}h ${mVal}m`;
+                    
+                    const hourTasks = dailyStats[d].hourlyTasks ? dailyStats[d].hourlyTasks[h] : null;
+                    
+                    if (hourTasks && Object.keys(hourTasks).length > 0) {
+                        let winnerTask = null;
+                        let maxImpact = -1;
+                        
+                        Object.entries(hourTasks).forEach(([tName, stats]) => {
+                            if(stats.wScore > maxImpact) {
+                                maxImpact = stats.wScore;
+                                winnerTask = { name: tName, ...stats };
+                            }
+                        });
+
+                        if (winnerTask) {
+                            const avgScore = winnerTask.dur > 0 ? Math.round(winnerTask.wScore / winnerTask.dur) : 0;
+                            const durationRatio = Math.min(1, winnerTask.dur / 3600); 
+                            
+                            let colorClass = '';
+                            let textClass = '';
+
+                            if (avgScore >= 60) {
+                                if (durationRatio < 0.2) { colorClass = 'bg-violet-200 dark:bg-violet-900'; textClass = 'text-dark-contrast'; }
+                                else if (durationRatio < 0.5) { colorClass = 'bg-violet-400 dark:bg-violet-700'; }
+                                else if (durationRatio < 0.8) { colorClass = 'bg-violet-600 dark:bg-violet-500'; }
+                                else { colorClass = 'bg-violet-800 dark:bg-violet-400'; }
+                            } else {
+                                if (durationRatio < 0.2) { colorClass = 'bg-stone-200 dark:bg-stone-800'; textClass = 'text-dark-contrast'; }
+                                else if (durationRatio < 0.5) { colorClass = 'bg-stone-400 dark:bg-stone-600'; }
+                                else if (durationRatio < 0.8) { colorClass = 'bg-stone-500 dark:bg-stone-500'; }
+                                else { colorClass = 'bg-stone-600 dark:bg-stone-400'; }
+                            }
+
+                            cell.className = `heatmap-cell ${colorClass} ${textClass}`;
+                            
+                            const displayParams = winnerTask.name.split(' - ')[0]; 
+                            cell.innerText = displayParams.length > 8 ? displayParams.substring(0,8) + '..' : displayParams;
+                            
+                            const hVal = Math.floor(winnerTask.dur/3600);
+                            const mVal = Math.floor((winnerTask.dur%3600)/60);
+                            cell.title = `Tarefa: ${winnerTask.name}\nScore: ${avgScore}/100\nTempo: ${hVal}h ${mVal}m`;
+                        } else {
+                             cell.classList.add('bg-stone-50', 'dark:bg-stone-900');
+                        }
+                    } else {
+                        cell.classList.add('bg-stone-50', 'dark:bg-stone-900');
+                    }
+                    
                     container.appendChild(cell);
                 });
             }
@@ -1218,7 +1737,6 @@
 
         function updateWeeklyUI(dateKey) {
             const { start, end } = getWeekRange(dateKey);
-            // Formatting Date Range Title
             const formatDate = (d) => d.split('-').reverse().slice(0,2).join('/');
             document.getElementById('weekly-title').textContent = `Semana ${formatDate(start)} - ${formatDate(end)}`;
             document.getElementById('weekly-subtitle').textContent = `Baseado em ${dateKey.split('-').reverse().join('/')}`;
@@ -1228,83 +1746,102 @@
             // KPIs
             document.getElementById('kpi-weekly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
             document.getElementById('kpi-weekly-avg-time').textContent = formatSecondsToTime(data.totalSeconds / 7);
-            
+            document.getElementById('weekly-metric-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
+            document.getElementById('weekly-metric-afk').textContent = formatSecondsToTime(data.totalAfkSeconds);
+
             // Consistency
-            let dailyProds = []; 
+            let dailyScoresArr = [];
             Object.keys(data.dailyStats).forEach(d => { 
-                if(data.dailyStats[d].total > 0) dailyProds.push(data.dailyStats[d].active / data.dailyStats[d].total); 
+                const s = data.dailyScores[d];
+                if(s.totalDuration > 0) {
+                    const dayScore = Math.round(s.weightedScore / s.totalDuration);
+                    dailyScoresArr.push(dayScore); 
+                }
             });
+
             let consistencyScore = 0;
-            if(dailyProds.length > 1) {
-                const mean = dailyProds.reduce((a,b)=>a+b,0)/dailyProds.length;
-                const stdDev = Math.sqrt(dailyProds.reduce((a,b)=>a+Math.pow(b-mean,2),0)/dailyProds.length);
-                consistencyScore = Math.max(0, 100 - (stdDev * 200));
-            } else if(dailyProds.length === 1) consistencyScore = 100;
+            if(dailyScoresArr.length > 1) {
+                const mean = dailyScoresArr.reduce((a,b)=>a+b,0)/dailyScoresArr.length;
+                const stdDev = Math.sqrt(dailyScoresArr.reduce((a,b)=>a+Math.pow(b-mean,2),0)/dailyScoresArr.length);
+                consistencyScore = Math.max(0, 100 - (stdDev * 2.5));
+            } else if(dailyScoresArr.length === 1) {
+                consistencyScore = 100;
+            }
             document.getElementById('kpi-weekly-consistency').textContent = `${Math.round(consistencyScore)}%`;
 
-            // Top Category & Best Day
-            let topCat = "N/A", topCatTime = 0;
-            Object.entries(data.categoryUsage).forEach(([cat, dur]) => { 
-                if(dur > topCatTime) { topCatTime = dur; topCat = cat; } 
-            });
-            document.getElementById('kpi-weekly-top-cat').textContent = topCat;
-            document.getElementById('kpi-weekly-top-cat-time').textContent = formatSecondsToTime(topCatTime);
+            const sortedTasks = Object.entries(data.taskStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore);
+            
+            let topTask = "N/A", topTaskTime = 0;
+            if(sortedTasks.length > 0) {
+                topTask = sortedTasks[0][0];
+                topTaskTime = sortedTasks[0][1].duration;
+            }
+            
+            document.getElementById('kpi-weekly-top-cat').textContent = topTask;
+            document.getElementById('kpi-weekly-top-cat-time').textContent = formatSecondsToTime(topTaskTime);
 
             let bestDay = "-", bestVal = 0;
-            const weekDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-            
             const sortedDays = Object.keys(data.dailyStats).sort();
             
-            // Use 'sortedDays' to create weekday labels for Heatmap
-            const dayNamesMap = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            const weekDayLabels = sortedDays.map(d => {
-                const dateObj = new Date(d + 'T00:00:00');
-                return dayNamesMap[dateObj.getDay()];
-            });
-            
             sortedDays.forEach((d) => {
-                const s = data.dailyStats[d];
-                const p = s.total > 0 ? (s.active / s.total) * 100 : 0;
-                if(p > bestVal) { 
-                    bestVal = p; 
+                const s = data.dailyScores[d];
+                const dayScore = s.totalDuration > 0 ? Math.round(s.weightedScore / s.totalDuration) : 0;
+                
+                if(dayScore > bestVal) { 
+                    bestVal = dayScore; 
                     const dateObj = new Date(d + 'T00:00:00');
-                    const dayIdx = dateObj.getDay(); // 0=Sun
+                    const dayIdx = dateObj.getDay(); 
                     const ptDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
                     bestDay = ptDays[dayIdx];
                 }
             });
             document.getElementById('kpi-weekly-best-day').textContent = bestDay;
-            document.getElementById('kpi-weekly-best-val').textContent = `${Math.round(bestVal)}% Produtividade`;
+            document.getElementById('kpi-weekly-best-val').textContent = `Score Médio: ${bestVal}/100`;
 
-            // Update Charts
-            // Labels for Trend Chart (Day/Month)
-            const labels = sortedDays.map(d => {
-                const parts = d.split('-');
-                return `${parts[2]}/${parts[1]}`;
+            const dayNamesShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            
+            // --- Weekly Focus Chart ---
+            const top7Tasks = sortedTasks.slice(0, 7);
+            const focusTaskLabels = top7Tasks.map(t => t[0]);
+            const focusTaskData = top7Tasks.map(t => t[1].duration);
+            
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            const focusTaskColors = focusTaskLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED';
             });
 
-            charts.weeklyTrend.data.labels = labels;
-            charts.weeklyTrend.data.datasets[0].data = sortedDays.map(d => {
-                const s = data.dailyStats[d];
-                return s.total > 0 ? Math.round((s.active/s.total)*100) : 0;
-            });
-            charts.weeklyTrend.update();
+            charts.weeklyFocusTask.data.labels = focusTaskLabels;
+            charts.weeklyFocusTask.data.datasets[0].data = focusTaskData;
+            charts.weeklyFocusTask.data.datasets[0].backgroundColor = focusTaskColors;
+            charts.weeklyFocusTask.update();
 
-            const sortedApps = Object.entries(data.appUsage).sort((a,b)=>b[1]-a[1]).slice(0,5);
-            charts.weeklyApp.data.labels = sortedApps.map(i=>i[0]);
-            charts.weeklyApp.data.datasets[0].data = sortedApps.map(i=>i[1]);
-            charts.weeklyApp.update();
+            // --- REVERTED: Weekly Category Chart (Top 5 Apps/Categories by Time) ---
+            // Sort categories by duration
+            const sortedCategories = Object.entries(data.categoryUsage)
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 5); // Take top 5
+            
+            const catLabels = sortedCategories.map(c => c[0]);
+            const catData = sortedCategories.map(c => c[1]);
 
-            const cats = Object.keys(data.categoryUsage);
-            charts.weeklyCat.data.labels = labels;
-            charts.weeklyCat.data.datasets = cats.map((cat, i) => ({
-                label: cat, 
-                data: sortedDays.map(d => data.dailyStats[d].categorySeconds[cat] || 0),
-                backgroundColor: ['#7C3AED', '#4C1D95', '#8B5CF6', '#A78BFA', '#C4B5FD'][i%5]
-            }));
+            charts.weeklyCat.data.labels = catLabels;
+            charts.weeklyCat.data.datasets = [{
+                label: 'Tempo Total',
+                data: catData,
+                backgroundColor: ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE'], // Shades of violet
+                borderRadius: 4
+            }];
             charts.weeklyCat.update();
 
-            // Heatmap with Week Day Names
+            const weekDayLabels = sortedDays.map(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                return dayNamesShort[dateObj.getDay()];
+            });
             renderHeatmap(data.dailyStats, sortedDays, weekDayLabels); 
         }
 
@@ -1314,47 +1851,86 @@
             document.getElementById('monthly-title').textContent = `${monthNames[parseInt(dateKey.split('-')[1])-1]} ${dateKey.split('-')[0]}`;
             const data = processDataForRange(start, end);
 
-            // KPIs
             const daysInMonth = (new Date(end) - new Date(start)) / (86400000) + 1;
             document.getElementById('kpi-monthly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds); 
-            document.getElementById('kpi-monthly-avg-daily').textContent = formatSecondsToTime(data.totalSeconds / daysInMonth);
+            document.getElementById('kpi-monthly-avg-daily').textContent = formatSecondsToTime(data.daysCount > 0 ? data.totalActiveSeconds / data.daysCount : 0);
             document.getElementById('kpi-monthly-days').textContent = data.daysCount;
-            document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(data.totalSeconds / (daysInMonth/7));
+            document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(data.totalActiveSeconds / (daysInMonth/7));
 
-            // Best Day of Week
-            let dowStats = Array(7).fill(null).map(() => ({ active: 0, total: 0 }));
+            // Consistency
+            let dailyScoresArr = [];
             Object.keys(data.dailyStats).forEach(d => {
-                const dayIdx = new Date(d + 'T00:00:00').getDay(); 
-                dowStats[dayIdx].active += data.dailyStats[d].active;
-                dowStats[dayIdx].total += data.dailyStats[d].total;
+                const s = data.dailyScores[d];
+                if(s.totalDuration > 0) dailyScoresArr.push(Math.round(s.weightedScore / s.totalDuration));
             });
-            let bestDowIdx = -1, maxDowProd = -1;
-            dowStats.forEach((s, i) => {
-                if(s.total > 0) {
-                    const p = s.active / s.total;
-                    if(p > maxDowProd) { maxDowProd = p; bestDowIdx = i; }
+            
+            let consistency = 0;
+            if(dailyScoresArr.length > 1) {
+                const m = dailyScoresArr.reduce((a,b)=>a+b,0)/dailyScoresArr.length;
+                const sd = Math.sqrt(dailyScoresArr.reduce((a,b)=>a+Math.pow(b-m,2),0)/dailyScoresArr.length);
+                consistency = Math.max(0, 100 - (sd * 2.5));
+            } else if(dailyScoresArr.length === 1) consistency = 100;
+            document.getElementById('kpi-monthly-consistency').textContent = `${Math.round(consistency)}%`;
+
+            // Best Day
+            let dowScores = Array(7).fill(0);
+            let dowCounts = Array(7).fill(0);
+            Object.keys(data.dailyStats).forEach(d => {
+                const s = data.dailyScores[d];
+                if(s.totalDuration > 0) {
+                    const score = s.weightedScore / s.totalDuration; 
+                    const dayIdx = new Date(d + 'T00:00:00').getDay(); 
+                    dowScores[dayIdx] += score;
+                    dowCounts[dayIdx]++;
+                }
+            });
+            
+            let bestDowIdx = -1, maxDowScore = -1;
+            dowScores.forEach((totalScore, i) => {
+                if(dowCounts[i] > 0) {
+                    const avg = totalScore / dowCounts[i];
+                    if(avg > maxDowScore) { maxDowScore = avg; bestDowIdx = i; }
                 }
             });
             const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
             document.getElementById('kpi-monthly-best-day-week').textContent = bestDowIdx > -1 ? weekDayNames[bestDowIdx] : '-';
-            document.getElementById('kpi-monthly-best-day-val').textContent = `${Math.round(maxDowProd * 100)}% Produtividade Média`;
+            document.getElementById('kpi-monthly-best-day-val').textContent = `${Math.round(maxDowScore)}/100 Score Médio`;
 
-            // Consistency & Top Cat
-            let dailyProds = []; Object.values(data.dailyStats).forEach(s => { if(s.total > 0) dailyProds.push(s.active/s.total); });
-            let consistency = 0; 
-            if(dailyProds.length > 1) {
-                const m = dailyProds.reduce((a,b)=>a+b,0)/dailyProds.length;
-                const sd = Math.sqrt(dailyProds.reduce((a,b)=>a+Math.pow(b-m,2),0)/dailyProds.length);
-                consistency = Math.max(0, 100 - (sd * 200));
-            } else if(dailyProds.length===1) consistency=100;
-            document.getElementById('kpi-monthly-consistency').textContent = `${Math.round(consistency)}%`;
+            // Best Week Calculation
+            let weeklyScores=[], weeklyLabels=[], curWScore=0, curWDur=0, dCount=0, wCount=1, maxWScore=0, bestW=-1;
+            const sortedDays = Object.keys(data.dailyStats).sort();
+            
+            sortedDays.forEach((d, i) => {
+                const s = data.dailyScores[d];
+                curWScore += s.weightedScore; 
+                curWDur += s.totalDuration; 
+                dCount++;
+                
+                if(dCount===7 || i===sortedDays.length-1) {
+                    const wAvgScore = curWDur > 0 ? (curWScore/curWDur) : 0;
+                    weeklyScores.push(Math.round(wAvgScore)); 
+                    weeklyLabels.push(`Sem ${wCount}`);
+                    
+                    if(wAvgScore > maxWScore) { maxWScore = wAvgScore; bestW = wCount; }
+                    
+                    curWScore=0; curWDur=0; dCount=0; wCount++;
+                }
+            });
+            
+            document.getElementById('kpi-monthly-best-week').textContent = bestW > -1 ? `Semana ${bestW}` : "-";
+            document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWScore)}/100 Score Médio`;
 
-            let topCat = "N/A", topTime = 0;
-            Object.entries(data.categoryUsage).forEach(([c, t]) => { if(t > topTime) { topTime = t; topCat = c; } });
-            document.getElementById('kpi-monthly-top-cat').textContent = topCat;
-            document.getElementById('kpi-monthly-top-cat-time').textContent = formatSecondsToTime(topTime);
+            // Top Task
+            let topTask = "N/A", topTaskVal = 0;
+            const sortedMonthlyTasks = Object.entries(data.taskStats).sort((a,b) => b[1].weightedScore - a[1].weightedScore);
+            if(sortedMonthlyTasks.length > 0) {
+                topTask = sortedMonthlyTasks[0][0];
+                topTaskVal = sortedMonthlyTasks[0][1].duration;
+            }
+            document.getElementById('kpi-monthly-top-cat').textContent = topTask;
+            document.getElementById('kpi-monthly-top-cat-time').textContent = formatSecondsToTime(topTaskVal);
 
-            // Burnout & Goal
+            // Burnout Alert
             let maxStreak = 0, currStreak = 0;
             Object.keys(data.dailyStats).sort().forEach(d => {
                 if(data.dailyStats[d].total > 36000) currStreak++; else { maxStreak = Math.max(maxStreak, currStreak); currStreak = 0; }
@@ -1373,39 +1949,79 @@
             let goalsMet = Object.values(data.dailyStats).filter(s => s.active >= goalSec).length;
             document.getElementById('kpi-monthly-goal-eff').textContent = data.daysCount > 0 ? `${Math.round((goalsMet/data.daysCount)*100)}%` : "0%";
 
-            // Best Week Calculation
-            let weeklyScores=[], weeklyLabels=[], curWProd=0, curWTot=0, dCount=0, wCount=1, maxWProd=0, bestW=-1;
-            const sortedDays = Object.keys(data.dailyStats).sort();
-            sortedDays.forEach((d, i) => {
-                curWTot += data.dailyStats[d].total; curWProd += data.dailyStats[d].active; dCount++;
-                if(dCount===7 || i===sortedDays.length-1) {
-                    const wp = curWTot > 0 ? (curWProd/curWTot)*100 : 0;
-                    weeklyScores.push(Math.round(wp)); weeklyLabels.push(`Sem ${wCount}`);
-                    if(wp > maxWProd) { maxWProd = wp; bestW = wCount; }
-                    curWProd=0; curWTot=0; dCount=0; wCount++;
-                }
+            // --- SCORE RULE APPLIED HERE (Monthly Weekly Chart) ---
+            const weeklyScoreColors = weeklyScores.map(score => {
+                if (score >= 80) return '#7C3AED'; // High Perf
+                if (score >= 50) return '#C4B5FD'; // Med Perf
+                return '#D6D3D1'; // Low Perf
             });
-            document.getElementById('kpi-monthly-best-week').textContent = bestW > -1 ? `Semana ${bestW}` : "-";
-            document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWProd)}% Produtividade`;
 
-            // Update Charts
-            charts.monthlyTrendLine.data.labels = weeklyLabels; charts.monthlyTrendLine.data.datasets[0].data = weeklyScores; charts.monthlyTrendLine.update();
-            charts.monthlyWeekly.data.labels = weeklyLabels; charts.monthlyWeekly.data.datasets[0].data = weeklyScores; charts.monthlyWeekly.update();
+            charts.monthlyWeekly.data.labels = weeklyLabels; 
+            charts.monthlyWeekly.data.datasets[0].data = weeklyScores; 
+            charts.monthlyWeekly.data.datasets[0].backgroundColor = weeklyScoreColors;
+            charts.monthlyWeekly.update();
             
-            charts.monthlyRadar.data.labels = Object.keys(data.categoryUsage);
-            charts.monthlyRadar.data.datasets = [{ label: 'Horas', data: Object.values(data.categoryUsage).map(v=>v/3600), backgroundColor: 'rgba(124, 58, 237, 0.2)', borderColor: '#7C3AED', pointBackgroundColor: '#7C3AED' }];
+            // Radar Chart
+            const sortedRadarTasks = Object.entries(data.taskStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore)
+                .slice(0, 6); 
+
+            const radarLabels = sortedRadarTasks.map(t => t[0].length > 15 ? t[0].substring(0, 15) + '...' : t[0]); 
+            const radarData = sortedRadarTasks.map(t => t[1].duration / 3600); 
+
+            charts.monthlyRadar.data.labels = radarLabels;
+            charts.monthlyRadar.data.datasets = [{ 
+                label: 'Horas (Top Foco)', 
+                data: radarData, 
+                backgroundColor: 'rgba(124, 58, 237, 0.2)', 
+                borderColor: '#7C3AED', 
+                pointBackgroundColor: '#7C3AED',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#7C3AED'
+            }];
             charts.monthlyRadar.update();
 
+            // Monthly Focus Task Chart
+            const top7Monthly = sortedMonthlyTasks.slice(0, 7);
+            const mLabels = top7Monthly.map(t => t[0]);
+            const mData = top7Monthly.map(t => t[1].duration);
+            
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            const mColors = mLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED';
+            });
+
+            charts.monthlyFocusTask.data.labels = mLabels;
+            charts.monthlyFocusTask.data.datasets[0].data = mData;
+            charts.monthlyFocusTask.data.datasets[0].backgroundColor = mColors;
+            charts.monthlyFocusTask.update();
+
+            // --- REVISED: Padrão por Dia (Average Active Hours) ---
             let dowT = [0,0,0,0,0,0,0];
+            let dowCount = [0,0,0,0,0,0,0];
+            
             sortedDays.forEach(d => { 
                 const idx = new Date(d+'T00:00:00').getDay(); 
-                dowT[idx===0?6:idx-1] += data.dailyStats[d].total; 
+                const arrIdx = idx === 0 ? 6 : idx - 1; 
+                
+                // Using ACTIVE time instead of total for productivity pattern
+                dowT[arrIdx] += data.dailyStats[d].active; 
+                dowCount[arrIdx]++;
             });
-            charts.monthlyDay.data.datasets[0].data = dowT;
+            
+            // Calculate Average per Day of Week
+            const dowAvg = dowT.map((total, i) => dowCount[i] > 0 ? total / dowCount[i] : 0);
+
+            charts.monthlyDay.data.datasets[0].data = dowAvg;
+            charts.monthlyDay.data.datasets[0].label = 'Média Horas Ativas';
             charts.monthlyDay.update();
         }
 
-        // --- Helper to update diffs (Daily Only) ---
         function updateDiffBadge(elementId, currentVal, prevVal, isPercentage = false) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -1428,7 +2044,6 @@
                  el.className = `mt-2 text-xs font-bold font-sans px-2 py-1 rounded inline-block ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
                  el.classList.remove('hidden');
             } else {
-                 // CHANGED: Removed .toFixed(1) to show integer percentage (e.g. 75%)
                  el.textContent = `${icon} ${Math.round(Math.abs(diffPercent))}%`;
                  el.className = `text-xs font-bold font-sans px-2 py-1 rounded ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
                  el.classList.remove('hidden');
@@ -1438,7 +2053,6 @@
         function updateDashboardUI(dataObj, comparisonObj = null) {
             const metrics = dataObj.metrics;
 
-            // 1. Update KPIs
             document.getElementById('kpi-total-time').textContent = formatSecondsToTime(metrics.totalSeconds);
             document.getElementById('kpi-activities').textContent = metrics.activitiesCount.toLocaleString();
             document.getElementById('kpi-apps').textContent = Object.keys(metrics.appUsage).length;
@@ -1448,7 +2062,6 @@
             document.getElementById('kpi-productivity').textContent = `${prodRate}%`;
             document.getElementById('kpi-prod-bar').style.width = `${prodRate}%`;
 
-            // Comparison Logic
             if (comparisonObj) {
                 const compMetrics = comparisonObj.metrics;
                 const compProdRate = compMetrics.totalSeconds > 0 ? Math.round((compMetrics.totalActiveSeconds / compMetrics.totalSeconds) * 100) : 0;
@@ -1460,80 +2073,85 @@
                 ['diff-total-time', 'diff-productivity', 'diff-activities'].forEach(id => document.getElementById(id).classList.add('hidden'));
             }
 
-            // 2. Update Charts
-            const sortedApps = Object.entries(metrics.appUsage).sort((a, b) => b[1] - a[1]);
-            const top5 = sortedApps.slice(0, 5);
-            const othersTotal = sortedApps.slice(5).reduce((acc, curr) => acc + curr[1], 0);
+            const sortedTasks = Object.entries(metrics.taskUsage).sort((a, b) => b[1] - a[1]).slice(0, 7);
+            const taskLabels = sortedTasks.map(t => t[0]);
+            const taskData = sortedTasks.map(t => t[1]);
             
-            const appLabels = top5.map(i => i[0]);
-            const appData = top5.map(i => i[1]);
-            if (othersTotal > 0) {
-                appLabels.push('Outros');
-                appData.push(othersTotal);
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            
+            const taskColors = taskLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED'; 
+            });
+
+            charts.focusTask.data.labels = taskLabels;
+            charts.focusTask.data.datasets[0].data = taskData;
+            charts.focusTask.data.datasets[0].backgroundColor = taskColors;
+            charts.focusTask.update();
+
+            const hours = Object.keys(metrics.hourlyStats).map(Number).sort((a,b)=>a-b);
+            let startHour = 8; 
+            let endHour = 19;
+            
+            const activeHours = hours.filter(h => metrics.hourlyStats[h].totalDuration > 0);
+            if(activeHours.length > 0) {
+                startHour = Math.max(0, activeHours[0] - 1);
+                endHour = Math.min(23, activeHours[activeHours.length-1] + 1);
             }
+
+            const rangeHours = hours.filter(h => h >= startHour && h <= endHour);
+            const hourlyLabels = rangeHours.map(h => `${String(h).padStart(2,'0')}:00`);
             
-            charts.appDist.data.labels = appLabels;
-            charts.appDist.data.datasets[0].data = appData;
-            charts.appDist.update();
+            const hourlyScores = rangeHours.map(h => {
+                const s = metrics.hourlyStats[h];
+                return s.totalDuration > 0 ? Math.round(s.weightedScore / s.totalDuration) : 0;
+            });
 
-            const sortedTimes = Object.keys(metrics.timelineBuckets).sort();
-            const activityData = sortedTimes.map(t => metrics.timelineBuckets[t]);
-            const scoreData = sortedTimes.map(t => Math.round((metrics.timelineBuckets[t] / 30) * 100));
-
-            charts.timeline.data.labels = sortedTimes;
-            
-            // CHANGED: Convert minutes to hours for display
-            charts.timeline.data.datasets = [{ 
-                label: 'Dia Atual', 
-                data: activityData.map(v => v/60), 
-                borderColor: '#7C3AED', 
-                backgroundColor: 'rgba(124, 58, 237, 0.05)', 
-                fill: true, 
-                tension: 0.4,
-                borderWidth: 2
-            }];
-
-            if (comparisonObj) {
-                const compActivityData = sortedTimes.map(t => comparisonObj.metrics.timelineBuckets[t] || 0);
-                charts.timeline.data.datasets.push({
-                    label: 'Dia Comparado', 
-                    data: compActivityData.map(v => v/60),
-                    borderColor: '#A8A29E', 
-                    backgroundColor: 'rgba(168, 162, 158, 0.05)', 
-                    fill: true, 
-                    borderDash: [5, 5], 
-                    tension: 0.4,
-                    borderWidth: 2
+            const hourlyMetaData = rangeHours.map(h => {
+                const s = metrics.hourlyStats[h];
+                if(s.totalDuration === 0) return { topTask: '-', topTaskDuration: 0 };
+                
+                let topTaskName = '-';
+                let topTaskDur = 0;
+                Object.entries(s.tasks).forEach(([name, dur]) => {
+                    if(dur > topTaskDur) {
+                        topTaskDur = dur;
+                        topTaskName = name;
+                    }
                 });
-                document.getElementById('legend-compare').classList.remove('hidden');
-                document.getElementById('legend-compare').classList.add('flex');
-            } else {
-                document.getElementById('legend-compare').classList.add('hidden');
-                document.getElementById('legend-compare').classList.remove('flex');
-            }
+                return { topTask: topTaskName, topTaskDuration: topTaskDur };
+            });
 
-            charts.timeline.update();
+            const hourlyColors = hourlyScores.map(score => {
+                if (score >= 80) return '#7C3AED'; 
+                if (score >= 50) return '#C4B5FD'; 
+                return '#D6D3D1'; 
+            });
 
-            charts.trend.data.labels = sortedTimes;
-            charts.trend.data.datasets[0].data = scoreData;
+            charts.trend.data.labels = hourlyLabels;
+            charts.trend.data.datasets[0].data = hourlyScores;
+            charts.trend.data.datasets[0].backgroundColor = hourlyColors;
+            charts.trend.data.datasets[0].metaData = hourlyMetaData; 
             charts.trend.update();
 
             charts.status.data.datasets[0].data = [metrics.totalActiveSeconds, metrics.totalAfkSeconds];
             charts.status.update();
 
-            // 3. Update Insights
-            const topApp = sortedApps.length > 0 ? sortedApps[0][0] : "Nenhuma";
-            document.getElementById('insight-top-app').textContent = `${topApp} (${formatSecondsToTime(sortedApps.length > 0 ? sortedApps[0][1] : 0)})`;
+            const sortedTasksByScore = Object.entries(metrics.appStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore);
+            
+            const topTaskEntry = sortedTasksByScore.length > 0 ? sortedTasksByScore[0] : ["Nenhuma", {duration: 0, weightedScore: 0}];
+            const topTaskName = topTaskEntry[0];
+            const topTaskDuration = topTaskEntry[1].duration;
+            const topTaskScore = topTaskDuration > 0 ? Math.round(topTaskEntry[1].weightedScore / topTaskDuration) : 0;
 
-            let maxScore = -1;
-            let peakTime = "--";
-            sortedTimes.forEach((time, index) => {
-                if (scoreData[index] > maxScore) {
-                    maxScore = scoreData[index];
-                    peakTime = time;
-                }
-            });
-            document.getElementById('insight-peak-time').textContent = `${peakTime} (Score: ${maxScore})`;
+            document.getElementById('insight-top-task').textContent = topTaskName;
+            document.getElementById('insight-top-task-time').textContent = formatSecondsToTime(topTaskDuration);
+            document.getElementById('insight-top-task-score').textContent = `${topTaskScore}/100`;
+
             document.getElementById('insight-afk-time').textContent = formatSecondsToTime(metrics.totalAfkSeconds);
 
             updateGoal(metrics.totalActiveSeconds);
@@ -1564,10 +2182,8 @@
             const selectedDate = document.getElementById('dateSelect').value;
             if(!selectedDate) return;
 
-            // Sync selectors visually if coming from Date change
             syncAuxiliarySelectsWithDate();
 
-            // Route based on View
             if (currentView === 'daily') {
                 const compareDate = document.getElementById('compareDateSelect').value;
                 const isCompareEnabled = document.getElementById('enableCompare').checked;
@@ -1585,15 +2201,11 @@
             }
         }
 
-        // New Handlers for Auxiliary Controls
         document.getElementById('monthSelect').addEventListener('change', (e) => {
              const monthKey = e.target.value;
              if(!monthKey) return;
-             
              updateWeekOptions(monthKey);
-
              if (currentView === 'monthly') {
-                 // Update monthly view with first day of month
                  updateMonthlyUI(monthKey + '-01');
              }
         });
@@ -1601,7 +2213,6 @@
         document.getElementById('weekSelect').addEventListener('change', (e) => {
              const startDate = e.target.value;
              if(!startDate) return;
-             
              if (currentView === 'weekly') {
                  updateWeeklyUI(startDate);
              }
@@ -1638,7 +2249,6 @@
                     
                     if (globalRawData.length === 0) throw new Error("Planilha vazia");
 
-                    // Extract Dates
                     const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
                     const datesSet = new Set();
                     globalRawData.forEach(r => {
@@ -1648,7 +2258,7 @@
                     
                     globalDates = Array.from(datesSet).sort().reverse();
                     populateDateSelects();
-                    populateAuxiliarySelects(); // NEW
+                    populateAuxiliarySelects(); 
                     
                     document.getElementById('statusMsg').classList.add('hidden');
                 } catch (error) {
@@ -1704,21 +2314,21 @@
 
             rows.forEach((row, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                tr.className = "border-b border-slate-100 dark:border-stone-800 hover:bg-slate-50 dark:hover:bg-stone-800 transition-colors";
                 
                 let timeVal = row[keyStartTime];
                 if(typeof timeVal === 'number') timeVal = formatExcelTime(timeVal);
 
                 tr.innerHTML = `
                     <td class="px-4 py-3 font-mono text-xs">${timeVal || '--'}</td>
-                    <td class="px-4 py-3 font-medium text-slate-700">${(row[keyProcess] || '').replace('.exe','')}</td>
+                    <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">${(row[keyProcess] || '').replace('.exe','')}</td>
                     <td class="px-4 py-3">${formatSecondsToTimeShort(row[keyDuration] || 0)}</td>
                     <td class="px-4 py-3">
                         <span class="px-2 py-1 rounded text-xs font-semibold ${String(row[keyStatus]).includes('ATIVO') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
                             ${row[keyStatus] || 'N/A'}
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-xs text-slate-500 truncate max-w-xs">${row[keyTitle] || ''}</td>
+                    <td class="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs">${row[keyTitle] || ''}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1729,10 +2339,20 @@
             document.getElementById('statusText').textContent = "Gerando dados demo (30 dias)...";
             
             globalRawData = [];
-            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer', 'outlook', 'word'];
+            const apps = ['excel', 'chrome', 'spotify', 'vscode', 'teams', 'explorer', 'outlook', 'word', 'whatsapp', 'slack', 'monday'];
+            const titles = {
+                'excel': ['Budget.xlsx', 'Financial_Report_2024.xlsx', 'Data_Analysis.xlsx'],
+                'chrome': ['Tutorial Javascript - YouTube', 'Dashboard Design - Figma', 'Stack Overflow - Error 404', 'Funny Cats Compilation - YouTube', 'Gmail - Inbox (3)', 'Jira Board - Sprint 42', 'Google Ads - Campanha Q3', 'Gerenciador de Anúncios - Meta Business Suite'],
+                'vscode': ['index.html - Project Alpha', 'style.css - Project Alpha', 'main.js - Project Beta'],
+                'spotify': ['Focus Flow Playlist', 'Top Hits 2024'],
+                'teams': ['Meeting with John', 'General Channel'],
+                'word': ['Proposal_Final_v2.docx', 'Meeting_Notes.docx'],
+                'whatsapp': ['WhatsApp Web', 'Grupo da Firma (3)'],
+                'slack': ['#general - Slack', '#dev-team - Slack'],
+                'monday': ['Sprint Planning - Monday.com', 'Roadmap Q4 - Monday.com']
+            };
             const statuses = ['ATIVO', 'ATIVO', 'ATIVO', 'AFK', 'ATIVO', 'AUSENTE'];
             
-            // Generate last 30 days
             const datesToGen = [];
             for(let i=0; i<30; i++) {
                 let d = new Date();
@@ -1744,7 +2364,6 @@
                  let currentTime = 8 * 3600; 
                  const endTime = 18 * 3600;
                  
-                 // Skip some Sundays mostly
                  const dateObj = new Date(dateStr);
                  if (dateObj.getDay() === 0 && Math.random() > 0.2) return; 
 
@@ -1753,6 +2372,9 @@
                     const app = apps[Math.floor(Math.random() * apps.length)];
                     const status = statuses[Math.floor(Math.random() * statuses.length)];
                     
+                    let titleList = titles[app] || ['Application Window'];
+                    let winTitle = titleList[Math.floor(Math.random() * titleList.length)];
+
                     const h = Math.floor(currentTime / 3600);
                     const m = Math.floor((currentTime % 3600) / 60);
                     const s = currentTime % 60;
@@ -1764,7 +2386,7 @@
                         "Processo": app + ".exe",
                         "Duração (seg)": duration,
                         "Status": status,
-                        "Título da Janela": "Demo Window"
+                        "Título da Janela": winTitle 
                     });
                     currentTime += duration;
                 }
@@ -1774,7 +2396,7 @@
             globalRawData.forEach(r => datesSet.add(r["Data Início"]));
             globalDates = Array.from(datesSet).sort().reverse();
             populateDateSelects();
-            populateAuxiliarySelects(); // NEW
+            populateAuxiliarySelects(); 
             
             setTimeout(() => { document.getElementById('statusMsg').classList.add('hidden'); }, 500);
         }

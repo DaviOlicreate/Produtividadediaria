@@ -702,8 +702,8 @@
                 <!-- Stacked Bar (Reverted to Categories) -->
                 <div class="card-type-a p-8 cursor-zoom-in" onclick="expandChart('weeklyCat')">
                     <div class="mb-6">
-                        <h3 class="font-serif text-lg font-bold text-charcoal">Top 5 Categorias/Apps</h3>
-                        <p class="font-sans text-xs text-stone-400 mt-1">Distribuição de tempo na semana</p>
+                        <h3 class="font-serif text-lg font-bold text-charcoal">Top 5 Aplicativos</h3>
+                        <p class="font-sans text-xs text-stone-400 mt-1">Detalhamento por Software</p>
                     </div>
                     <div class="relative h-72 w-full">
                         <canvas id="weeklyCategoryChart"></canvas>
@@ -1007,7 +1007,7 @@
             if(chartKey === 'focusTask') title = "Análise de Foco: Tarefas & Distrações";
             else if(chartKey === 'trend') title = "Performance por Horário";
             else if(chartKey === 'weeklyFocusTask') title = "Foco & Performance Semanal";
-            else if(chartKey === 'weeklyCat') title = "Top 5 Categorias/Apps";
+            else if(chartKey === 'weeklyCat') title = "Top 5 Aplicativos";
             else if(chartKey === 'monthlyFocusTask') title = "Foco & Performance Mensal";
             else if(chartKey === 'monthlyRadar') title = "Equilíbrio de Atividades (Mensal)";
             else if(chartKey === 'monthlyWeekly') title = "Performance Semanal (Score)";
@@ -1749,10 +1749,11 @@
             document.getElementById('weekly-metric-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
             document.getElementById('weekly-metric-afk').textContent = formatSecondsToTime(data.totalAfkSeconds);
 
-            // Consistency
+            // --- UPDATED CONSISTENCY LOGIC (Based on Daily Weighted Score) ---
             let dailyScoresArr = [];
             Object.keys(data.dailyStats).forEach(d => { 
                 const s = data.dailyScores[d];
+                // Only consider days with activity for consistency measure
                 if(s.totalDuration > 0) {
                     const dayScore = Math.round(s.weightedScore / s.totalDuration);
                     dailyScoresArr.push(dayScore); 
@@ -1800,8 +1801,11 @@
             document.getElementById('kpi-weekly-best-val').textContent = `Score Médio: ${bestVal}/100`;
 
             const dayNamesShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            
-            // --- Weekly Focus Chart ---
+            const labelsDayNames = sortedDays.map(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                return dayNamesShort[dateObj.getDay()];
+            });
+
             const top7Tasks = sortedTasks.slice(0, 7);
             const focusTaskLabels = top7Tasks.map(t => t[0]);
             const focusTaskData = top7Tasks.map(t => t[1].duration);
@@ -1820,19 +1824,19 @@
             charts.weeklyFocusTask.data.datasets[0].backgroundColor = focusTaskColors;
             charts.weeklyFocusTask.update();
 
-            // --- REVERTED: Weekly Category Chart (Top 5 Apps/Categories by Time) ---
-            // Sort categories by duration
-            const sortedCategories = Object.entries(data.categoryUsage)
+            // --- UPDATED: Weekly Apps Chart (Top 5 Apps by Time) ---
+            // Changed from Categories to Apps for more granular detail
+            const sortedApps = Object.entries(data.appUsage)
                 .sort((a,b) => b[1] - a[1])
                 .slice(0, 5); // Take top 5
             
-            const catLabels = sortedCategories.map(c => c[0]);
-            const catData = sortedCategories.map(c => c[1]);
+            const appLabels = sortedApps.map(c => c[0]); // c[0] is the app name
+            const appData = sortedApps.map(c => c[1]); // c[1] is duration
 
-            charts.weeklyCat.data.labels = catLabels;
+            charts.weeklyCat.data.labels = appLabels;
             charts.weeklyCat.data.datasets = [{
                 label: 'Tempo Total',
-                data: catData,
+                data: appData,
                 backgroundColor: ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE'], // Shades of violet
                 borderRadius: 4
             }];
@@ -1857,7 +1861,7 @@
             document.getElementById('kpi-monthly-days').textContent = data.daysCount;
             document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(data.totalActiveSeconds / (daysInMonth/7));
 
-            // Consistency
+            // --- Updated Consistency ---
             let dailyScoresArr = [];
             Object.keys(data.dailyStats).forEach(d => {
                 const s = data.dailyScores[d];
@@ -1872,7 +1876,7 @@
             } else if(dailyScoresArr.length === 1) consistency = 100;
             document.getElementById('kpi-monthly-consistency').textContent = `${Math.round(consistency)}%`;
 
-            // Best Day
+            // --- Updated Best Day of Week ---
             let dowScores = Array(7).fill(0);
             let dowCounts = Array(7).fill(0);
             Object.keys(data.dailyStats).forEach(d => {
@@ -1896,7 +1900,7 @@
             document.getElementById('kpi-monthly-best-day-week').textContent = bestDowIdx > -1 ? weekDayNames[bestDowIdx] : '-';
             document.getElementById('kpi-monthly-best-day-val').textContent = `${Math.round(maxDowScore)}/100 Score Médio`;
 
-            // Best Week Calculation
+            // --- Updated Best Week ---
             let weeklyScores=[], weeklyLabels=[], curWScore=0, curWDur=0, dCount=0, wCount=1, maxWScore=0, bestW=-1;
             const sortedDays = Object.keys(data.dailyStats).sort();
             
@@ -1920,7 +1924,7 @@
             document.getElementById('kpi-monthly-best-week').textContent = bestW > -1 ? `Semana ${bestW}` : "-";
             document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWScore)}/100 Score Médio`;
 
-            // Top Task
+            // --- Top Task ---
             let topTask = "N/A", topTaskVal = 0;
             const sortedMonthlyTasks = Object.entries(data.taskStats).sort((a,b) => b[1].weightedScore - a[1].weightedScore);
             if(sortedMonthlyTasks.length > 0) {
@@ -1930,7 +1934,6 @@
             document.getElementById('kpi-monthly-top-cat').textContent = topTask;
             document.getElementById('kpi-monthly-top-cat-time').textContent = formatSecondsToTime(topTaskVal);
 
-            // Burnout Alert
             let maxStreak = 0, currStreak = 0;
             Object.keys(data.dailyStats).sort().forEach(d => {
                 if(data.dailyStats[d].total > 36000) currStreak++; else { maxStreak = Math.max(maxStreak, currStreak); currStreak = 0; }
@@ -1949,11 +1952,11 @@
             let goalsMet = Object.values(data.dailyStats).filter(s => s.active >= goalSec).length;
             document.getElementById('kpi-monthly-goal-eff').textContent = data.daysCount > 0 ? `${Math.round((goalsMet/data.daysCount)*100)}%` : "0%";
 
-            // --- SCORE RULE APPLIED HERE (Monthly Weekly Chart) ---
+            // Apply Score Rule Colors to Monthly Weekly Trend as well
             const weeklyScoreColors = weeklyScores.map(score => {
-                if (score >= 80) return '#7C3AED'; // High Perf
-                if (score >= 50) return '#C4B5FD'; // Med Perf
-                return '#D6D3D1'; // Low Perf
+                if (score >= 80) return '#7C3AED';
+                if (score >= 50) return '#C4B5FD';
+                return '#D6D3D1';
             });
 
             charts.monthlyWeekly.data.labels = weeklyLabels; 
@@ -1961,7 +1964,7 @@
             charts.monthlyWeekly.data.datasets[0].backgroundColor = weeklyScoreColors;
             charts.monthlyWeekly.update();
             
-            // Radar Chart
+            // --- UPDATED RADAR CHART ---
             const sortedRadarTasks = Object.entries(data.taskStats)
                 .sort((a, b) => b[1].weightedScore - a[1].weightedScore)
                 .slice(0, 6); 
@@ -1982,7 +1985,7 @@
             }];
             charts.monthlyRadar.update();
 
-            // Monthly Focus Task Chart
+            // --- Updated Monthly Focus Task Chart ---
             const top7Monthly = sortedMonthlyTasks.slice(0, 7);
             const mLabels = top7Monthly.map(t => t[0]);
             const mData = top7Monthly.map(t => t[1].duration);

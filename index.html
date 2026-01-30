@@ -979,8 +979,8 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- ATENÇÃO: COLOQUE SUA NOVA CONFIGURAÇÃO AQUI ---
-        // Você pega isso no Console do Firebase > Project Settings > General > Your Apps
+        // --- COLOQUE SUA CONFIGURAÇÃO DO FIREBASE AQUI ---
+        // Você pega isso no Console do Firebase > Project Settings
         const firebaseConfig = {
   apiKey: "AIzaSyDZ3tVevztaxfdKd0rAsZNFLmGTdLwl_6o",
   authDomain: "timesheet-ec9d2.firebaseapp.com",
@@ -1934,6 +1934,617 @@
                     container.appendChild(cell);
                 });
             }
+        }
+
+        function updateDailyUI(dateKey, compareData = null) {
+            const result = processDataForDate(dateKey); 
+            updateDashboardUI(result, compareData);
+        }
+
+        function updateWeeklyUI(dateKey) {
+            const { start, end } = getWeekRange(dateKey);
+            const formatDate = (d) => d.split('-').reverse().slice(0,2).join('/');
+            document.getElementById('weekly-title').textContent = `Semana ${formatDate(start)} - ${formatDate(end)}`;
+            document.getElementById('weekly-subtitle').textContent = `Baseado em ${dateKey.split('-').reverse().join('/')}`;
+
+            const data = processDataForRange(start, end);
+
+            // KPIs
+            document.getElementById('kpi-weekly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
+            document.getElementById('kpi-weekly-avg-time').textContent = formatSecondsToTime(data.totalSeconds / 7);
+            document.getElementById('weekly-metric-active').textContent = formatSecondsToTime(data.totalActiveSeconds);
+            document.getElementById('weekly-metric-afk').textContent = formatSecondsToTime(data.totalAfkSeconds);
+
+            // --- UPDATED CONSISTENCY LOGIC (Based on Daily Weighted Score) ---
+            let dailyScoresArr = [];
+            Object.keys(data.dailyStats).forEach(d => { 
+                const s = data.dailyScores[d];
+                // Only consider days with activity for consistency measure
+                if(s.totalDuration > 0) {
+                    const dayScore = Math.round(s.weightedScore / s.totalDuration);
+                    dailyScoresArr.push(dayScore); 
+                }
+            });
+
+            let consistencyScore = 0;
+            if(dailyScoresArr.length > 1) {
+                const mean = dailyScoresArr.reduce((a,b)=>a+b,0)/dailyScoresArr.length;
+                const stdDev = Math.sqrt(dailyScoresArr.reduce((a,b)=>a+Math.pow(b-mean,2),0)/dailyScoresArr.length);
+                consistencyScore = Math.max(0, 100 - (stdDev * 2.5));
+            } else if(dailyScoresArr.length === 1) {
+                consistencyScore = 100;
+            }
+            document.getElementById('kpi-weekly-consistency').textContent = `${Math.round(consistencyScore)}%`;
+
+            const sortedTasks = Object.entries(data.taskStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore);
+            
+            let topTask = "N/A", topTaskTime = 0;
+            if(sortedTasks.length > 0) {
+                topTask = sortedTasks[0][0];
+                topTaskTime = sortedTasks[0][1].duration;
+            }
+            
+            document.getElementById('kpi-weekly-top-cat').textContent = topTask;
+            document.getElementById('kpi-weekly-top-cat-time').textContent = formatSecondsToTime(topTaskTime);
+
+            let bestDay = "-", bestVal = 0;
+            const sortedDays = Object.keys(data.dailyStats).sort();
+            
+            sortedDays.forEach((d) => {
+                const s = data.dailyScores[d];
+                const dayScore = s.totalDuration > 0 ? Math.round(s.weightedScore / s.totalDuration) : 0;
+                
+                if(dayScore > bestVal) { 
+                    bestVal = dayScore; 
+                    const dateObj = new Date(d + 'T00:00:00');
+                    const dayIdx = dateObj.getDay(); 
+                    const ptDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                    bestDay = ptDays[dayIdx];
+                }
+            });
+            document.getElementById('kpi-weekly-best-day').textContent = bestDay;
+            document.getElementById('kpi-weekly-best-val').textContent = `Score Médio: ${bestVal}/100`;
+
+            const dayNamesShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const labelsDayNames = sortedDays.map(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                return dayNamesShort[dateObj.getDay()];
+            });
+
+            const top7Tasks = sortedTasks.slice(0, 7);
+            const focusTaskLabels = top7Tasks.map(t => t[0]);
+            const focusTaskData = top7Tasks.map(t => t[1].duration);
+            
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            const focusTaskColors = focusTaskLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED';
+            });
+
+            charts.weeklyFocusTask.data.labels = focusTaskLabels;
+            charts.weeklyFocusTask.data.datasets[0].data = focusTaskData;
+            charts.weeklyFocusTask.data.datasets[0].backgroundColor = focusTaskColors;
+            charts.weeklyFocusTask.update();
+
+            // --- UPDATED: Weekly Apps Chart (Top 5 Apps by Time) ---
+            const sortedApps = Object.entries(data.appUsage)
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 5); // Take top 5
+            
+            const appLabels = sortedApps.map(c => c[0]); // c[0] is the app name
+            const appData = sortedApps.map(c => c[1]); // c[1] is duration
+
+            charts.weeklyCat.data.labels = appLabels;
+            charts.weeklyCat.data.datasets = [{
+                label: 'Tempo Total',
+                data: appData,
+                backgroundColor: ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE'], // Shades of violet
+                borderRadius: 4
+            }];
+            charts.weeklyCat.update();
+
+            const weekDayLabels = sortedDays.map(d => {
+                const dateObj = new Date(d + 'T00:00:00');
+                return dayNamesShort[dateObj.getDay()];
+            });
+            renderHeatmap(data.dailyStats, sortedDays, weekDayLabels); 
+        }
+
+        function updateMonthlyUI(dateKey) {
+            const { start, end } = getMonthRange(dateKey);
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('monthly-title').textContent = `${monthNames[parseInt(dateKey.split('-')[1])-1]} ${dateKey.split('-')[0]}`;
+            const data = processDataForRange(start, end);
+
+            const daysInMonth = (new Date(end) - new Date(start)) / (86400000) + 1;
+            document.getElementById('kpi-monthly-total-active').textContent = formatSecondsToTime(data.totalActiveSeconds); 
+            document.getElementById('kpi-monthly-avg-daily').textContent = formatSecondsToTime(data.daysCount > 0 ? data.totalActiveSeconds / data.daysCount : 0);
+            document.getElementById('kpi-monthly-days').textContent = data.daysCount;
+            document.getElementById('kpi-monthly-avg-weekly').textContent = formatSecondsToTime(data.totalActiveSeconds / (daysInMonth/7));
+
+            // --- Updated Consistency ---
+            let dailyScoresArr = [];
+            Object.keys(data.dailyStats).forEach(d => {
+                const s = data.dailyScores[d];
+                if(s.totalDuration > 0) dailyScoresArr.push(Math.round(s.weightedScore / s.totalDuration));
+            });
+            
+            let consistency = 0;
+            if(dailyScoresArr.length > 1) {
+                const m = dailyScoresArr.reduce((a,b)=>a+b,0)/dailyScoresArr.length;
+                const sd = Math.sqrt(dailyScoresArr.reduce((a,b)=>a+Math.pow(b-m,2),0)/dailyScoresArr.length);
+                consistency = Math.max(0, 100 - (sd * 2.5));
+            } else if(dailyScoresArr.length === 1) consistency = 100;
+            document.getElementById('kpi-monthly-consistency').textContent = `${Math.round(consistency)}%`;
+
+            // --- Updated Best Day of Week ---
+            let dowScores = Array(7).fill(0);
+            let dowCounts = Array(7).fill(0);
+            Object.keys(data.dailyStats).forEach(d => {
+                const s = data.dailyScores[d];
+                if(s.totalDuration > 0) {
+                    const score = s.weightedScore / s.totalDuration; 
+                    const dayIdx = new Date(d + 'T00:00:00').getDay(); 
+                    dowScores[dayIdx] += score;
+                    dowCounts[dayIdx]++;
+                }
+            });
+            
+            let bestDowIdx = -1, maxDowScore = -1;
+            dowScores.forEach((totalScore, i) => {
+                if(dowCounts[i] > 0) {
+                    const avg = totalScore / dowCounts[i];
+                    if(avg > maxDowScore) { maxDowScore = avg; bestDowIdx = i; }
+                }
+            });
+            const weekDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            document.getElementById('kpi-monthly-best-day-week').textContent = bestDowIdx > -1 ? weekDayNames[bestDowIdx] : '-';
+            document.getElementById('kpi-monthly-best-day-val').textContent = `${Math.round(maxDowScore)}/100 Score Médio`;
+
+            // --- Updated Best Week ---
+            let weeklyScores=[], weeklyLabels=[], curWScore=0, curWDur=0, dCount=0, wCount=1, maxWScore=0, bestW=-1;
+            const sortedDays = Object.keys(data.dailyStats).sort();
+            
+            sortedDays.forEach((d, i) => {
+                const s = data.dailyScores[d];
+                curWScore += s.weightedScore; 
+                curWDur += s.totalDuration; 
+                dCount++;
+                
+                if(dCount===7 || i===sortedDays.length-1) {
+                    const wAvgScore = curWDur > 0 ? (curWScore/curWDur) : 0;
+                    weeklyScores.push(Math.round(wAvgScore)); 
+                    weeklyLabels.push(`Sem ${wCount}`);
+                    
+                    if(wAvgScore > maxWScore) { maxWScore = wAvgScore; bestW = wCount; }
+                    
+                    curWScore=0; curWDur=0; dCount=0; wCount++;
+                }
+            });
+            
+            document.getElementById('kpi-monthly-best-week').textContent = bestW > -1 ? `Semana ${bestW}` : "-";
+            document.getElementById('kpi-monthly-best-val').textContent = `${Math.round(maxWScore)}/100 Score Médio`;
+
+            // --- Top Task ---
+            let topTask = "N/A", topTaskVal = 0;
+            const sortedMonthlyTasks = Object.entries(data.taskStats).sort((a,b) => b[1].weightedScore - a[1].weightedScore);
+            if(sortedMonthlyTasks.length > 0) {
+                topTask = sortedMonthlyTasks[0][0];
+                topTaskVal = sortedMonthlyTasks[0][1].duration;
+            }
+            document.getElementById('kpi-monthly-top-cat').textContent = topTask;
+            document.getElementById('kpi-monthly-top-cat-time').textContent = formatSecondsToTime(topTaskVal);
+
+            let maxStreak = 0, currStreak = 0;
+            Object.keys(data.dailyStats).sort().forEach(d => {
+                if(data.dailyStats[d].total > 36000) currStreak++; else { maxStreak = Math.max(maxStreak, currStreak); currStreak = 0; }
+            });
+            maxStreak = Math.max(maxStreak, currStreak);
+            document.getElementById('kpi-monthly-burnout').textContent = maxStreak > 0 ? `${maxStreak} dias` : "0";
+            if(maxStreak >= 5) { 
+                document.getElementById('kpi-monthly-burnout').className = "value text-red-600"; 
+                document.getElementById('kpi-monthly-burnout-desc').textContent = "⚠️ Cuidado!";
+            } else {
+                document.getElementById('kpi-monthly-burnout').className = "value text-charcoal";
+                document.getElementById('kpi-monthly-burnout-desc').textContent = "Saudável";
+            }
+
+            const goalSec = (parseFloat(document.getElementById('goalInput').value)||8)*3600;
+            let goalsMet = Object.values(data.dailyStats).filter(s => s.active >= goalSec).length;
+            document.getElementById('kpi-monthly-goal-eff').textContent = data.daysCount > 0 ? `${Math.round((goalsMet/data.daysCount)*100)}%` : "0%";
+
+            // Apply Score Rule Colors to Monthly Weekly Trend as well
+            const weeklyScoreColors = weeklyScores.map(score => {
+                if (score >= 80) return '#7C3AED';
+                if (score >= 50) return '#C4B5FD';
+                return '#D6D3D1';
+            });
+
+            charts.monthlyWeekly.data.labels = weeklyLabels; 
+            charts.monthlyWeekly.data.datasets[0].data = weeklyScores; 
+            charts.monthlyWeekly.data.datasets[0].backgroundColor = weeklyScoreColors;
+            charts.monthlyWeekly.update();
+            
+            // --- UPDATED RADAR CHART ---
+            const sortedRadarTasks = Object.entries(data.taskStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore)
+                .slice(0, 6); 
+
+            const radarLabels = sortedRadarTasks.map(t => t[0].length > 15 ? t[0].substring(0, 15) + '...' : t[0]); 
+            const radarData = sortedRadarTasks.map(t => t[1].duration / 3600); 
+
+            charts.monthlyRadar.data.labels = radarLabels;
+            charts.monthlyRadar.data.datasets = [{ 
+                label: 'Horas (Top Foco)', 
+                data: radarData, 
+                backgroundColor: 'rgba(124, 58, 237, 0.2)', 
+                borderColor: '#7C3AED', 
+                pointBackgroundColor: '#7C3AED',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#7C3AED'
+            }];
+            charts.monthlyRadar.update();
+
+            // --- Updated Monthly Focus Task Chart ---
+            const top7Monthly = sortedMonthlyTasks.slice(0, 7);
+            const mLabels = top7Monthly.map(t => t[0]);
+            const mData = top7Monthly.map(t => t[1].duration);
+            
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            const mColors = mLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED';
+            });
+
+            charts.monthlyFocusTask.data.labels = mLabels;
+            charts.monthlyFocusTask.data.datasets[0].data = mData;
+            charts.monthlyFocusTask.data.datasets[0].backgroundColor = mColors;
+            charts.monthlyFocusTask.update();
+
+            // --- REVISED: Padrão por Dia (Average Active Hours) ---
+            let dowT = [0,0,0,0,0,0,0];
+            let dowCount = [0,0,0,0,0,0,0];
+            
+            sortedDays.forEach(d => { 
+                const idx = new Date(d+'T00:00:00').getDay(); 
+                const arrIdx = idx === 0 ? 6 : idx - 1; 
+                
+                // Using ACTIVE time instead of total for productivity pattern
+                dowT[arrIdx] += data.dailyStats[d].active; 
+                dowCount[arrIdx]++;
+            });
+            
+            // Calculate Average per Day of Week
+            const dowAvg = dowT.map((total, i) => dowCount[i] > 0 ? total / dowCount[i] : 0);
+
+            charts.monthlyDay.data.datasets[0].data = dowAvg;
+            charts.monthlyDay.data.datasets[0].label = 'Média Horas Ativas';
+            charts.monthlyDay.update();
+        }
+
+        function updateDiffBadge(elementId, currentVal, prevVal, isPercentage = false) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            if (prevVal === undefined || prevVal === null || prevVal === 0) {
+                el.classList.add('hidden');
+                return;
+            }
+
+            let diff = currentVal - prevVal;
+            let diffPercent = (diff / prevVal) * 100;
+            let icon = diff >= 0 ? '▲' : '▼';
+            
+            if(elementId === 'diff-total-time') {
+                 let absDiff = Math.abs(diff);
+                 let h = Math.floor(absDiff / 3600);
+                 let m = Math.floor((absDiff % 3600) / 60);
+                 let timeStr = h > 0 ? `${h}h${m}m` : `${m}m`;
+                 el.textContent = `${icon} ${timeStr}`;
+                 el.className = `mt-2 text-xs font-bold font-sans px-2 py-1 rounded inline-block ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
+                 el.classList.remove('hidden');
+            } else {
+                 el.textContent = `${icon} ${Math.round(Math.abs(diffPercent))}%`;
+                 el.className = `text-xs font-bold font-sans px-2 py-1 rounded ${diff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
+                 el.classList.remove('hidden');
+            }
+        }
+
+        function updateDashboardUI(dataObj, comparisonObj = null) {
+            const metrics = dataObj.metrics;
+
+            document.getElementById('kpi-total-time').textContent = formatSecondsToTime(metrics.totalSeconds);
+            document.getElementById('kpi-activities').textContent = metrics.activitiesCount.toLocaleString();
+            document.getElementById('kpi-apps').textContent = Object.keys(metrics.appUsage).length;
+            document.getElementById('kpi-date').textContent = document.getElementById('dateSelect').options[document.getElementById('dateSelect').selectedIndex]?.text || "Hoje";
+
+            const prodRate = metrics.totalSeconds > 0 ? Math.round((metrics.totalActiveSeconds / metrics.totalSeconds) * 100) : 0;
+            document.getElementById('kpi-productivity').textContent = `${prodRate}%`;
+            document.getElementById('kpi-prod-bar').style.width = `${prodRate}%`;
+
+            if (comparisonObj) {
+                const compMetrics = comparisonObj.metrics;
+                const compProdRate = compMetrics.totalSeconds > 0 ? Math.round((compMetrics.totalActiveSeconds / compMetrics.totalSeconds) * 100) : 0;
+                
+                updateDiffBadge('diff-total-time', metrics.totalSeconds, compMetrics.totalSeconds);
+                updateDiffBadge('diff-productivity', prodRate, compProdRate, true);
+                updateDiffBadge('diff-activities', metrics.activitiesCount, compMetrics.activitiesCount, true);
+            } else {
+                ['diff-total-time', 'diff-productivity', 'diff-activities'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            }
+
+            const sortedTasks = Object.entries(metrics.taskUsage).sort((a, b) => b[1] - a[1]).slice(0, 7);
+            const taskLabels = sortedTasks.map(t => t[0]);
+            const taskData = sortedTasks.map(t => t[1]);
+            
+            const focusKeywords = ['whatsapp', 'slack', 'monday', 'ads', 'anúncios', 'gerenciador', 'meta', 'business', 'campaign'];
+            const distractionKeywords = ['youtube', 'netflix', 'facebook', 'instagram', 'twitter', 'tiktok', 'twitch', 'hbo', 'prime', 'disney'];
+            
+            const taskColors = taskLabels.map(label => {
+                const lower = label.toLowerCase();
+                if(focusKeywords.some(k => lower.includes(k))) return '#7C3AED';
+                if(distractionKeywords.some(k => lower.includes(k))) return '#D6D3D1';
+                return '#7C3AED'; 
+            });
+
+            charts.focusTask.data.labels = taskLabels;
+            charts.focusTask.data.datasets[0].data = taskData;
+            charts.focusTask.data.datasets[0].backgroundColor = taskColors;
+            charts.focusTask.update();
+
+            const hours = Object.keys(metrics.hourlyStats).map(Number).sort((a,b)=>a-b);
+            let startHour = 8; 
+            let endHour = 19;
+            
+            const activeHours = hours.filter(h => metrics.hourlyStats[h].totalDuration > 0);
+            if(activeHours.length > 0) {
+                startHour = Math.max(0, activeHours[0] - 1);
+                endHour = Math.min(23, activeHours[activeHours.length-1] + 1);
+            }
+
+            const rangeHours = hours.filter(h => h >= startHour && h <= endHour);
+            const hourlyLabels = rangeHours.map(h => `${String(h).padStart(2,'0')}:00`);
+            
+            const hourlyScores = rangeHours.map(h => {
+                const s = metrics.hourlyStats[h];
+                return s.totalDuration > 0 ? Math.round(s.weightedScore / s.totalDuration) : 0;
+            });
+
+            const hourlyMetaData = rangeHours.map(h => {
+                const s = metrics.hourlyStats[h];
+                if(s.totalDuration === 0) return { topTask: '-', topTaskDuration: 0 };
+                
+                let topTaskName = '-';
+                let topTaskDur = 0;
+                Object.entries(s.tasks).forEach(([name, dur]) => {
+                    if(dur > topTaskDur) {
+                        topTaskDur = dur;
+                        topTaskName = name;
+                    }
+                });
+                return { topTask: topTaskName, topTaskDuration: topTaskDur };
+            });
+
+            const hourlyColors = hourlyScores.map(score => {
+                if (score >= 80) return '#7C3AED'; 
+                if (score >= 50) return '#C4B5FD'; 
+                return '#D6D3D1'; 
+            });
+
+            charts.trend.data.labels = hourlyLabels;
+            charts.trend.data.datasets[0].data = hourlyScores;
+            charts.trend.data.datasets[0].backgroundColor = hourlyColors;
+            charts.trend.data.datasets[0].metaData = hourlyMetaData; 
+            charts.trend.update();
+
+            charts.status.data.datasets[0].data = [metrics.totalActiveSeconds, metrics.totalAfkSeconds];
+            charts.status.update();
+
+            const sortedTasksByScore = Object.entries(metrics.appStats)
+                .sort((a, b) => b[1].weightedScore - a[1].weightedScore);
+            
+            const topTaskEntry = sortedTasksByScore.length > 0 ? sortedTasksByScore[0] : ["Nenhuma", {duration: 0, weightedScore: 0}];
+            const topTaskName = topTaskEntry[0];
+            const topTaskDuration = topTaskEntry[1].duration;
+            const topTaskScore = topTaskDuration > 0 ? Math.round(topTaskEntry[1].weightedScore / topTaskDuration) : 0;
+
+            document.getElementById('insight-top-task').textContent = topTaskName;
+            document.getElementById('insight-top-task-time').textContent = formatSecondsToTime(topTaskDuration);
+            document.getElementById('insight-top-task-score').textContent = `${topTaskScore}/100`;
+
+            document.getElementById('insight-afk-time').textContent = formatSecondsToTime(metrics.totalAfkSeconds);
+
+            updateGoal(metrics.totalActiveSeconds);
+            populateTablePreview(dataObj.rows.slice(0, 100));
+        }
+
+        function updateGoal(currentActiveSeconds) {
+            let goalHours = parseFloat(document.getElementById('goalInput').value) || 8;
+            if(goalHours <= 0) goalHours = 1;
+            
+            const goalSeconds = goalHours * 3600;
+            const goalPercent = Math.min(100, Math.round((currentActiveSeconds / goalSeconds) * 100));
+            
+            document.getElementById('insight-goal-percent').textContent = `${goalPercent}%`;
+            const bar = document.getElementById('insight-goal-bar');
+            bar.style.width = `${goalPercent}%`;
+            
+            if (goalPercent >= 100) {
+                bar.classList.add('bg-emerald-500');
+                bar.classList.remove('bg-violet-600');
+            } else {
+                bar.classList.add('bg-violet-600');
+                bar.classList.remove('bg-emerald-500');
+            }
+        }
+        
+        // --- Process Loaded Data (After fetching from Firebase) ---
+        function processLoadedData() {
+            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const datesSet = new Set();
+            globalRawData.forEach(r => {
+                const d = parseDateKey(r[keyDate]);
+                if(d !== "Indefinido") datesSet.add(d);
+            });
+            
+            globalDates = Array.from(datesSet).sort().reverse();
+            populateDateSelects();
+            populateAuxiliarySelects(); 
+        }
+
+        window.onDateChange = function() {
+            const selectedDate = document.getElementById('dateSelect').value;
+            if(!selectedDate) return;
+
+            syncAuxiliarySelectsWithDate();
+
+            if (currentView === 'daily') {
+                const compareDate = document.getElementById('compareDateSelect').value;
+                const isCompareEnabled = document.getElementById('enableCompare').checked;
+                let compareData = null;
+                if (isCompareEnabled && compareDate && compareDate !== "") {
+                    compareData = processDataForDate(compareDate);
+                }
+                updateDailyUI(selectedDate, compareData);
+            } 
+            else if (currentView === 'weekly') {
+                updateWeeklyUI(selectedDate);
+            }
+            else if (currentView === 'monthly') {
+                updateMonthlyUI(selectedDate);
+            }
+        }
+
+        document.getElementById('monthSelect').addEventListener('change', (e) => {
+             const monthKey = e.target.value;
+             if(!monthKey) return;
+             updateWeekOptions(monthKey);
+             if (currentView === 'monthly') {
+                 updateMonthlyUI(monthKey + '-01');
+             }
+        });
+
+        document.getElementById('weekSelect').addEventListener('change', (e) => {
+             const startDate = e.target.value;
+             if(!startDate) return;
+             if (currentView === 'weekly') {
+                 updateWeeklyUI(startDate);
+             }
+        });
+
+        document.getElementById('dateSelect').addEventListener('change', window.onDateChange);
+        document.getElementById('compareDateSelect').addEventListener('change', window.onDateChange);
+        document.getElementById('enableCompare').addEventListener('change', (e) => {
+            const compSelect = document.getElementById('compareDateSelect');
+            compSelect.disabled = !e.target.checked;
+            if (!e.target.checked) {
+                compSelect.value = "";
+                window.onDateChange();
+            }
+        });
+        
+        document.getElementById('goalInput').addEventListener('input', () => { window.onDateChange(); });
+
+        window.handleFileSelect = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('statusMsg').classList.remove('hidden');
+            document.getElementById('statusText').textContent = "Processando arquivo...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length === 0) throw new Error("Planilha vazia");
+                    
+                    // Instead of just loading local, we save to Firebase
+                    saveToFirebase(jsonData);
+
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('statusMsg').className = "bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 text-sm flex items-center gap-2";
+                    document.getElementById('statusText').textContent = "Erro ao ler arquivo. Verifique formato.";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function populateDateSelects() {
+            const select = document.getElementById('dateSelect');
+            const compSelect = document.getElementById('compareDateSelect');
+            
+            select.innerHTML = '';
+            compSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            if(globalDates.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "Sem datas válidas";
+                select.add(opt);
+            } else {
+                globalDates.forEach(d => {
+                    const [y, m, day] = d.split('-');
+                    const dateLabel = `${day}/${m}/${y}`;
+                    
+                    const opt1 = document.createElement('option');
+                    opt1.value = d; opt1.text = dateLabel; select.add(opt1);
+                    
+                    const opt2 = document.createElement('option');
+                    opt2.value = d; opt2.text = dateLabel; compSelect.add(opt2);
+                });
+                select.value = globalDates[0];
+                window.onDateChange();
+            }
+        }
+        
+        function populateTablePreview(rows) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            if(rows.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Sem dados.</td></tr>';
+                 return;
+            }
+
+            const keyDuration = Object.keys(rows[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(rows[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(rows[0]).find(k => k.includes('Status')) || 'Status';
+            const keyTitle = Object.keys(rows[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStartTime = Object.keys(rows[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 dark:border-stone-800 hover:bg-slate-50 dark:hover:bg-stone-800 transition-colors";
+                
+                let timeVal = row[keyStartTime];
+                if(typeof timeVal === 'number') timeVal = formatExcelTime(timeVal);
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono text-xs">${timeVal || '--'}</td>
+                    <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">${(row[keyProcess] || '').replace('.exe','')}</td>
+                    <td class="px-4 py-3">${formatSecondsToTimeShort(row[keyDuration] || 0)}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${String(row[keyStatus]).includes('ATIVO') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                            ${row[keyStatus] || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs">${row[keyTitle] || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         // Initialize

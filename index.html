@@ -1099,7 +1099,8 @@
             document.getElementById('statusMsg').classList.remove('hidden');
             document.getElementById('statusText').textContent = "Salvando na sua conta...";
 
-            const keyDate = Object.keys(newRows[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const fRow = newRows[0] || {};
+            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
             const dataByDate = {};
 
             newRows.forEach(row => {
@@ -1553,10 +1554,16 @@
                 return `${dateObj.y}-${String(dateObj.m).padStart(2,'0')}-${String(dateObj.d).padStart(2,'0')}`;
             }
             if (typeof rawDate === 'string') {
-                const parts = rawDate.split('/');
+                let cleanDate = rawDate.trim().split(' ')[0]; // Em caso de 'YYYY/MM/DD HH:MM'
+                const parts = cleanDate.split('/');
                 if (parts.length === 3) {
-                    if (parts[0].length === 4) return rawDate; 
+                    if (parts[0].length === 4) return cleanDate.replace(/\//g, '-'); 
                     return `${parts[2]}-${String(parts[1]).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`;
+                }
+                const partsDash = cleanDate.split('-');
+                if (partsDash.length === 3) {
+                    if (partsDash[0].length === 4) return cleanDate;
+                    return `${partsDash[2]}-${String(partsDash[1]).padStart(2,'0')}-${String(partsDash[0]).padStart(2,'0')}`;
                 }
                 const d = new Date(rawDate);
                 if (!isNaN(d)) return d.toISOString().split('T')[0];
@@ -1640,12 +1647,13 @@
         }
 
         function processDataForRange(startDateKey, endDateKey) {
-            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
-            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
-            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
-            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
-            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
-            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+            const fRow = globalRawData[0] || {};
+            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
+            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
+            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
+            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
+            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
+            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
 
             const rangeRows = globalRawData.filter(row => {
                 const d = parseDateKey(row[keyDate]);
@@ -1757,12 +1765,13 @@
 
         // --- Daily Data Processing ---
         function processDataForDate(targetDateKey) {
-            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
-            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
-            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
-            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
-            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
-            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+            const fRow = globalRawData[0] || {};
+            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
+            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
+            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
+            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
+            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
+            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
 
             const filteredRows = globalRawData.filter(row => parseDateKey(row[keyDate]) === targetDateKey);
 
@@ -2519,11 +2528,12 @@
                  return;
             }
 
-            const keyDuration = Object.keys(rows[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
-            const keyProcess = Object.keys(rows[0]).find(k => k.includes('Processo')) || 'Processo';
-            const keyStatus = Object.keys(rows[0]).find(k => k.includes('Status')) || 'Status';
-            const keyTitle = Object.keys(rows[0]).find(k => k.includes('Título')) || 'Título da Janela';
-            const keyStartTime = Object.keys(rows[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
+            const fRow = rows[0] || {};
+            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
+            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
+            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
+            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
+            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
 
             rows.forEach((row, index) => {
                 const tr = document.createElement('tr');

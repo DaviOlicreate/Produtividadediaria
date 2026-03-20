@@ -56,8 +56,8 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Login Screen */
-        #login-screen {
+        /* Login & Paywall Screens */
+        #login-screen, #paywall-screen {
             position: fixed;
             inset: 0;
             z-index: 100;
@@ -67,10 +67,10 @@
             justify-content: center;
             transition: opacity 0.5s ease, visibility 0.5s;
         }
-        html.dark #login-screen {
+        html.dark #login-screen, html.dark #paywall-screen {
             background: radial-gradient(circle at center, #1C1917 0%, #0C0A09 100%);
         }
-        #login-screen.hidden-screen {
+        #login-screen.hidden-screen, #paywall-screen.hidden-screen {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -348,6 +348,23 @@
                 <span>Entrar com Google</span>
             </button>
             <p id="loginError" class="text-red-500 text-xs mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- PAYWALL SCREEN OVERLAY -->
+    <div id="paywall-screen" class="hidden-screen">
+        <div class="bg-white dark:bg-stone-900 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-stone-200 dark:border-stone-800">
+            <div class="bg-rose-500 w-16 h-16 flex items-center justify-center rounded-full text-white shadow-lg mx-auto mb-6">
+                <i class="fa-solid fa-lock text-3xl"></i>
+            </div>
+            <h1 class="font-serif text-3xl font-bold text-charcoal dark:text-white mb-2">Acesso Restrito</h1>
+            <p class="text-stone-500 dark:text-stone-400 text-sm mb-6">Parece que você ainda não possui uma assinatura ativa ou ela expirou.</p>
+            
+            <a href="https://pay.hotmart.com/SEU_LINK_AQUI" target="_blank" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all hover:shadow-md mb-4">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Adquirir Acesso</span>
+            </a>
+            <button onclick="logout()" class="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 underline font-semibold">Sair / Entrar com outra conta</button>
         </div>
     </div>
 
@@ -977,7 +994,7 @@
         // Import Firebase Functions (Modular Web SDK)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, getDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- COLOQUE SUA CONFIGURAÇÃO DO FIREBASE AQUI ---
         // Você pega isso no Console do Firebase > Project Settings
@@ -1032,28 +1049,50 @@
         }
 
         // Listen for Auth Changes
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in
                 currentUser = user;
-                console.log("Usuário logado:", user.uid);
+                console.log("Usuário logado:", user.email);
                 
-                // Update UI for logged in state
                 document.getElementById('login-screen').classList.add('hidden-screen');
-                document.getElementById('main-content').classList.remove('opacity-0');
-                
-                // Update Profile Header
-                document.getElementById('userProfileDisplay').classList.remove('hidden');
-                document.getElementById('userName').textContent = user.displayName || user.email;
-                if(user.photoURL) document.getElementById('userAvatar').src = user.photoURL;
-                
-                // Load this user's data
-                loadFirebaseData();
+                document.getElementById('statusMsg').classList.remove('hidden');
+                document.getElementById('statusText').textContent = "Verificando assinatura...";
+
+                try {
+                    const docRef = doc(db, "access_list", user.email.toLowerCase());
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists() && docSnap.data().status === "active") {
+                        // HAS ACCESS
+                        const paywall = document.getElementById('paywall-screen');
+                        if (paywall) paywall.classList.add('hidden-screen');
+                        
+                        document.getElementById('main-content').classList.remove('opacity-0');
+                        document.getElementById('userProfileDisplay').classList.remove('hidden');
+                        document.getElementById('userName').textContent = user.displayName || user.email;
+                        if(user.photoURL) document.getElementById('userAvatar').src = user.photoURL;
+                        
+                        loadFirebaseData();
+                    } else {
+                        // NO ACCESS
+                        document.getElementById('statusMsg').classList.add('hidden');
+                        document.getElementById('main-content').classList.add('opacity-0');
+                        const paywall = document.getElementById('paywall-screen');
+                        if (paywall) paywall.classList.remove('hidden-screen');
+                    }
+                } catch(error) {
+                     console.error("Erro ao verificar acesso:", error);
+                     alert("Erro ao validar assinatura. Atualize a página e tente novamente.");
+                     await signOut(auth);
+                }
             } else {
                 // User is signed out
                 currentUser = null;
                 document.getElementById('login-screen').classList.remove('hidden-screen');
                 document.getElementById('main-content').classList.add('opacity-0');
+                const paywall = document.getElementById('paywall-screen');
+                if (paywall) paywall.classList.add('hidden-screen');
             }
         });
 

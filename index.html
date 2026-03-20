@@ -1099,8 +1099,7 @@
             document.getElementById('statusMsg').classList.remove('hidden');
             document.getElementById('statusText').textContent = "Salvando na sua conta...";
 
-            const fRow = newRows[0] || {};
-            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
+            const keyDate = Object.keys(newRows[0]).find(k => k.includes('Data Início')) || 'Data Início';
             const dataByDate = {};
 
             newRows.forEach(row => {
@@ -1641,13 +1640,12 @@
         }
 
         function processDataForRange(startDateKey, endDateKey) {
-            const fRow = globalRawData[0] || {};
-            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
-            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
-            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
-            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
-            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
-            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
+            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
+            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
 
             const rangeRows = globalRawData.filter(row => {
                 const d = parseDateKey(row[keyDate]);
@@ -1759,13 +1757,12 @@
 
         // --- Daily Data Processing ---
         function processDataForDate(targetDateKey) {
-            const fRow = globalRawData[0] || {};
-            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
-            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
-            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
-            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
-            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
-            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
+            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const keyDuration = Object.keys(globalRawData[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(globalRawData[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyTitle = Object.keys(globalRawData[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStatus = Object.keys(globalRawData[0]).find(k => k.includes('Status')) || 'Status';
+            const keyStartTime = Object.keys(globalRawData[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
 
             const filteredRows = globalRawData.filter(row => parseDateKey(row[keyDate]) === targetDateKey);
 
@@ -2522,12 +2519,11 @@
                  return;
             }
 
-            const fRow = rows[0] || {};
-            const keyDuration = Object.keys(fRow).find(k => k.toLowerCase().includes('dura') || k.toLowerCase().includes('seg') || k.toLowerCase().includes('time')) || 'Duração (seg)';
-            const keyProcess = Object.keys(fRow).find(k => k.toLowerCase().includes('processo') || k.toLowerCase().includes('app')) || 'Processo';
-            const keyStatus = Object.keys(fRow).find(k => k.toLowerCase().includes('status') || k.toLowerCase().includes('estado')) || 'Status';
-            const keyTitle = Object.keys(fRow).find(k => k.toLowerCase().includes('título') || k.toLowerCase().includes('title') || k.toLowerCase().includes('janela')) || 'Título da Janela';
-            const keyStartTime = Object.keys(fRow).find(k => k.toLowerCase().includes('hora in') || k.toLowerCase().includes('start')) || 'Hora Início';
+            const keyDuration = Object.keys(rows[0]).find(k => k.includes('Duração') || k.includes('seg')) || 'Duração (seg)';
+            const keyProcess = Object.keys(rows[0]).find(k => k.includes('Processo')) || 'Processo';
+            const keyStatus = Object.keys(rows[0]).find(k => k.includes('Status')) || 'Status';
+            const keyTitle = Object.keys(rows[0]).find(k => k.includes('Título')) || 'Título da Janela';
+            const keyStartTime = Object.keys(rows[0]).find(k => k.includes('Hora Início')) || 'Hora Início';
 
             rows.forEach((row, index) => {
                 const tr = document.createElement('tr');

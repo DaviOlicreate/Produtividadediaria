@@ -2436,7 +2436,8 @@
         
         // --- Process Loaded Data (After fetching from Firebase) ---
         function processLoadedData() {
-            const keyDate = Object.keys(globalRawData[0]).find(k => k.includes('Data Início')) || 'Data Início';
+            const fRow = globalRawData[0] || {};
+            const keyDate = Object.keys(fRow).find(k => k.toLowerCase().includes('data in') || k.toLowerCase().includes('data') || k.toLowerCase().includes('date')) || 'Data Início';
             const datesSet = new Set();
             globalRawData.forEach(r => {
                 const d = parseDateKey(r[keyDate]);

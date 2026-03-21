@@ -1164,7 +1164,8 @@
                 await loadFirebaseData(); 
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                document.getElementById('statusText').textContent = "Erro ao salvar no Firebase.";
+                document.getElementById('statusText').textContent = "Erro ao salvar: " + error.message;
+                alert("Erro detalhado do Firebase:\n" + error.message + "\n\nPor favor, tire um print ou copie esse erro e me mande no chat para eu resolver isso agora mesmo!");
             }
         }
 

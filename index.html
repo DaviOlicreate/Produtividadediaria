@@ -1150,13 +1150,26 @@
                 }
             });
 
-            // CHANGED: Save to specific user path
-            const promises = Object.keys(dataByDate).map(async (dateStr) => {
-                await setDoc(doc(db, "users", currentUser.uid, "productivity_data", dateStr), {
-                    date: dateStr,
-                    data: dataByDate[dateStr]
-                });
-            });
+            // DIVISÃO (CHUNKING) PARA EVITAR LIMITES DE 1MB DO FIREBASE
+            const promises = [];
+            const chunkSize = 1500; // Limita ~1500 linhas por documento (bem longe de 1MB)
+
+            for (const dateStr of Object.keys(dataByDate)) {
+                const rows = dataByDate[dateStr];
+                
+                for (let i = 0; i < rows.length; i += chunkSize) {
+                    const chunk = rows.slice(i, i + chunkSize);
+                    // O primeiro arquivo do dia chama 'YYYY-MM-DD'. Os seguintes chamam 'YYYY-MM-DD_pt1', '_pt2', etc.
+                    const docId = i === 0 ? dateStr : `${dateStr}_pt${i / chunkSize}`;
+                    
+                    promises.push(
+                        setDoc(doc(db, "users", currentUser.uid, "productivity_data", docId), {
+                            date: dateStr,
+                            data: chunk
+                        })
+                    );
+                }
+            }
 
             try {
                 await Promise.all(promises);

@@ -51,6 +51,9 @@
     
     <!-- SheetJS (XLSX) para ler o Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- idb-keyval para salvar acesso a arquivos locais -->
+    <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
 
     <style>
         body {
@@ -446,11 +449,17 @@
                         </select>
                     </div>
 
+                    <!-- Sincronização Diária Pendente -->
+                    <button id="btnDailySync" class="hidden cursor-pointer bg-amber-500 hover:bg-amber-600 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-amber-200 dark:shadow-none flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95 animate-pulse">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span class="hidden sm:inline">Sincronizar Planilha</span>
+                    </button>
+
                     <!-- File Upload -->
-                    <label for="fileUpload" class="cursor-pointer bg-violet-700 hover:bg-violet-800 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-violet-200 dark:shadow-none flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95">
+                    <button id="btnImport" class="cursor-pointer bg-violet-700 hover:bg-violet-800 text-white transition-all px-5 py-2.5 rounded-full shadow-lg shadow-violet-200 dark:shadow-none flex items-center gap-2 text-xs font-bold uppercase tracking-wider active:scale-95">
                         <i class="fa-solid fa-upload"></i>
                         <span class="hidden sm:inline">Importar</span>
-                    </label>
+                    </button>
                     <input type="file" id="fileUpload" accept=".xlsx, .xlsm, .xls" class="hidden">
                     
                     <button id="clearDbBtn" class="text-[10px] text-stone-400 hover:text-red-600 font-bold uppercase tracking-widest ml-2 border-b border-transparent hover:border-red-600 transition-all" title="Limpar BD Pessoal">
@@ -1077,6 +1086,7 @@
                         if(user.photoURL) document.getElementById('userAvatar').src = user.photoURL;
                         
                         loadFirebaseData();
+                        checkAutoSync();
                     } else {
                         // NO ACCESS
                         document.getElementById('statusMsg').classList.add('hidden');
@@ -2522,12 +2532,15 @@
         window.handleFileSelect = function(event) {
             const file = event.target.files[0];
             if (!file) return;
+            processLocalFile(file);
+        }
 
+        async function processLocalFile(file) {
             document.getElementById('statusMsg').classList.remove('hidden');
             document.getElementById('statusText').textContent = "Processando arquivo...";
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
@@ -2538,7 +2551,11 @@
                     if (jsonData.length === 0) throw new Error("Planilha vazia");
                     
                     // Instead of just loading local, we save to Firebase
-                    saveToFirebase(jsonData);
+                    await saveToFirebase(jsonData);
+                    
+                    // Record sync date
+                    const today = new Date().toISOString().split('T')[0];
+                    localStorage.setItem('lastSyncDate', today);
 
                 } catch (error) {
                     console.error(error);
@@ -2547,6 +2564,43 @@
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        async function checkAutoSync() {
+            if (!window.showOpenFilePicker || !window.idbKeyval) return;
+            
+            try {
+                const handle = await idbKeyval.get('spreadsheet-handle');
+                if (!handle) return;
+                
+                const today = new Date().toISOString().split('T')[0];
+                if (localStorage.getItem('lastSyncDate') === today) return;
+                
+                const options = { mode: 'read' };
+                const permission = await handle.queryPermission(options);
+                
+                if (permission === 'granted') {
+                    const file = await handle.getFile();
+                    processLocalFile(file);
+                } else {
+                    const syncBtn = document.getElementById('btnDailySync');
+                    syncBtn.classList.remove('hidden');
+                    syncBtn.onclick = async () => {
+                        try {
+                            const newPermission = await handle.requestPermission(options);
+                            if (newPermission === 'granted') {
+                                syncBtn.classList.add('hidden');
+                                const file = await handle.getFile();
+                                processLocalFile(file);
+                            }
+                        } catch(e) {
+                            console.error("Erro requestPermission:", e);
+                        }
+                    };
+                }
+            } catch(e) {
+                console.error("Erro no auto sync:", e);
+            }
         }
 
         function populateDateSelects() {
@@ -2618,6 +2672,36 @@
         document.addEventListener('DOMContentLoaded', () => {
             initCharts();
             document.getElementById('fileUpload').addEventListener('change', window.handleFileSelect);
+            
+            document.getElementById('btnImport').addEventListener('click', async () => {
+                if (window.showOpenFilePicker && window.idbKeyval) {
+                    try {
+                        const [fileHandle] = await window.showOpenFilePicker({
+                            types: [{
+                                description: 'Excel',
+                                accept: {
+                                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                                    'application/vnd.ms-excel.sheet.macroEnabled.12': ['.xlsm'],
+                                    'application/vnd.ms-excel': ['.xls']
+                                }
+                            }],
+                            excludeAcceptAllOption: true,
+                            multiple: false
+                        });
+                        
+                        await idbKeyval.set('spreadsheet-handle', fileHandle);
+                        const file = await fileHandle.getFile();
+                        processLocalFile(file);
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            console.error('API Error:', error);
+                            document.getElementById('fileUpload').click();
+                        }
+                    }
+                } else {
+                    document.getElementById('fileUpload').click();
+                }
+            });
         });
     </script>
 </body>

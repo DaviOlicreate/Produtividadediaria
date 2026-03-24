@@ -2671,6 +2671,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initCharts();
+            checkAutoSync();
             document.getElementById('fileUpload').addEventListener('change', window.handleFileSelect);
             
             document.getElementById('btnImport').addEventListener('click', async () => {

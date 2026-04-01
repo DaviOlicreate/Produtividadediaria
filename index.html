@@ -1374,26 +1374,24 @@
         function convertExcelDuration(val) {
             if (!val && val !== 0) return 0;
             
-            // Se por acaso vier como número do Excel (fração do dia)
-            if (typeof val === 'number') return Math.round(val * 86400); 
-            
-            // Se vier como string formatada HH:MM:SS ou HH:MM
+            // Se vier como string formatada HH:MM:SS ou HH:MM pelo SheetJS (raw: false)
             if (typeof val === 'string' && val.includes(':')) {
                 const parts = val.split(':').map(Number);
                 if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-                if (parts.length === 2) return parts[0]*3600 + parts[1]*60; // Se for HH:MM, o Excel costuma vir como "01:30"
-                
-                // Caso especial: se for apenas "MM:SS" (raro, mas possível)
-                // O SheetJS com raw:false retorna HH:MM:SS
+                if (parts.length === 2) return parts[0]*3600 + parts[1]*60; 
+                return 0;
             }
-            
+
             let num = parseFloat(val);
             if (isNaN(num)) return 0;
-            
-            // Se for uma fração < 0.999 e não tiver sido capturado pelo type check acima
-            if (num > 0 && num < 0.999) return Math.round(num * 86400);
-            
-            // Se for 1 ou mais, assumimos que já é segundos (valor cru de algumas ferramentas)
+
+            // Se for um número pequeno (< 1), quase certamente é uma fração de dia do Excel (ex: 0.5 = 12h)
+            if (num > 0 && num < 1.0) {
+                return Math.round(num * 86400);
+            }
+
+            // Se for >= 1, assumimos que já está em segundos. 
+            // (Evita multiplicar segundos reais por 86400, o que causava os milhões de horas)
             return Math.round(num);
         }
 
@@ -1511,7 +1509,7 @@
                                     return `Score Médio: ${raw}/100`;
                                 }
                                 if (type === 'radar') {
-                                    return `${context.label}: ${formatSecondsToTimeShort(raw * 3600)}`;
+                                    return `${context.label}: ${formatSecondsToTimeShort(raw)}`;
                                 }
                                 if (context.parsed.y !== null) {
                                     return label + context.parsed.y;
@@ -2281,7 +2279,7 @@
                 .slice(0, 6); 
 
             const radarLabels = sortedRadarTasks.map(t => t[0].length > 15 ? t[0].substring(0, 15) + '...' : t[0]); 
-            const radarData = sortedRadarTasks.map(t => t[1].duration / 3600); 
+            const radarData = sortedRadarTasks.map(t => t[1].duration); 
 
             charts.monthlyRadar.data.labels = radarLabels;
             charts.monthlyRadar.data.datasets = [{ 
